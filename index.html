@@ -209,6 +209,24 @@
   }
   .ri-remove:hover { background: #3a1515; border-color: var(--red); color: var(--red); }
 
+  /* ── Quantity stepper ────────────────────────── */
+  .qty-stepper {
+    display: flex; align-items: center; gap: 0; flex-shrink: 0; margin-left: 8px;
+  }
+  .qty-stepper button {
+    width: 28px; height: 28px; border: 1px solid var(--border); background: var(--card);
+    color: var(--text); font-size: 16px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .qty-stepper button:first-child { border-radius: 6px 0 0 6px; }
+  .qty-stepper button:last-child { border-radius: 0 6px 6px 0; }
+  .qty-stepper button:hover { background: var(--card-hover); border-color: var(--border-lit); }
+  .qty-stepper .qty-val {
+    width: 32px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    font-size: 14px; font-weight: 600; color: var(--gold);
+  }
+
   /* ── Programming step ──────────────────────── */
   .prog-section { margin-top: 16px; }
   .prog-field { margin-bottom: 16px; }
@@ -473,7 +491,7 @@ const totalSteps = 6;
 // Selected state
 let selectedAntennas = new Set(); // multiselect
 let selectedAddlAntennas = new Set(); // multiselect
-let selectedBattery = 'factory'; // single select — default factory
+let selectedBatteries = new Map(); // key → quantity (e.g. 'usbc-standard' → 2)
 let selectedAccessories = new Set(); // multiselect
 let adapterSuppressed = false; // user chose to supply their own adapter
 
@@ -506,9 +524,8 @@ const additionalAntennas = [
   { key: 'extraadapter', name: 'Extra SMA-F to BNC-F Adapter', desc: 'Spare BNC adapter so you can leave one on a mag mount or other accessory and still have one for the radio. One adapter is already included if you selected an antenna upgrade.', price: 5, img: S+'2022/09/smaftobncf.jpg', id: 456, needsAdapter: false, isAdapter: true },
 ];
 
-// Battery upgrades — single select (radio buttons). Factory is default/preselected.
+// Battery upgrades — multiselect with quantity. Factory is always included.
 const batteryUpgrades = [
-  { key: 'factory', name: 'Factory Battery', desc: 'Standard 1800mAh battery included with your kit. Requires charging cradle (included).', price: 0, img: '', id: null },
   { key: 'usbc-standard', name: 'USB-C Battery (1300mAh) with Cable', desc: 'Standard-size rechargeable battery with built-in USB-C port. Charge from any USB-C cable — no cradle needed. Includes USB-C cable.', price: 25, img: S+'2023/08/20230831_163401.jpg', id: 2367 },
   { key: 'usbc-extended', name: 'USB-C Extended Battery (3800mAh) with Cable', desc: 'High-capacity extended battery with built-in USB-C port. Nearly double the runtime of the factory battery. Includes USB-C cable.', price: 29, img: S+'2023/04/20250725_123654.jpg', id: 749 },
 ];
@@ -599,18 +616,46 @@ function renderAdditionalAntennas() {
 
 function renderBatteryUpgrades() {
   const container = document.getElementById('battery-options');
-  container.innerHTML = batteryUpgrades.map(b => `
-    <div class="opt-card ${selectedBattery === b.key ? 'selected' : ''}"
-         onclick="selectBattery('${b.key}')">
-      <div class="oc-radio"></div>
+
+  // Factory battery — always included
+  let factoryHtml = `
+    <div class="opt-card selected" style="cursor:default;opacity:0.85">
+      <div class="oc-check" style="background:var(--green);border-color:var(--green);color:#111">✓</div>
+      <div class="oc-body">
+        <div class="oc-name">Factory Battery (1800mAh)</div>
+        <div class="oc-desc">Standard battery included with your kit. Requires charging cradle (included).</div>
+      </div>
+      <div class="oc-price free" style="color:var(--green)">Included</div>
+    </div>
+  `;
+
+  const anySelected = selectedBatteries.size > 0;
+  let note = anySelected
+    ? '<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:#5c5">USB-C batteries selected below. Each includes a USB-C charging cable.</div>'
+    : '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--muted)">Want to ditch the charging cradle? Add a USB-C rechargeable battery below. Grab extras for longer trips or to share across radios.</div>';
+
+  container.innerHTML = factoryHtml + note + batteryUpgrades.map(b => {
+    const qty = selectedBatteries.get(b.key) || 0;
+    const isSelected = qty > 0;
+    return `
+    <div class="opt-card ${isSelected ? 'selected' : ''}"
+         onclick="toggleBattery('${b.key}')">
+      <div class="oc-check">${isSelected ? '✓' : ''}</div>
       ${b.img ? `<div class="oc-img"><img src="${b.img}" alt="${b.name}" onerror="this.parentElement.innerHTML='<div style=\\'color:#444;font-size:11px;text-align:center;padding:8px\\'>No img</div>'"></div>` : ''}
       <div class="oc-body">
         <div class="oc-name">${b.name}</div>
         <div class="oc-desc">${b.desc}</div>
       </div>
-      <div class="oc-price ${b.price === 0 ? 'free' : ''}">${b.price === 0 ? 'Included' : '+$' + b.price}</div>
+      ${isSelected ? `
+        <div class="qty-stepper" onclick="event.stopPropagation()">
+          <button onclick="batteryQty('${b.key}',-1)">−</button>
+          <div class="qty-val">${qty}</div>
+          <button onclick="batteryQty('${b.key}',1)">+</button>
+        </div>
+        <div class="oc-price">+$${b.price * qty}</div>
+      ` : `<div class="oc-price">+$${b.price}/ea</div>`}
     </div>
-  `).join('');
+  `}).join('');
 }
 
 function renderAccessories() {
@@ -859,20 +904,20 @@ function renderReview() {
     `);
   }
 
-  // Battery upgrade
-  if (selectedBattery && selectedBattery !== 'factory') {
-    const bat = batteryUpgrades.find(b => b.key === selectedBattery);
+  // Battery upgrades
+  selectedBatteries.forEach((qty, key) => {
+    const bat = batteryUpgrades.find(b => b.key === key);
     if (bat) {
       items.push(`
         <div class="review-item">
           <div class="ri-img">${bat.img ? `<img src="${bat.img}" alt="">` : ''}</div>
-          <div class="ri-name">${bat.name}<small>Battery upgrade — replaces factory battery</small></div>
-          <div class="ri-price">+$${bat.price}</div>
-          <button class="ri-remove" onclick="reviewRemove('battery')" title="Remove">&times;</button>
+          <div class="ri-name">${bat.name}${qty > 1 ? ' <small>×' + qty + '</small>' : ''}<small>Battery upgrade</small></div>
+          <div class="ri-price">+$${bat.price * qty}</div>
+          <button class="ri-remove" onclick="reviewRemove('battery','${key}')" title="Remove">&times;</button>
         </div>
       `);
     }
-  }
+  });
 
   // Accessories
   selectedAccessories.forEach(key => {
@@ -938,7 +983,7 @@ function renderReview() {
 function reviewRemove(type, key) {
   if (type === 'antenna') { selectedAntennas.delete(key); }
   else if (type === 'addl') { selectedAddlAntennas.delete(key); }
-  else if (type === 'battery') { selectedBattery = 'factory'; }
+  else if (type === 'battery') { selectedBatteries.delete(key); }
   else if (type === 'programming') { programmingChoice = 'standard'; }
   else if (type === 'accessory') { selectedAccessories.delete(key); }
   updateBottomBar();
@@ -1073,8 +1118,18 @@ function adapterModalCancel() {
   document.getElementById('adapter-modal').classList.remove('open');
 }
 
-function selectBattery(key) {
-  selectedBattery = key;
+function toggleBattery(key) {
+  if (selectedBatteries.has(key)) selectedBatteries.delete(key);
+  else selectedBatteries.set(key, 1);
+  renderBatteryUpgrades();
+  updateBottomBar();
+}
+
+function batteryQty(key, delta) {
+  const current = selectedBatteries.get(key) || 0;
+  const newQty = current + delta;
+  if (newQty <= 0) selectedBatteries.delete(key);
+  else selectedBatteries.set(key, newQty);
   renderBatteryUpgrades();
   updateBottomBar();
 }
@@ -1110,11 +1165,11 @@ function calcTotal() {
   });
   if (anyBNC && !adapterSuppressed) total += ADAPTER_PRICE;
 
-  // Battery upgrade
-  if (selectedBattery && selectedBattery !== 'factory') {
-    const bat = batteryUpgrades.find(b => b.key === selectedBattery);
-    if (bat) total += bat.price;
-  }
+  // Battery upgrades
+  selectedBatteries.forEach((qty, key) => {
+    const bat = batteryUpgrades.find(b => b.key === key);
+    if (bat) total += bat.price * qty;
+  });
 
   // Programming upcharge
   if (programmingChoice === 'multi') total += 10;
@@ -1130,7 +1185,7 @@ function calcTotal() {
 function countAddons() {
   let count = selectedAntennas.size;
   count += selectedAddlAntennas.size;
-  if (selectedBattery && selectedBattery !== 'factory') count++;
+  selectedBatteries.forEach((qty) => { count += qty; });
   if (programmingChoice === 'multi') count++;
   count += selectedAccessories.size;
   return count;
