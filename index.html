@@ -1416,16 +1416,16 @@ const radioLineup = [
     pitch: 'The most popular two-way radio on the planet. Massive accessory ecosystem — batteries, antennas, cases, and chargers are widely available and affordable. If you already own UV-5Rs, everything is compatible.',
     solves: [],
     features: ['128 memory channels', 'Dual-band VHF/UHF', 'Huge accessory ecosystem', 'Most affordable option'],
-    tags: ['budget', 'simple', 'compatible']
+    tags: ['budget', 'simple', 'compatible', 'compact']
   },
   {
     key: 'uv5r-mini', name: 'UV-5R Mini Essentials Kit', price: 39, id: 8438,
     img: S+'2025/12/1000009129-scaled.jpg',
     tagline: 'More channels, smaller price',
-    pitch: 'Packs 1000 memory channels into the most affordable kit we offer. Built-in USB-C charging (no cradle needed) and Bluetooth programming from your phone. Also picks up aircraft frequencies.',
+    pitch: 'Packs 999 memory channels into the most affordable kit we offer. Built-in USB-C charging (no cradle needed) and Bluetooth programming from your phone. Also picks up aircraft frequencies.',
     solves: ['More coverage area / channels', 'Listen to aircraft', 'USB-C charging'],
-    features: ['1000 memory channels', 'USB-C charging built in', 'Airband receive', 'Bluetooth phone programming'],
-    tags: ['budget', 'simple', 'channels', 'airband', 'usbc']
+    features: ['999 memory channels', 'USB-C charging built in', 'Airband receive', 'Automatic NOAA weather alerts', 'Bluetooth phone programming'],
+    tags: ['budget', 'simple', 'channels', 'airband', 'usbc', 'compact', 'noaa']
   },
   {
     key: 'uv-pro', name: 'UV-PRO Essentials Kit', price: 159, id: 7862,
@@ -1433,8 +1433,8 @@ const radioLineup = [
     tagline: 'Waterproof & connected',
     pitch: 'IP67 waterproof, GPS location sharing, text messaging, and full Bluetooth TNC support for APRS and Winlink. Simple enough to start using immediately, but with room to grow into advanced digital modes. The only handheld we offer with Bluetooth smartphone control.',
     solves: ['Waterproof / water use', 'GPS / location sharing', 'Bluetooth / app control', 'Room to grow'],
-    features: ['IP67 waterproof', '180 memory channels', 'GPS + APRS built in', 'USB-C charging built in', 'Analog text messaging', 'Bluetooth TNC for APRS/Winlink', 'Mobile app control', 'Airband receive'],
-    tags: ['waterproof', 'gps', 'bluetooth', 'airband', 'grow', 'professional', 'usbc', 'channels']
+    features: ['IP67 waterproof', '180 memory channels', 'GPS + APRS built in', 'USB-C charging built in', 'Analog text messaging', 'Bluetooth TNC for APRS/Winlink', 'Mobile app control', 'Airband receive', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+    tags: ['waterproof', 'gps', 'bluetooth', 'airband', 'grow', 'professional', 'usbc', 'channels', 'noaa', 'commercial']
   },
   {
     key: 'dmr-6x2', name: 'DMR 6X2 PRO Essentials Kit', price: 249, id: 2931,
@@ -1442,8 +1442,8 @@ const radioLineup = [
     tagline: 'Digital & encryption capable',
     pitch: 'Full DMR digital radio with encryption capability for private communications. 4000 memory channels, GPS, APRS, and digital text messaging. Our most economical path to encryption-capable digital radio.',
     solves: ['Privacy / encryption capable', 'More coverage area / channels', 'GPS / location sharing', 'Digital text messaging'],
-    features: ['DMR digital + analog', 'Encryption capable', '4000 memory channels', 'GPS + APRS', 'Digital text messaging', 'USB-C battery', 'IP54 water resistant'],
-    tags: ['encryption', 'digital', 'channels', 'gps', 'professional', 'bluetooth', 'water-resistant', 'usbc', 'grow']
+    features: ['DMR digital + analog', 'Encryption capable', '4000 memory channels', 'GPS + APRS', 'Digital text messaging', 'USB-C battery', 'IP54 water resistant', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+    tags: ['encryption', 'digital', 'channels', 'gps', 'professional', 'bluetooth', 'water-resistant', 'usbc', 'grow', 'noaa', 'commercial']
   },
   {
     key: 'da-7x2', name: 'DA-7X2 Essentials Kit', price: 299, id: 9050,
@@ -1451,8 +1451,8 @@ const radioLineup = [
     tagline: 'The best we offer',
     pitch: 'Everything the DMR 6X2 PRO does, plus true dual receive, crossband repeat (use it as a portable repeater), airband monitoring, NXDN digital mode, and Bluetooth PTT. For operators who want no compromises.',
     solves: ['Privacy / encryption capable', 'Crossband repeat', 'Listen to aircraft', 'Maximum capability'],
-    features: ['DMR + NXDN digital modes', 'Encryption capable', '4000 memory channels', 'Crossband repeat', 'True dual receive', 'Digital text messaging', 'GPS + APRS', 'Airband receive', 'Bluetooth PTT', 'USB-C battery', 'IP54 water resistant'],
-    tags: ['encryption', 'digital', 'crossband', 'airband', 'professional', 'premium', 'bluetooth', 'water-resistant', 'usbc', 'gps', 'grow', 'channels']
+    features: ['DMR + NXDN digital modes', 'Encryption capable', '4000 memory channels', 'Crossband repeat', 'True dual receive', 'Digital text messaging', 'GPS + APRS', 'Airband receive', 'Bluetooth PTT', 'USB-C battery', 'IP54 water resistant', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+    tags: ['encryption', 'digital', 'crossband', 'airband', 'professional', 'premium', 'bluetooth', 'water-resistant', 'usbc', 'gps', 'grow', 'channels', 'noaa', 'commercial']
   },
 ];
 
@@ -1478,7 +1478,7 @@ const interviewQuestions = [
       { key: 'general', icon: '🏘️', label: 'Around town / neighborhood', detail: 'Family, neighborhood, or local communication', tags: ['budget', 'simple'] },
       { key: 'outdoor', icon: '🏕️', label: 'Outdoors — hiking, camping, overlanding', detail: 'Trail, campsite, or off-road use', tags: ['gps', 'grow'] },
       { key: 'water', icon: '🚤', label: 'On or near water', detail: 'Kayaking, boating, beach, or wet environments', tags: ['waterproof'] },
-      { key: 'professional', icon: '🏗️', label: 'Work / commercial / business use', detail: 'Worksite, security, event coordination, business ops', tags: ['professional', 'waterproof', 'gps'] },
+      { key: 'professional', icon: '🏗️', label: 'Work / commercial / business use', detail: 'Worksite, security, event coordination, business ops', tags: ['professional', 'commercial', 'waterproof', 'gps'] },
       { key: 'emergency', icon: '🆘', label: 'Emergency preparedness', detail: 'Disaster readiness, backup comms', tags: ['channels', 'durable'] },
     ]
   },
@@ -1495,6 +1495,8 @@ const interviewQuestions = [
       { key: 'airband', icon: '✈️', label: 'Listen to aircraft', detail: 'I want to monitor aviation frequencies', tags: ['airband'] },
       { key: 'bluetooth', icon: '🎧', label: 'Bluetooth headset', detail: 'Helmet comms, wireless earpiece, or hands-free operation', tags: ['bluetooth'] },
       { key: 'grow', icon: '📈', label: 'Room to grow', detail: "I'm new but want advanced features later", tags: ['grow'] },
+      { key: 'noaa', icon: '🌦️', label: 'Automatic weather alerts', detail: 'Auto-notifies you of severe weather — all radios can tune NOAA manually', tags: ['noaa'] },
+      { key: 'compact', icon: '📏', label: 'Small & lightweight', detail: 'I want the most compact, pocketable radio', tags: ['compact'] },
       { key: 'compatible', icon: '🔄', label: 'UV-5R compatible', detail: 'I already have UV-5Rs or their accessories', tags: ['compatible', 'budget'] },
     ]
   },
@@ -1606,7 +1608,8 @@ function getPersonalizedReasons(radio) {
   if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the wet environments you described');
   if (a.use === 'water' && !radio.tags.includes('waterproof') && radio.tags.includes('water-resistant')) reasons.push('IP54 water resistant — handles rain and splashes');
   if (a.use === 'outdoor' && radio.tags.includes('gps')) reasons.push('GPS & APRS — perfect for the outdoor use you mentioned');
-  if (a.use === 'professional' && radio.tags.includes('professional')) reasons.push('Built for commercial and business use — durable, feature-rich, and reliable');
+  if (a.use === 'professional' && radio.tags.includes('commercial')) reasons.push('FCC Part 90 commercial certified — approved for business and commercial use');
+  if (a.use === 'professional' && radio.tags.includes('professional') && !radio.tags.includes('commercial')) reasons.push('Feature-rich and reliable for professional use');
   if (a.use === 'general' && radio.tags.includes('budget')) reasons.push('Simple and reliable — great for everyday neighborhood use');
   if (a.use === 'emergency' && radio.tags.includes('channels')) reasons.push('Lots of channels — covers more repeaters for emergency readiness');
 
@@ -1619,6 +1622,9 @@ function getPersonalizedReasons(radio) {
     if (a.features.includes('bluetooth') && radio.tags.includes('bluetooth')) reasons.push('Bluetooth headset support — pairs with helmet comms, earpieces, or wireless PTT');
     if (a.features.includes('channels') && radio.tags.includes('channels')) reasons.push('Extra memory channels for the wide coverage area you need');
     if (a.features.includes('grow') && radio.tags.includes('grow')) reasons.push('Room to grow — simple now, with advanced features when you\'re ready');
+    if (a.features.includes('noaa') && radio.tags.includes('noaa')) reasons.push('Automatic NOAA weather alerts — get warned before severe weather hits');
+    if (a.features.includes('noaa') && !radio.tags.includes('noaa')) reasons.push('Can tune NOAA frequencies manually, but lacks automatic weather alerts');
+    if (a.features.includes('compact') && radio.tags.includes('compact')) reasons.push('Compact and lightweight — easy to pocket or pack');
     if (a.features.includes('compatible') && radio.tags.includes('compatible')) reasons.push('UV-5R compatible — works with your existing batteries, chargers, and accessories');
     if (a.features.includes('price') && radio.tags.includes('budget')) reasons.push('Most affordable option — best value for getting on the air');
   }
