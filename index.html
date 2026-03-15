@@ -719,6 +719,15 @@ function adapterModalAdd() {
   updateBottomBar();
 }
 
+function adapterModalSkip() {
+  // User says they already have an adapter — add antenna without adapter
+  selectedAddlAntennas.add(pendingAntennaKey);
+  pendingAntennaKey = null;
+  document.getElementById('adapter-modal').classList.remove('open');
+  renderAdditionalAntennas();
+  updateBottomBar();
+}
+
 function adapterModalCancel() {
   // User declined — don't add the antenna
   pendingAntennaKey = null;
@@ -892,11 +901,12 @@ wizardInitialized = true;
 <!-- Adapter prompt modal -->
 <div class="modal-overlay" id="adapter-modal">
   <div class="modal-box">
-    <h3>BNC Adapter Required</h3>
-    <p>This antenna connects via BNC and requires an SMA-F to BNC-F Adapter ($5) to mount on your radio. Would you like to add one?</p>
-    <div class="modal-btns">
-      <button class="modal-btn-add" onclick="adapterModalAdd()">Yes, add adapter — $5</button>
-      <button class="modal-btn-cancel" onclick="adapterModalCancel()">No thanks</button>
+    <h3>BNC Adapter Needed</h3>
+    <p>This antenna connects via BNC and requires an SMA-F to BNC-F Adapter to work with your radio. If you don't already have one, we recommend adding it to your order.</p>
+    <div class="modal-btns" style="flex-direction:column;gap:8px">
+      <button class="modal-btn-add" onclick="adapterModalAdd()">Add adapter to my order — $5</button>
+      <button class="modal-btn-cancel" onclick="adapterModalSkip()">I already have one</button>
+      <button class="modal-btn-cancel" onclick="adapterModalCancel()" style="opacity:0.7;font-size:12px">Cancel — don't add this antenna</button>
     </div>
   </div>
 </div>
