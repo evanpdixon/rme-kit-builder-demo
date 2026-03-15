@@ -2118,8 +2118,8 @@ function showInterviewResults() {
     });
   } else if (waterIndirect) {
     radioLineup.forEach(r => {
-      if (r.tags.includes('waterproof')) scores[r.key] += 2;
-      else if (r.tags.includes('water-resistant')) scores[r.key] += 1;
+      if (r.tags.includes('waterproof')) scores[r.key] += 1;
+      // IP54 gets no extra bonus for indirect — base tag match is enough
     });
   }
 
