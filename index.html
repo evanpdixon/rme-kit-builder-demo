@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kit Builder — UV-5R Essentials Kit | Radio Made Easy</title>
+<title>Kit Builder — Radio Made Easy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
@@ -299,6 +299,68 @@
   .prog-field.dragging { opacity: 0.4; transform: scale(0.98); }
   .prog-field.drag-over { border-top: 2px solid var(--gold); }
 
+  /* ── Needs assessment ──────────────────────── */
+  .needs-phase { animation: fadeIn 0.3s ease; }
+  .needs-landing { text-align: center; padding: 40px 0; }
+  .needs-landing h2 { font-family: 'Abhaya Libre', serif; font-size: 28px; margin-bottom: 12px; color: var(--gold); }
+  .needs-landing p { color: #fff; font-size: 15px; max-width: 600px; margin: 0 auto 32px; line-height: 1.6; }
+
+  .needs-q { max-width: 650px; margin: 0 auto; padding: 20px 0; }
+  .needs-q h2 { font-size: 22px; margin-bottom: 6px; color: var(--gold); }
+  .needs-q .nq-sub { color: #fff; font-size: 14px; margin-bottom: 20px; }
+
+  .nq-option {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    background: var(--card); border: 2px solid var(--border); cursor: pointer;
+    margin-bottom: 8px; transition: all 0.2s;
+  }
+  .nq-option:hover { border-color: var(--border-lit); background: var(--card-hover); }
+  .nq-option.selected { border-color: var(--gold); background: #1a1800; }
+  .nq-option .nq-check {
+    width: 22px; height: 22px; border: 2px solid var(--border-lit); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .nq-option.selected .nq-check { border-color: var(--gold); color: var(--gold); }
+  .nq-option .nq-icon { font-size: 24px; flex-shrink: 0; }
+  .nq-option .nq-label { font-size: 14px; font-weight: 500; color: #fff; }
+  .nq-option .nq-detail { font-size: 12px; color: #ddd; margin-top: 2px; }
+
+  .needs-btns { display: flex; gap: 10px; justify-content: center; margin-top: 24px; }
+
+  /* Quantity row */
+  .qty-row {
+    display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    background: var(--card); border: 1px solid var(--border); margin-bottom: 8px;
+  }
+  .qty-row .qty-icon { font-size: 24px; }
+  .qty-row .qty-label { flex: 1; }
+  .qty-row .qty-label strong { color: var(--gold); font-size: 14px; }
+  .qty-row .qty-label span { display: block; font-size: 12px; color: #ddd; margin-top: 2px; }
+  .qty-row .qty-ctrl { display: flex; align-items: center; gap: 8px; }
+  .qty-row .qty-ctrl button {
+    width: 28px; height: 28px; background: var(--card); border: 1px solid var(--border);
+    color: var(--gold); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .qty-row .qty-ctrl button:hover { border-color: var(--gold); }
+  .qty-row .qty-ctrl .qty-val { font-size: 16px; font-weight: 600; color: var(--gold); min-width: 24px; text-align: center; }
+
+  /* Kit plan summary */
+  .kit-plan { max-width: 650px; margin: 0 auto; padding: 20px 0; text-align: center; }
+  .kit-plan h2 { font-family: 'Abhaya Libre', serif; font-size: 24px; color: var(--gold); margin-bottom: 8px; }
+  .kit-plan .plan-sub { color: #fff; font-size: 14px; margin-bottom: 24px; }
+  .kit-plan-items { text-align: left; margin-bottom: 24px; }
+  .kit-plan-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: var(--card); border: 1px solid var(--border); margin-bottom: 6px;
+  }
+  .kit-plan-item .kpi-icon { font-size: 24px; }
+  .kit-plan-item .kpi-text { flex: 1; }
+  .kit-plan-item .kpi-text strong { color: var(--gold); font-size: 14px; }
+  .kit-plan-item .kpi-text span { display: block; color: #ddd; font-size: 12px; margin-top: 2px; }
+  .kit-plan-item .kpi-status { font-size: 12px; padding: 3px 10px; border: 1px solid var(--border); color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .kit-plan-item .kpi-status.done { border-color: var(--green); color: var(--green); }
+  .kit-plan-item .kpi-status.active { border-color: var(--gold); color: var(--gold); }
+
   /* ── Radio selector / interview ─────────────── */
   .selector-phase { animation: fadeIn 0.3s ease; }
   .selector-landing { text-align: center; padding: 40px 0; }
@@ -460,15 +522,37 @@
 
 <div class="topbar">
   <div class="logo">Radio Made Easy</div>
-  <div class="breadcrumb"><a href="#">Shop</a> / <a href="#">Handheld Radios</a> / Kit Builder</div>
+  <div class="breadcrumb" id="breadcrumb"><a href="#">Shop</a> / Kit Builder</div>
   <a href="kit-builder-admin.html" style="margin-left:auto;font-size:11px;padding:3px 10px;background:#2a2000;color:var(--gold);border:1px solid var(--gold);letter-spacing:1px;text-transform:uppercase;text-decoration:none">Admin Panel</a>
   <div class="demo-badge" style="margin-left:0">WIREFRAME DEMO</div>
 </div>
 
 <div class="page">
 
-  <!-- RADIO SELECTOR PHASE -->
-  <div id="selector-phase" class="selector-phase">
+  <!-- NEEDS ASSESSMENT PHASE -->
+  <div id="needs-phase" class="needs-phase">
+    <div id="needs-landing" class="needs-landing">
+      <h2>Build Your Radio Kit</h2>
+      <p>Radio Made Easy kits are pre-programmed and ready to use out of the box. Let's figure out exactly what you need.</p>
+      <div class="selector-paths">
+        <div class="selector-path" onclick="startNeedsAssessment()">
+          <div class="sp-icon">🧭</div>
+          <h3>Help Me Figure It Out</h3>
+          <p>Answer a few quick questions about how you'll use your radios and we'll build a plan for you.</p>
+        </div>
+        <div class="selector-path" onclick="showCategoryPicker()">
+          <div class="sp-icon">📋</div>
+          <h3>I Know What I Need</h3>
+          <p>Pick your radio categories and quantities, then build each kit step by step.</p>
+        </div>
+      </div>
+    </div>
+    <div id="needs-container" style="display:none"></div>
+    <div id="kit-plan-container" style="display:none"></div>
+  </div>
+
+  <!-- RADIO SELECTOR PHASE (handheld — existing) -->
+  <div id="selector-phase" class="selector-phase" style="display:none">
     <div class="selector-landing" id="selector-landing">
       <h2>Build Your Custom Radio Kit</h2>
       <p>Every Radio Made Easy kit comes pre-programmed and ready to use out of the box. Pick your radio and customize it with antennas, batteries, and accessories — we'll handle the rest.</p>
@@ -656,6 +740,1622 @@ const _adminConfig = (() => {
 })();
 
 const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
+
+// ══════════════════════════════════════════════════════
+// ── NEEDS ASSESSMENT + MULTI-KIT SESSION ──
+// ══════════════════════════════════════════════════════
+
+// Session state
+let kitSession = {
+  needsAnswers: {},
+  categories: [],   // e.g. [{type:'handheld',qty:3},{type:'mobile',qty:2},{type:'base',qty:1},{type:'hf',qty:1}]
+  kits: [],          // built kits with selections
+  currentKitIndex: 0,
+  preferences: []    // carry-forward from needs assessment (e.g. 'digital','waterproof')
+};
+
+// Needs assessment questions
+const needsQuestions = [
+  {
+    id: 'usage',
+    question: "What do you need radios for?",
+    sub: "Select all that apply — many people need more than one type.",
+    multi: true,
+    options: [
+      { key: 'handheld', icon: '🤚', label: 'Handheld radios for people on foot', detail: 'Hiking, events, security, neighborhood, tactical, emergency — carried on your person', categories: ['handheld'] },
+      { key: 'vehicle', icon: '🚗', label: 'Mobile radios for vehicles', detail: 'Truck, Jeep, RV, convoy — mounted in a vehicle with higher power and range', categories: ['mobile'] },
+      { key: 'base', icon: '🏠', label: 'A base station at home, office, or property', detail: 'Fixed location radio with a rooftop or outdoor antenna for maximum local range', categories: ['base'] },
+      { key: 'hf', icon: '🌐', label: 'Long-distance HF communication', detail: 'Regional, nationwide, or worldwide communication — hundreds or thousands of miles', categories: ['hf'] },
+      { key: 'notsure', icon: '🤔', label: "I'm not sure — help me figure it out", detail: "We'll ask a few more questions to find the right setup", categories: [] },
+    ]
+  },
+  {
+    id: 'distance',
+    question: "How far do you need to communicate?",
+    sub: "Pick the best match. We'll recommend the right equipment.",
+    multi: false,
+    condition: (answers) => answers.usage && answers.usage.includes('notsure'),
+    options: [
+      { key: 'short', icon: '📍', label: 'Short range — neighborhood or campsite', detail: '1-5 miles, line of sight', categories: ['handheld'] },
+      { key: 'medium', icon: '📡', label: 'Medium range — across town or between vehicles', detail: '5-25 miles, with repeaters or higher power', categories: ['handheld', 'mobile'] },
+      { key: 'long', icon: '🗺️', label: 'Long range — across a region or state', detail: '25+ miles, needs higher power and better antennas', categories: ['mobile', 'base'] },
+      { key: 'extreme', icon: '🌍', label: 'Extreme range — nationwide or worldwide', detail: 'Hundreds or thousands of miles via HF radio', categories: ['hf'] },
+    ]
+  },
+  {
+    id: 'where',
+    question: "Where will you use your radios?",
+    sub: "Select all that apply.",
+    multi: true,
+    condition: (answers) => answers.usage && answers.usage.includes('notsure'),
+    options: [
+      { key: 'onfoot', icon: '🥾', label: 'On foot — hiking, walking, events', detail: 'Need something portable you can carry', categories: ['handheld'] },
+      { key: 'invehicle', icon: '🚙', label: 'In a vehicle', detail: 'Mounted in a car, truck, RV, or boat', categories: ['mobile'] },
+      { key: 'athome', icon: '🏡', label: 'At a fixed location — home, office, ranch', detail: 'Permanent or semi-permanent setup with an outdoor antenna', categories: ['base'] },
+      { key: 'offgrid', icon: '⛺', label: 'Off-grid or backcountry', detail: 'No cell service, need reliable comms over distance', categories: ['handheld', 'hf'] },
+    ]
+  },
+  {
+    id: 'preferences',
+    question: "What matters most to you?",
+    sub: "Pick up to two. Skip if nothing stands out.",
+    multi: true,
+    options: [
+      { key: 'digital', icon: '🔒', label: 'Digital / encryption capable', detail: 'Private, encrypted communications', pref: 'digital' },
+      { key: 'waterproof', icon: '💧', label: 'Waterproof / rugged', detail: 'Will get wet or be used in harsh conditions', pref: 'waterproof' },
+      { key: 'simple', icon: '👍', label: 'Simple and easy to use', detail: 'Minimal learning curve, just works', pref: 'simple' },
+      { key: 'range', icon: '📡', label: 'Maximum range & power', detail: 'Need to reach as far as possible', pref: 'range' },
+      { key: 'budget', icon: '💵', label: 'Budget friendly', detail: 'Get set up affordably', pref: 'budget' },
+      { key: 'crossband', icon: '🔁', label: 'Crossband repeat', detail: 'Use a mobile radio as a portable repeater to extend handheld range', pref: 'crossband' },
+    ]
+  },
+];
+
+let needsStep = 0;
+
+function startNeedsAssessment() {
+  kitSession = { needsAnswers: {}, categories: [], kits: [], currentKitIndex: 0, preferences: [] };
+  needsStep = 0;
+  document.getElementById('needs-landing').style.display = 'none';
+  document.getElementById('needs-container').style.display = 'block';
+  renderNeedsQuestion();
+}
+
+function showCategoryPicker() {
+  kitSession = { needsAnswers: {}, categories: [], kits: [], currentKitIndex: 0, preferences: [] };
+  document.getElementById('needs-landing').style.display = 'none';
+  document.getElementById('needs-container').style.display = 'block';
+  renderCategoryPicker();
+}
+
+function renderNeedsQuestion() {
+  // Find next applicable question
+  while (needsStep < needsQuestions.length) {
+    const q = needsQuestions[needsStep];
+    if (q.condition && !q.condition(kitSession.needsAnswers)) {
+      needsStep++;
+      continue;
+    }
+    break;
+  }
+  if (needsStep >= needsQuestions.length) {
+    // All questions answered — compute categories
+    computeCategories();
+    return;
+  }
+
+  const q = needsQuestions[needsStep];
+  const answers = kitSession.needsAnswers[q.id] || (q.multi ? [] : '');
+  const container = document.getElementById('needs-container');
+
+  container.innerHTML = `
+    <div class="needs-q">
+      <h2>${q.question}</h2>
+      <div class="nq-sub">${q.sub}</div>
+      ${q.options.map(opt => {
+        const isSelected = q.multi ? answers.includes(opt.key) : answers === opt.key;
+        return `
+        <div class="nq-option ${isSelected ? 'selected' : ''}" onclick="toggleNeedsOption('${q.id}','${opt.key}',${q.multi})">
+          <div class="nq-check">${isSelected ? '✓' : ''}</div>
+          <div class="nq-icon">${opt.icon}</div>
+          <div>
+            <div class="nq-label">${opt.label}</div>
+            <div class="nq-detail">${opt.detail}</div>
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="needs-btns">
+        ${needsStep > 0 ? '<button class="btn-nav btn-back" onclick="needsStep--;renderNeedsQuestion()">← Back</button>' : ''}
+        <button class="btn-nav btn-next" onclick="advanceNeeds()">
+          ${needsStep < needsQuestions.length - 1 ? 'Next →' : 'See My Kit Plan →'}
+        </button>
+        ${q.multi ? '<button class="btn-nav btn-back" onclick="advanceNeeds()" style="font-size:12px">Skip</button>' : ''}
+      </div>
+    </div>
+  `;
+}
+
+function toggleNeedsOption(qId, key, multi) {
+  if (multi) {
+    if (!kitSession.needsAnswers[qId]) kitSession.needsAnswers[qId] = [];
+    const arr = kitSession.needsAnswers[qId];
+    const idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1);
+    else {
+      // "notsure" is exclusive with other usage options
+      if (qId === 'usage' && key === 'notsure') {
+        arr.length = 0;
+        arr.push(key);
+      } else if (qId === 'usage' && arr.includes('notsure')) {
+        arr.length = 0;
+        arr.push(key);
+      } else {
+        arr.push(key);
+      }
+    }
+  } else {
+    kitSession.needsAnswers[qId] = key;
+  }
+  renderNeedsQuestion();
+}
+
+function advanceNeeds() {
+  needsStep++;
+  renderNeedsQuestion();
+}
+
+function computeCategories() {
+  const cats = new Set();
+  const answers = kitSession.needsAnswers;
+
+  // From direct usage selection
+  if (answers.usage) {
+    answers.usage.forEach(key => {
+      const opt = needsQuestions[0].options.find(o => o.key === key);
+      if (opt) opt.categories.forEach(c => cats.add(c));
+    });
+  }
+
+  // From guided questions (distance + where)
+  if (answers.distance) {
+    const opt = needsQuestions.find(q => q.id === 'distance').options.find(o => o.key === answers.distance);
+    if (opt) opt.categories.forEach(c => cats.add(c));
+  }
+  if (answers.where) {
+    answers.where.forEach(key => {
+      const opt = needsQuestions.find(q => q.id === 'where').options.find(o => o.key === key);
+      if (opt) opt.categories.forEach(c => cats.add(c));
+    });
+  }
+
+  // Preferences
+  if (answers.preferences) {
+    kitSession.preferences = answers.preferences.map(key => {
+      const opt = needsQuestions.find(q => q.id === 'preferences').options.find(o => o.key === key);
+      return opt ? opt.pref : key;
+    });
+  }
+
+  // Default to handheld if nothing selected
+  if (cats.size === 0) cats.add('handheld');
+
+  // Build category list with default qty 1
+  kitSession.categories = [...cats].map(c => ({ type: c, qty: 1 }));
+  renderQuantityPicker();
+}
+
+function renderCategoryPicker() {
+  // Direct category selection (skip guided questions)
+  const container = document.getElementById('needs-container');
+  const cats = kitSession.categories.length > 0 ? kitSession.categories : [];
+  const selected = new Set(cats.map(c => c.type));
+
+  const catOptions = [
+    { key: 'handheld', icon: '🤚', name: 'Handheld Radios', desc: 'Portable, body-worn radios for people on foot' },
+    { key: 'mobile', icon: '🚗', name: 'Vehicle Mobile Radios', desc: 'Higher-power radios mounted in vehicles' },
+    { key: 'base', icon: '🏠', name: 'Base Station', desc: 'Fixed-location radio with outdoor antenna' },
+    { key: 'hf', icon: '🌐', name: 'HF Radio', desc: 'Long-distance communication — hundreds or thousands of miles' },
+  ];
+
+  container.innerHTML = `
+    <div class="needs-q">
+      <h2>What types of radio do you need?</h2>
+      <div class="nq-sub">Select all that apply. You can build multiple kits.</div>
+      ${catOptions.map(c => `
+        <div class="nq-option ${selected.has(c.key) ? 'selected' : ''}" onclick="toggleDirectCategory('${c.key}')">
+          <div class="nq-check">${selected.has(c.key) ? '✓' : ''}</div>
+          <div class="nq-icon">${c.icon}</div>
+          <div>
+            <div class="nq-label">${c.name}</div>
+            <div class="nq-detail">${c.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="needs-btns">
+        <button class="btn-nav btn-back" onclick="backToNeedsLanding()">← Back</button>
+        <button class="btn-nav btn-next" onclick="finishDirectCategories()">Next: Quantities →</button>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDirectCategory(key) {
+  const idx = kitSession.categories.findIndex(c => c.type === key);
+  if (idx >= 0) kitSession.categories.splice(idx, 1);
+  else kitSession.categories.push({ type: key, qty: 1 });
+  renderCategoryPicker();
+}
+
+function finishDirectCategories() {
+  if (kitSession.categories.length === 0) return;
+  renderQuantityPicker();
+}
+
+function backToNeedsLanding() {
+  document.getElementById('needs-landing').style.display = '';
+  document.getElementById('needs-container').style.display = 'none';
+  document.getElementById('kit-plan-container').style.display = 'none';
+}
+
+const categoryMeta = {
+  handheld: { icon: '🤚', name: 'Handheld Radio Kit', unitLabel: 'person', unitPlural: 'people' },
+  mobile: { icon: '🚗', name: 'Vehicle Mobile Kit', unitLabel: 'vehicle', unitPlural: 'vehicles' },
+  base: { icon: '🏠', name: 'Base Station Kit', unitLabel: 'location', unitPlural: 'locations' },
+  hf: { icon: '🌐', name: 'HF Radio Kit', unitLabel: 'station', unitPlural: 'stations' },
+};
+
+function renderQuantityPicker() {
+  document.getElementById('needs-container').style.display = 'block';
+  document.getElementById('kit-plan-container').style.display = 'none';
+  const container = document.getElementById('needs-container');
+
+  container.innerHTML = `
+    <div class="needs-q">
+      <h2>How Many Do You Need?</h2>
+      <div class="nq-sub">We typically recommend a handheld for each person, a mobile for each vehicle, and a base station at home.</div>
+      ${kitSession.categories.map((cat, i) => {
+        const m = categoryMeta[cat.type];
+        return `
+        <div class="qty-row">
+          <div class="qty-icon">${m.icon}</div>
+          <div class="qty-label">
+            <strong>${m.name}</strong>
+            <span>How many ${m.unitPlural}?</span>
+          </div>
+          <div class="qty-ctrl">
+            <button onclick="adjustQty(${i},-1)">−</button>
+            <div class="qty-val">${cat.qty}</div>
+            <button onclick="adjustQty(${i},1)">+</button>
+          </div>
+        </div>`;
+      }).join('')}
+      <div class="needs-btns">
+        <button class="btn-nav btn-back" onclick="needsStep=0;renderNeedsQuestion();kitSession.categories=[]">← Back</button>
+        <button class="btn-nav btn-next" onclick="showKitPlan()">See My Kit Plan →</button>
+      </div>
+    </div>
+  `;
+}
+
+function adjustQty(catIdx, delta) {
+  const cat = kitSession.categories[catIdx];
+  cat.qty = Math.max(1, Math.min(8, cat.qty + delta));
+  renderQuantityPicker();
+}
+
+function showKitPlan() {
+  // Build kit list from categories × quantities
+  kitSession.kits = [];
+  kitSession.categories.forEach(cat => {
+    for (let i = 0; i < cat.qty; i++) {
+      kitSession.kits.push({
+        category: cat.type,
+        label: cat.qty > 1 ? `${categoryMeta[cat.type].name} #${i + 1}` : categoryMeta[cat.type].name,
+        status: 'pending',
+        radioKey: null,
+        selections: {},
+        cartItems: []
+      });
+    }
+  });
+  kitSession.currentKitIndex = 0;
+
+  document.getElementById('needs-container').style.display = 'none';
+  document.getElementById('kit-plan-container').style.display = 'block';
+  renderKitPlan();
+}
+
+function renderKitPlan() {
+  const container = document.getElementById('kit-plan-container');
+  const totalKits = kitSession.kits.length;
+  const doneKits = kitSession.kits.filter(k => k.status === 'complete').length;
+
+  container.innerHTML = `
+    <div class="kit-plan">
+      <h2>Your Kit Plan</h2>
+      <p class="plan-sub">${totalKits} kit${totalKits > 1 ? 's' : ''} to build. ${doneKits > 0 ? doneKits + ' done, ' + (totalKits - doneKits) + ' to go.' : "We'll build them one at a time."}</p>
+      <div class="kit-plan-items">
+        ${kitSession.kits.map((kit, i) => `
+          <div class="kit-plan-item">
+            <div class="kpi-icon">${categoryMeta[kit.category].icon}</div>
+            <div class="kpi-text">
+              <strong>${kit.label}</strong>
+              <span>${kit.status === 'complete' ? kit.radioKey : kit.status === 'active' ? 'Building now...' : 'Waiting'}</span>
+            </div>
+            <div class="kpi-status ${kit.status}">${kit.status === 'complete' ? 'Done' : kit.status === 'active' ? 'Active' : 'Pending'}</div>
+          </div>
+        `).join('')}
+      </div>
+      ${doneKits < totalKits ? `
+        <button class="btn-nav btn-next" onclick="startNextKit()">
+          ${doneKits === 0 ? 'Start Building →' : 'Build Next Kit →'}
+        </button>
+      ` : `
+        <button class="btn-nav btn-next" onclick="showCombinedReview()">
+          Review All Kits & Add to Cart →
+        </button>
+      `}
+      <div style="margin-top:12px">
+        <button class="btn-nav btn-back" onclick="backToNeedsLanding()">← Start Over</button>
+      </div>
+    </div>
+  `;
+}
+
+function startNextKit() {
+  // Find next pending kit
+  const idx = kitSession.kits.findIndex(k => k.status === 'pending');
+  if (idx < 0) { renderKitPlan(); return; }
+  kitSession.currentKitIndex = idx;
+  kitSession.kits[idx].status = 'active';
+
+  const kit = kitSession.kits[idx];
+  document.getElementById('needs-phase').style.display = 'none';
+
+  if (kit.category === 'handheld') {
+    startHandheldFlow();
+  } else if (kit.category === 'mobile') {
+    startMobileFlow();
+  } else if (kit.category === 'base') {
+    startBaseFlow();
+  } else if (kit.category === 'hf') {
+    startHfFlow();
+  }
+}
+
+function completeCurrentKit(cartItems) {
+  const kit = kitSession.kits[kitSession.currentKitIndex];
+  kit.status = 'complete';
+  kit.cartItems = cartItems || [];
+
+  // Hide all category phases and bottom bar
+  document.getElementById('selector-phase').style.display = 'none';
+  document.getElementById('wizard-phase').style.display = 'none';
+  document.querySelector('.bottom-bar').style.display = 'none';
+  if (document.getElementById('mobile-phase')) document.getElementById('mobile-phase').style.display = 'none';
+  if (document.getElementById('base-phase')) document.getElementById('base-phase').style.display = 'none';
+  if (document.getElementById('hf-phase')) document.getElementById('hf-phase').style.display = 'none';
+
+  // Show needs phase with kit plan
+  document.getElementById('needs-phase').style.display = 'block';
+  document.getElementById('needs-landing').style.display = 'none';
+  document.getElementById('needs-container').style.display = 'none';
+  document.getElementById('kit-plan-container').style.display = 'block';
+  renderKitPlan();
+}
+
+function startHandheldFlow() {
+  // Route to existing handheld selector/interview
+  document.getElementById('selector-phase').style.display = 'block';
+  document.getElementById('selector-landing').style.display = '';
+  document.getElementById('interview-container').style.display = 'none';
+  document.getElementById('radio-picker').style.display = 'none';
+  document.getElementById('wizard-phase').style.display = 'none';
+
+  // Pre-set interview answers from preferences
+  interviewAnswers = {};
+  document.getElementById('breadcrumb').innerHTML = '<a href="#">Shop</a> / <a href="#" onclick="backToKitPlan();return false">Kit Plan</a> / Handheld Radio';
+}
+
+function backToKitPlan() {
+  // Abandon current kit — reset to pending
+  const kit = kitSession.kits[kitSession.currentKitIndex];
+  if (kit) kit.status = 'pending';
+
+  document.getElementById('selector-phase').style.display = 'none';
+  document.getElementById('wizard-phase').style.display = 'none';
+  document.querySelector('.bottom-bar').style.display = 'none';
+  if (document.getElementById('mobile-phase')) document.getElementById('mobile-phase').style.display = 'none';
+  if (document.getElementById('base-phase')) document.getElementById('base-phase').style.display = 'none';
+  if (document.getElementById('hf-phase')) document.getElementById('hf-phase').style.display = 'none';
+
+  document.getElementById('needs-phase').style.display = 'block';
+  document.getElementById('needs-landing').style.display = 'none';
+  document.getElementById('needs-container').style.display = 'none';
+  document.getElementById('kit-plan-container').style.display = 'block';
+  renderKitPlan();
+}
+
+// ══════════════════════════════════════════════════════
+// ── MOBILE / BASE / HF RADIO DATA ──
+// ══════════════════════════════════════════════════════
+
+const mobileRadioLineup = [
+  {
+    key: 'uv50pro', name: 'UV-50PRO Essentials Kit', price: 329, id: 8487,
+    img: S+'2025/11/1000008462.jpg',
+    tagline: 'Analog powerhouse',
+    pitch: '50W mobile radio with Bluetooth smartphone control, GPS, APRS, and radio-to-radio text messaging. IP54 rated. Fully controllable from the hand mic.',
+    features: ['50W VHF/UHF', '180 memory channels', 'Bluetooth control', 'GPS + APRS', 'Text messaging', 'IP54 water resistant', 'Airband receive', 'Hand mic control'],
+    tags: ['waterproof', 'gps', 'bluetooth', 'simple', 'professional'],
+    digital: false
+  },
+  {
+    key: 'd578', name: 'DMR D578 Mobile Radio Kit', price: 549, id: 4157,
+    img: S+'2023/11/20250904_100231-EDIT.jpg',
+    tagline: 'Digital & encryption capable',
+    pitch: 'Full DMR digital radio with encryption, tri-band (2M/70cm/1.25M), GPS, APRS, crossband repeater, and Bluetooth. Interoperates with DMR 6X2 PRO and DA-7X2 handhelds.',
+    features: ['DMR digital + analog', 'Encryption capable', '50W tri-band', 'Crossband repeater', 'GPS + APRS', 'Bluetooth', 'Digital text messaging', 'IP54 water resistant'],
+    tags: ['encryption', 'digital', 'crossband', 'gps', 'bluetooth', 'professional'],
+    digital: true
+  },
+];
+
+const hfRadioLineup = [
+  {
+    key: 'g90', name: 'Xiegu G90 Mobile Radio Kit', price: 549, id: 3654,
+    img: S+'2023/06/20230608_164856-1.jpg',
+    tagline: 'Budget HF — get on the air',
+    pitch: 'Budget-friendly HF radio covering 1.8-54 MHz. Includes MARS/CAP mod. Ideal entry point for long-distance amateur radio.',
+    features: ['20W HF', '1.8-54 MHz', 'Built-in tuner', 'MARS/CAP mod included', 'Compact form factor'],
+    tags: ['budget', 'hf', 'portable'],
+  },
+  {
+    key: 'ft891', name: 'Yaesu FT-891 Mobile Radio Kit', price: 899, id: 720,
+    img: null,
+    tagline: 'Premium HF performance',
+    pitch: 'Full-featured 100W HF radio covering 1.8-54 MHz. Excellent receiver, built for serious HF operators. Includes MARS/CAP mod.',
+    features: ['100W HF', '1.8-54 MHz', 'Superior receiver', 'MARS/CAP mod included', 'Rugged build'],
+    tags: ['premium', 'hf', 'power'],
+    outOfStock: true
+  },
+];
+
+// Mobile/base accessories
+const mobileProducts = {
+  vehicleMounts: [
+    { key: 'ramwedge', name: 'RAM Tough Wedge Mobile Radio Mount', desc: 'No-drill seat/console wedge mount with air bag insert. Keeps your radio accessible without modifying your vehicle.', price: 139, id: 8157 },
+    { key: 'tacoma-console', name: 'Console Radio Mounting Bracket — Toyota Tacoma 2016+', desc: 'Vehicle-specific console mount for Tacoma. Clean, integrated look.', price: 129, id: 6987, vehicleMatch: 'tacoma' },
+  ],
+  antennaMounts: [
+    { key: 'lipmount-nmo', name: 'Comet CP-5NMO Antenna Lip Mount', desc: 'Permanent lip mount — most stable option. Mounts on trunk/hood lip without drilling.', price: 99, id: 7013, mountType: 'permanent' },
+    { key: 'lipmount-so239', name: 'Comet CP-5M Antenna Lip Mount (SO-239)', desc: 'Permanent lip mount with SO-239 connector.', price: 99, id: 7277, mountType: 'permanent' },
+    { key: 'fender-tacoma', name: 'Fender Antenna Mount — Toyota Tacoma 2016+', desc: 'Vehicle-specific NMO fender mount for clean, permanent install.', price: 29, id: 8224, mountType: 'permanent', vehicleMatch: 'tacoma' },
+    { key: 'magmount-nmo', name: 'Comet Mag Mount NMO', desc: 'Flat magnetic mount for vehicle roofs. Easy to remove — best if you need to take the antenna off regularly.', price: 39, id: 6940, mountType: 'temporary' },
+    { key: 'roofrack', name: 'Comet Adjustable Roof Rack Mount', desc: 'Clamps to roof rack bars. Good option when no flat metal surface is available.', price: 44.95, id: 7198, mountType: 'permanent' },
+    { key: 'ditchlight', name: 'Ditch Light Antenna Mount Extension', desc: 'Adds antenna mount to existing ditch light mount.', price: 29, id: 7602, mountType: 'permanent' },
+  ],
+  vehicleAntennas: [
+    { key: 'comet-b10', name: 'Comet B-10 VHF/UHF NMO Antenna (12")', desc: 'Compact 12-inch NMO antenna. Low profile for vehicles that need clearance.', price: 59, id: 8869 },
+    { key: 'sar', name: 'Wideband Search and Rescue Vehicle Antenna', desc: 'Covers Amateur, FRS/GMRS, MURS, and Commercial frequencies. VHF 140-160MHz, UHF 435-465MHz. PL-259 terminated.', price: 79, id: 5428 },
+  ],
+  nmoCoax: [
+    { key: 'nmo-coax', name: 'NMO Antenna Coax Cable Assembly', desc: 'Pre-terminated coax for NMO mounts. Connects your NMO mount to your radio.', price: 49, id: 6636 },
+    { key: 'nmo-pl259', name: 'Comet CK-3NMO Deluxe NMO to PL-259 Cable', desc: 'Premium NMO to PL-259 cable assembly.', price: 45, id: 6715 },
+    { key: 'so239-cable', name: 'Comet CK-3M5 Mobile Mount Cable SO-239', desc: 'Cable assembly for SO-239 mounts.', price: 44.95, id: 7200 },
+  ],
+  power: [
+    { key: 'lifepo4-20ah', name: '20Ah LiFePO4 Battery', desc: 'Compact 12V portable power. Run your radio without the vehicle running — great for overlanding, tailgating, or emergency use.', price: 129, id: 6631 },
+    { key: 'lifepo4-10ah', name: '10Ah LiFePO4 Battery', desc: 'Smaller 12V portable power for lighter use.', price: 109, id: 6722 },
+    { key: 'charger-ac', name: 'LiFePO4 AC Charger', desc: 'Wall charger for LiFePO4 batteries.', price: 29, id: 6632 },
+    { key: 'charger-dc', name: 'LiFePO4 DC-to-DC Vehicle Charger', desc: 'Charge your LiFePO4 battery from your vehicle\'s auxiliary battery. Do not connect to starter battery.', price: 99, id: 6942 },
+    { key: 'ac-psu', name: 'AC to 30A DC Switching Power Supply', desc: 'For permanent base station or home use. Best if you have whole-home battery backup or generator.', price: 149, id: 6969 },
+  ],
+  powerCables: [
+    { key: 'wiring-harness', name: '12V Wiring Harness with OEM T Plug', desc: 'Direct wiring harness for hardwired vehicle installs.', price: 19.95, id: 7205 },
+    { key: 'oem-t-powerpole', name: 'OEM T-Style to Powerpole Cable with Fuses', desc: 'Adapter cable to connect OEM-T power to Anderson Powerpole connectors.', price: 19, id: 8695 },
+    { key: 'power-cable-short', name: 'Power Cable OEM-T to Powerpole (Shortened)', desc: 'Shortened power cable for clean installs.', price: 29, id: 7693 },
+  ],
+  accessories: [
+    { key: 'bs22', name: 'BS-22 Wireless Speakermic', desc: 'Bluetooth wireless speaker-microphone. Clips to gear, pairs via Bluetooth. Compatible with UV-50PRO and UV-PRO.', price: 59, id: 8491 },
+    { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards.', price: 19, id: 966 },
+    { key: 'relocation', name: 'Antenna Jack Relocation Cable', desc: 'Right-angle PL-259 to SO-239 cable for repositioning the antenna jack.', price: 19, id: 7271 },
+    { key: 'manpack', name: 'Manpack Radio Bag', desc: 'Custom radio bag for portable/manpack operations. Fits mobile radios with battery for field-portable use.', price: 349, id: 856 },
+  ],
+};
+
+// Base station specific
+const baseProducts = {
+  antennaPath: {
+    quick: {
+      label: 'Portable / Quick-Deploy Base',
+      desc: 'Mountain Jumper mount with wideband antenna — set up anywhere with a metal surface. No drilling, no mast.',
+      items: [
+        { key: 'mtn-jumper', name: 'Mountain Jumper Angle-Adjustable Mount', desc: '180° adjustable magnetic mount. Works on metal roofs, barns, RVs, toolboxes, or any metal surface.', price: 69, id: 2046, required: true },
+        { key: 'sar-antenna', name: 'Wideband Search and Rescue Antenna', desc: 'Covers Amateur, FRS/GMRS, MURS, and Commercial frequencies. Pairs with the Mountain Jumper mount.', price: 79, id: 5428, required: true },
+      ]
+    },
+    permanent: {
+      label: 'Permanent Mast / Tower Base',
+      desc: 'High-performance base antenna on a mast or tower. Best range and performance — requires a user-supplied or purchased mast.',
+      antennas: [
+        { key: 'gp3', name: 'Comet GP-3 Base Antenna', desc: 'Dual-band VHF/UHF base antenna. SO-239 connector. Good balance of size and performance.', price: 109, id: 6897 },
+        { key: 'gp6', name: 'Comet GP-6 Base Antenna', desc: 'Higher-gain dual-band VHF/UHF base antenna. SO-239 connector. Better range than GP-3 — larger antenna.', price: 179, id: 6716 },
+      ],
+      mounts: [
+        { key: 'chimney', name: 'Antenna Mast Chimney Strap Mounts', desc: 'Strap-on chimney mount for antenna mast. No drilling into the roof.', price: 49, id: 6949 },
+        // Future: gable mounts, standoff mounts, wall mounts
+      ]
+    }
+  },
+};
+
+// HF specific
+const hfProducts = {
+  antennas: [
+    { key: 'efhw-40-10-portable', name: 'Portable End Fed Half Wave 40M-10M', desc: 'Lightweight portable HF antenna covering 40 through 10 meters. Hang from a tree, toss over a branch, or string between supports.', price: 199, id: 6873 },
+    { key: 'efhw-80-10-portable', name: 'End Fed Half Wave 80M-10M', desc: 'Full-coverage HF antenna — 80 through 10 meters. More bands than the 40-10M version. Portable deployment.', price: 299, id: 7267 },
+    { key: 'efhw-80-10-permanent', name: 'Chameleon LEFS Weatherproof End Fed Half Wave 80M-10M', desc: 'Permanent/weatherproof HF antenna covering 80-10 meters. Built for long-term outdoor installation.', price: 179, id: 6947 },
+  ],
+  accessories: [
+    { key: 'digirig-ft891', name: 'Digirig with Interface Cables for FT-891', desc: 'Digital modes interface for the FT-891. Run FT8, JS8Call, Winlink, and other digital modes from your computer.', price: 89, id: 7272, radioMatch: 'ft891' },
+    { key: 'digirig-g90', name: 'Digirig with Interface Cables for G90', desc: 'Digital modes interface for the G90. Run FT8, JS8Call, Winlink, and other digital modes from your computer.', price: 89, id: 7273, radioMatch: 'g90' },
+    { key: 'relocation', name: 'Antenna Jack Relocation Cable', desc: 'Right-angle PL-259 to SO-239 cable.', price: 19, id: 7271 },
+    { key: 'manpack', name: 'Manpack Radio Bag', desc: 'Custom radio bag for portable/manpack HF operations.', price: 349, id: 856 },
+    { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards.', price: 19, id: 966 },
+  ],
+};
+
+// Coax products (shared between base + HF)
+const coaxProducts = {
+  grades: [
+    { key: '400uf-under50', name: '400 Ultra Flex', desc: 'Premium low-loss coax. Best for longer runs and maximum performance.', pricePerFt: 5, id: 6718, maxFt: 50, label: '400 Ultra Flex (≤50ft) — $5/ft' },
+    { key: '400uf-over50', name: '400 Ultra Flex', desc: 'Premium low-loss coax — bulk pricing for longer runs.', pricePerFt: 3.50, id: 6950, minFt: 51, label: '400 Ultra Flex (>50ft) — $3.50/ft' },
+    { key: '240uf-under50', name: '240 Ultra Flex', desc: 'Thinner, more flexible coax. Easier to route but slightly more signal loss.', pricePerFt: 3, id: 6951, maxFt: 50, label: '240 Ultra Flex (≤50ft) — $3/ft' },
+    { key: '240uf-over50', name: '240 Ultra Flex', desc: 'Thinner coax — bulk pricing.', pricePerFt: 2, id: 6952, minFt: 51, label: '240 Ultra Flex (>50ft) — $2/ft' },
+  ],
+  prebuilt: [
+    { key: 'rg316-25', name: '25ft RG-316 Coax with Choke', desc: 'Thin, flexible coax with built-in choke. Good for short runs and portable setups.', price: 79, id: 7075 },
+  ]
+};
+
+// ══════════════════════════════════════════════════════
+// ── MOBILE FLOW ──
+// ══════════════════════════════════════════════════════
+
+let mobileState = {};
+
+function startMobileFlow() {
+  mobileState = { radioKey: null, vehicle: { year: '', make: '', model: '' }, selections: {}, cartItems: [], step: 0 };
+  document.getElementById('breadcrumb').innerHTML = '<a href="#">Shop</a> / <a href="#" onclick="backToKitPlan();return false">Kit Plan</a> / Vehicle Mobile Radio';
+
+  // Ensure mobile phase container exists
+  if (!document.getElementById('mobile-phase')) {
+    const div = document.createElement('div');
+    div.id = 'mobile-phase';
+    div.className = 'selector-phase';
+    document.querySelector('.page').appendChild(div);
+  }
+  document.getElementById('mobile-phase').style.display = 'block';
+  document.getElementById('mobile-phase').innerHTML = '';
+  renderMobileRadioChoice();
+}
+
+function renderMobileRadioChoice() {
+  const phase = document.getElementById('mobile-phase');
+  const prefs = kitSession.preferences;
+  const hasDigitalPref = prefs.includes('digital') || prefs.includes('crossband');
+
+  phase.innerHTML = `
+    <div class="selector-landing">
+      <h2>Choose Your Mobile Radio</h2>
+      <p>Both radios are 50W and include a hand mic, mounting bracket, power cable, and free custom programming.</p>
+      <div class="radio-grid" style="max-width:700px;margin:0 auto">
+        ${mobileRadioLineup.map(r => `
+          <div class="radio-pick ${mobileState.radioKey === r.key ? 'selected' : ''}" onclick="selectMobileRadio('${r.key}')">
+            <div class="rp-img"><img src="${r.img || ''}" alt="${r.name}" onerror="this.parentElement.innerHTML='📻'"></div>
+            <h4>${r.name.replace(' Essentials Kit','').replace(' Mobile Radio Kit','')}</h4>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${r.tagline}</div>
+            <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${r.price}</div>
+            <div style="font-size:12px;color:#ddd;line-height:1.5;margin-bottom:8px">${r.pitch}</div>
+            ${hasDigitalPref && r.digital ? '<div style="font-size:11px;padding:4px 8px;background:#1a1800;border:1px solid var(--gold);color:var(--gold);display:inline-block">Recommended for digital/encryption</div>' : ''}
+            <ul style="text-align:left;font-size:12px;color:#ccc;margin-top:8px;padding-left:16px">${r.features.map(f=>'<li>'+f+'</li>').join('')}</ul>
+          </div>
+        `).join('')}
+      </div>
+      <div class="needs-btns" style="margin-top:20px">
+        <button class="btn-nav btn-back" onclick="backToKitPlan()">← Back to Kit Plan</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectMobileRadio(key) {
+  mobileState.radioKey = key;
+  mobileState.step = 0;
+  renderMobileWizard();
+}
+
+function renderMobileWizard() {
+  const phase = document.getElementById('mobile-phase');
+  const radio = mobileRadioLineup.find(r => r.key === mobileState.radioKey);
+  const steps = getMobileSteps();
+  const step = steps[mobileState.step];
+
+  phase.innerHTML = `
+    <div class="hero" style="margin-bottom:20px">
+      <div class="hero-img" style="max-width:200px">
+        <img src="${radio.img || ''}" alt="${radio.name}" onerror="this.parentElement.innerHTML='📻'" style="width:100%">
+      </div>
+      <div class="hero-info">
+        <h1 style="font-size:22px">${radio.name}</h1>
+        <div class="base-price">$${radio.price}.00</div>
+        <div style="font-size:13px;color:#ddd;margin-top:8px">Kit includes: radio, hand mic, mounting bracket, power cable with Powerpoles, cigarette lighter adapter, free custom programming.</div>
+      </div>
+    </div>
+    <div class="step-labels" style="margin-bottom:16px">
+      ${steps.map((s, i) => `<div class="step-label ${i === mobileState.step ? 'active' : i < mobileState.step ? 'completed' : ''}" onclick="mobileState.step=${i};renderMobileWizard()">${s.name}</div>`).join('')}
+    </div>
+    <div id="mobile-step-content"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+      ${mobileState.step > 0 ? '<button class="btn-nav btn-back" onclick="mobileState.step--;renderMobileWizard()">← Back</button>' : '<button class="btn-nav btn-back" onclick="mobileState.radioKey=null;renderMobileRadioChoice()">← Change Radio</button>'}
+      <button class="btn-nav btn-next" onclick="advanceMobileStep()">
+        ${mobileState.step < steps.length - 1 ? 'Next: ' + steps[mobileState.step + 1].name + ' →' : 'Save Kit & Continue →'}
+      </button>
+    </div>
+  `;
+  step.render();
+}
+
+function getMobileSteps() {
+  return [
+    { name: 'Vehicle', render: renderMobileVehicle },
+    { name: 'Antenna & Mount', render: renderMobileAntenna },
+    { name: 'Power', render: renderMobilePower },
+    { name: 'Accessories', render: renderMobileAccessories },
+    { name: 'Programming', render: renderMobileProgramming },
+    { name: 'Review', render: renderMobileReview },
+  ];
+}
+
+function advanceMobileStep() {
+  const steps = getMobileSteps();
+  if (mobileState.step < steps.length - 1) {
+    mobileState.step++;
+    renderMobileWizard();
+  } else {
+    // Complete kit
+    completeCurrentKit(mobileState.cartItems);
+  }
+}
+
+function renderMobileVehicle() {
+  const c = document.getElementById('mobile-step-content');
+  const v = mobileState.vehicle || { year: '', make: '', model: '' };
+  c.innerHTML = `
+    <div class="section-head"><h2>Your Vehicle</h2><p>Tell us about your vehicle so we can recommend the right mounts and antenna setup.</p></div>
+    <div style="max-width:500px;margin:0 auto">
+      <div class="field-row" style="display:flex;gap:12px;margin-bottom:12px">
+        <div style="flex:1"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Year</label><input type="text" id="mv-year" value="${v.year}" placeholder="2024" style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%"></div>
+        <div style="flex:2"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Make</label><input type="text" id="mv-make" value="${v.make}" placeholder="Toyota" style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%"></div>
+        <div style="flex:2"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Model</label><input type="text" id="mv-model" value="${v.model}" placeholder="Tacoma" style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%"></div>
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:8px">We use this to check for vehicle-specific mounting options.</div>
+      <div style="margin-top:16px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:8px">Radio mounting preference:</label>
+        <div class="nq-option ${(mobileState.selections.radioMount === 'ramwedge') ? 'selected' : ''}" onclick="mobileState.selections.radioMount='ramwedge';renderMobileVehicle()">
+          <div class="nq-check">${mobileState.selections.radioMount === 'ramwedge' ? '✓' : ''}</div>
+          <div><div class="nq-label">RAM Tough Wedge — No-drill mount ($139)</div><div class="nq-detail">Wedge-style seat/console mount. No modifications to your vehicle.</div></div>
+        </div>
+        <div class="nq-option ${(mobileState.selections.radioMount === 'self') ? 'selected' : ''}" onclick="mobileState.selections.radioMount='self';renderMobileVehicle()">
+          <div class="nq-check">${mobileState.selections.radioMount === 'self' ? '✓' : ''}</div>
+          <div><div class="nq-label">I'll mount it myself / use the included bracket</div><div class="nq-detail">Kit includes a basic mounting bracket and screws.</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+  // Save vehicle on input changes
+  ['mv-year','mv-make','mv-model'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => {
+      mobileState.vehicle = { year: document.getElementById('mv-year').value, make: document.getElementById('mv-make').value, model: document.getElementById('mv-model').value };
+    });
+  });
+}
+
+function renderMobileAntenna() {
+  const c = document.getElementById('mobile-step-content');
+  const v = mobileState.vehicle || {};
+  const isTacoma = (v.make || '').toLowerCase().includes('tacoma') && parseInt(v.year) >= 2016;
+  const sel = mobileState.selections;
+  if (!sel.antennaMount) sel.antennaMount = null;
+  if (!sel.antenna) sel.antenna = null;
+
+  // Build mount options based on vehicle
+  let mountOptions = [];
+  if (isTacoma) {
+    mountOptions.push({ key: 'fender-tacoma', highlight: true, label: 'Recommended: Tacoma Fender Mount ($29)', detail: 'Vehicle-specific NMO fender mount — clean, permanent install for your Tacoma.' });
+  }
+  mountOptions.push({ key: 'lipmount-nmo', highlight: !isTacoma, label: (isTacoma ? '' : 'Recommended: ') + 'Lip Mount NMO ($99)', detail: 'Most stable universal option. Mounts on trunk/hood lip without drilling.' });
+  mountOptions.push({ key: 'magmount-nmo', highlight: false, label: 'Magnetic Mount NMO ($39)', detail: 'Easy removal — best if you frequently remove the antenna. Less stable than permanent mounts.' });
+  mountOptions.push({ key: 'roofrack', highlight: false, label: 'Roof Rack Mount ($44.95)', detail: 'Clamps to roof rack bars. Good when no flat surface is available.' });
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Antenna & Mount</h2><p>Your mobile radio needs an external antenna for best performance. We'll help you pick the right mount for your vehicle.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      <label style="font-size:14px;color:var(--gold);display:block;margin-bottom:8px">Antenna Mount</label>
+      ${mountOptions.map(m => `
+        <div class="nq-option ${sel.antennaMount === m.key ? 'selected' : ''}" onclick="mobileState.selections.antennaMount='${m.key}';renderMobileAntenna()">
+          <div class="nq-check">${sel.antennaMount === m.key ? '✓' : ''}</div>
+          <div>
+            <div class="nq-label">${m.highlight ? '⭐ ' : ''}${m.label}</div>
+            <div class="nq-detail">${m.detail}</div>
+          </div>
+        </div>
+      `).join('')}
+
+      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Antenna</label>
+      ${mobileProducts.vehicleAntennas.map(a => `
+        <div class="nq-option ${sel.antenna === a.key ? 'selected' : ''}" onclick="mobileState.selections.antenna='${a.key}';renderMobileAntenna()">
+          <div class="nq-check">${sel.antenna === a.key ? '✓' : ''}</div>
+          <div>
+            <div class="nq-label">${a.name} ($${a.price})</div>
+            <div class="nq-detail">${a.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderMobilePower() {
+  const c = document.getElementById('mobile-step-content');
+  const sel = mobileState.selections;
+  if (!sel.power) sel.power = [];
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Power Options</h2><p>Your kit includes a power cable with Anderson Powerpoles and a cigarette lighter adapter. Add portable power or hardwire accessories below.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${mobileProducts.power.map(p => `
+        <div class="nq-option ${sel.power.includes(p.key) ? 'selected' : ''}" onclick="toggleMobilePower('${p.key}')">
+          <div class="nq-check">${sel.power.includes(p.key) ? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="nq-label">${p.name} ($${p.price})</div>
+            <div class="nq-detail">${p.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+
+      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Power Cables</label>
+      ${mobileProducts.powerCables.map(p => `
+        <div class="nq-option ${sel.power.includes(p.key) ? 'selected' : ''}" onclick="toggleMobilePower('${p.key}')">
+          <div class="nq-check">${sel.power.includes(p.key) ? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="nq-label">${p.name} ($${p.price})</div>
+            <div class="nq-detail">${p.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleMobilePower(key) {
+  const arr = mobileState.selections.power;
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  renderMobilePower();
+}
+
+function renderMobileAccessories() {
+  const c = document.getElementById('mobile-step-content');
+  const sel = mobileState.selections;
+  if (!sel.accessories) sel.accessories = [];
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Accessories</h2><p>Add speakermics, cable management, and more to complete your mobile setup.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${mobileProducts.accessories.map(a => `
+        <div class="nq-option ${sel.accessories.includes(a.key) ? 'selected' : ''}" onclick="toggleMobileAccessory('${a.key}')">
+          <div class="nq-check">${sel.accessories.includes(a.key) ? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="nq-label">${a.name} ($${a.price})</div>
+            <div class="nq-detail">${a.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleMobileAccessory(key) {
+  const arr = mobileState.selections.accessories;
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  renderMobileAccessories();
+}
+
+function renderMobileProgramming() {
+  const c = document.getElementById('mobile-step-content');
+  const radio = mobileRadioLineup.find(r => r.key === mobileState.radioKey);
+  const isDMR = radio && radio.digital;
+  const sel = mobileState.selections;
+  if (!sel.programming) sel.programming = { zip: '', notes: '', brandmeisterId: '' };
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Custom Programming</h2><p>Every Radio Made Easy kit comes custom programmed with GMRS, FRS, NOAA weather, and local repeaters for your area — included at no extra charge.</p></div>
+    <div style="max-width:500px;margin:0 auto">
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Primary location (ZIP code)</label>
+        <input type="text" id="mp-zip" value="${sel.programming.zip}" placeholder="Enter ZIP code" maxlength="5"
+          style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%;max-width:200px"
+          oninput="mobileState.selections.programming.zip=this.value">
+        <div style="font-size:11px;color:#888;margin-top:4px">We'll program local repeaters from this area.</div>
+      </div>
+      ${isDMR ? `
+      <div style="margin-bottom:16px;padding:14px;background:#1a1800;border:1px solid var(--gold-dim)">
+        <label style="font-size:12px;color:var(--gold);display:block;margin-bottom:4px">Brandmeister DMR ID (optional)</label>
+        <input type="text" id="mp-dmrid" value="${sel.programming.brandmeisterId}" placeholder="e.g. 3141234"
+          style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%;max-width:200px"
+          oninput="mobileState.selections.programming.brandmeisterId=this.value">
+        <div style="font-size:11px;color:#ddd;margin-top:4px">This applies only to amateur radio license holders. If you don't have one yet, you can <a href="https://brandmeister.network" target="_blank" style="color:var(--gold)">apply at Brandmeister.network</a>.</div>
+      </div>
+      ` : ''}
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Special instructions (optional)</label>
+        <textarea id="mp-notes" placeholder="Any special frequencies, channels, or notes for programming..."
+          style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%;min-height:60px"
+          oninput="mobileState.selections.programming.notes=this.value">${sel.programming.notes}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderMobileReview() {
+  const c = document.getElementById('mobile-step-content');
+  const radio = mobileRadioLineup.find(r => r.key === mobileState.radioKey);
+  const sel = mobileState.selections;
+
+  let items = [{ name: radio.name, price: radio.price, id: radio.id }];
+  let total = radio.price;
+
+  // Radio mount
+  if (sel.radioMount === 'ramwedge') {
+    const p = mobileProducts.vehicleMounts.find(m => m.key === 'ramwedge');
+    items.push({ name: p.name, price: p.price, id: p.id }); total += p.price;
+  }
+
+  // Antenna mount
+  if (sel.antennaMount) {
+    const m = mobileProducts.antennaMounts.find(a => a.key === sel.antennaMount);
+    if (m) { items.push({ name: m.name, price: m.price, id: m.id }); total += m.price; }
+  }
+
+  // Antenna
+  if (sel.antenna) {
+    const a = mobileProducts.vehicleAntennas.find(x => x.key === sel.antenna);
+    if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
+  }
+
+  // Power
+  (sel.power || []).forEach(key => {
+    const p = [...mobileProducts.power, ...mobileProducts.powerCables].find(x => x.key === key);
+    if (p) { items.push({ name: p.name, price: p.price, id: p.id }); total += p.price; }
+  });
+
+  // Accessories
+  (sel.accessories || []).forEach(key => {
+    const a = mobileProducts.accessories.find(x => x.key === key);
+    if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
+  });
+
+  mobileState.cartItems = items;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Review Your Mobile Kit</h2><p>${radio.name} — customized and ready to go.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${items.map(item => `
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:#ddd">${item.name}</span>
+          <span style="color:var(--gold);font-weight:600">$${item.price}</span>
+        </div>
+      `).join('')}
+      <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:16px;font-weight:700">
+        <span style="color:var(--gold)">Total</span>
+        <span style="color:var(--gold)">$${total}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ── BASE STATION FLOW ──
+// ══════════════════════════════════════════════════════
+
+let baseState = {};
+
+function startBaseFlow() {
+  baseState = { radioKey: null, antennaPath: null, selections: {}, cartItems: [], step: 0 };
+  document.getElementById('breadcrumb').innerHTML = '<a href="#">Shop</a> / <a href="#" onclick="backToKitPlan();return false">Kit Plan</a> / Base Station';
+  if (!document.getElementById('base-phase')) {
+    const div = document.createElement('div');
+    div.id = 'base-phase';
+    div.className = 'selector-phase';
+    document.querySelector('.page').appendChild(div);
+  }
+  document.getElementById('base-phase').style.display = 'block';
+  document.getElementById('base-phase').innerHTML = '';
+  renderBaseRadioChoice();
+}
+
+function renderBaseRadioChoice() {
+  const phase = document.getElementById('base-phase');
+  const prefs = kitSession.preferences;
+  const hasDigitalPref = prefs.includes('digital') || prefs.includes('crossband');
+
+  phase.innerHTML = `
+    <div class="selector-landing">
+      <h2>Choose Your Base Station Radio</h2>
+      <p>Same radios as our vehicle mobile kits — paired with base station accessories for a fixed-location setup.</p>
+      <div class="radio-grid" style="max-width:700px;margin:0 auto">
+        ${mobileRadioLineup.map(r => `
+          <div class="radio-pick ${baseState.radioKey === r.key ? 'selected' : ''}" onclick="selectBaseRadio('${r.key}')">
+            <div class="rp-img"><img src="${r.img || ''}" alt="${r.name}" onerror="this.parentElement.innerHTML='📻'"></div>
+            <h4>${r.name.replace(' Essentials Kit','').replace(' Mobile Radio Kit','')}</h4>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${r.tagline}</div>
+            <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${r.price}</div>
+            ${hasDigitalPref && r.digital ? '<div style="font-size:11px;padding:4px 8px;background:#1a1800;border:1px solid var(--gold);color:var(--gold);display:inline-block">Recommended for digital/privacy</div>' : ''}
+          </div>
+        `).join('')}
+      </div>
+      <div class="needs-btns" style="margin-top:20px">
+        <button class="btn-nav btn-back" onclick="backToKitPlan()">← Back to Kit Plan</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectBaseRadio(key) {
+  baseState.radioKey = key;
+  baseState.step = 0;
+  renderBaseWizard();
+}
+
+function getBaseSteps() {
+  return [
+    { name: 'Antenna Setup', render: renderBaseAntennaPath },
+    { name: 'Coax', render: renderBaseCoax },
+    { name: 'Power', render: renderBasePower },
+    { name: 'Accessories', render: renderBaseAccessories },
+    { name: 'Programming', render: renderBaseProgramming },
+    { name: 'Review', render: renderBaseReview },
+  ];
+}
+
+function renderBaseWizard() {
+  const phase = document.getElementById('base-phase');
+  const radio = mobileRadioLineup.find(r => r.key === baseState.radioKey);
+  const steps = getBaseSteps();
+  const step = steps[baseState.step];
+
+  phase.innerHTML = `
+    <div class="hero" style="margin-bottom:20px">
+      <div class="hero-img" style="max-width:200px">
+        <img src="${radio.img || ''}" alt="${radio.name}" onerror="this.parentElement.innerHTML='📻'" style="width:100%">
+      </div>
+      <div class="hero-info">
+        <h1 style="font-size:22px">${radio.name} — Base Station</h1>
+        <div class="base-price">$${radio.price}.00</div>
+      </div>
+    </div>
+    <div class="step-labels" style="margin-bottom:16px">
+      ${steps.map((s, i) => `<div class="step-label ${i === baseState.step ? 'active' : ''}" onclick="baseState.step=${i};renderBaseWizard()">${s.name}</div>`).join('')}
+    </div>
+    <div id="base-step-content"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+      ${baseState.step > 0 ? '<button class="btn-nav btn-back" onclick="baseState.step--;renderBaseWizard()">← Back</button>' : '<button class="btn-nav btn-back" onclick="baseState.radioKey=null;renderBaseRadioChoice()">← Change Radio</button>'}
+      <button class="btn-nav btn-next" onclick="advanceBaseStep()">
+        ${baseState.step < steps.length - 1 ? 'Next: ' + steps[baseState.step + 1].name + ' →' : 'Save Kit & Continue →'}
+      </button>
+    </div>
+  `;
+  step.render();
+}
+
+function advanceBaseStep() {
+  const steps = getBaseSteps();
+  if (baseState.step < steps.length - 1) { baseState.step++; renderBaseWizard(); }
+  else completeCurrentKit(baseState.cartItems);
+}
+
+function renderBaseAntennaPath() {
+  const c = document.getElementById('base-step-content');
+  const sel = baseState.selections;
+  if (!sel.antennaPath) sel.antennaPath = null;
+
+  const quick = baseProducts.antennaPath.quick;
+  const perm = baseProducts.antennaPath.permanent;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Antenna Setup</h2><p>Choose between a quick-deploy portable base or a permanent mast-mounted antenna.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      <div class="nq-option ${sel.antennaPath === 'quick' ? 'selected' : ''}" onclick="baseState.selections.antennaPath='quick';renderBaseAntennaPath()" style="align-items:flex-start">
+        <div class="nq-check">${sel.antennaPath === 'quick' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">${quick.label}</div>
+          <div class="nq-detail">${quick.desc}</div>
+          <div style="margin-top:8px;font-size:12px;color:var(--muted)">
+            ${quick.items.map(i => `${i.name} — $${i.price}`).join('<br>')}
+            <br>+ coax cable (next step)
+          </div>
+        </div>
+      </div>
+      <div class="nq-option ${sel.antennaPath === 'permanent' ? 'selected' : ''}" onclick="baseState.selections.antennaPath='permanent';renderBaseAntennaPath()" style="align-items:flex-start">
+        <div class="nq-check">${sel.antennaPath === 'permanent' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">${perm.label}</div>
+          <div class="nq-detail">${perm.desc}</div>
+        </div>
+      </div>
+
+      ${sel.antennaPath === 'permanent' ? `
+        <div style="margin-top:16px;padding:16px;border:1px solid var(--border);background:var(--card)">
+          <label style="font-size:14px;color:var(--gold);display:block;margin-bottom:8px">Base Antenna</label>
+          ${perm.antennas.map(a => `
+            <div class="nq-option ${sel.baseAntenna === a.key ? 'selected' : ''}" onclick="baseState.selections.baseAntenna='${a.key}';renderBaseAntennaPath()">
+              <div class="nq-check">${sel.baseAntenna === a.key ? '✓' : ''}</div>
+              <div><div class="nq-label">${a.name} ($${a.price})</div><div class="nq-detail">${a.desc}</div></div>
+            </div>
+          `).join('')}
+
+          <label style="font-size:14px;color:var(--gold);display:block;margin:16px 0 8px">Mast Mount</label>
+          ${perm.mounts.map(m => `
+            <div class="nq-option ${sel.mastMount === m.key ? 'selected' : ''}" onclick="baseState.selections.mastMount='${m.key}';renderBaseAntennaPath()">
+              <div class="nq-check">${sel.mastMount === m.key ? '✓' : ''}</div>
+              <div><div class="nq-label">${m.name} ($${m.price})</div><div class="nq-detail">${m.desc}</div></div>
+            </div>
+          `).join('')}
+          <div style="font-size:11px;color:#888;margin-top:8px">More mounting options (gable, standoff, wall mounts) coming soon.</div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderBaseCoax() {
+  const c = document.getElementById('base-step-content');
+  const sel = baseState.selections;
+  if (!sel.coax) sel.coax = { grade: '400uf', length: 25 };
+
+  const grade = sel.coax.grade;
+  const len = sel.coax.length;
+  const isOver50 = len > 50;
+  const pricePerFt = grade === '400uf' ? (isOver50 ? 3.50 : 5) : (isOver50 ? 2 : 3);
+  const coaxTotal = Math.round(len * pricePerFt * 100) / 100;
+  const productId = grade === '400uf' ? (isOver50 ? 6950 : 6718) : (isOver50 ? 6952 : 6951);
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Coax Cable</h2><p>Connect your radio to the antenna. Enter the length you need — measure from where the radio will sit to where the antenna will be mounted.</p></div>
+    <div style="max-width:500px;margin:0 auto">
+      <label style="font-size:14px;color:var(--gold);display:block;margin-bottom:8px">Cable Grade</label>
+      <div class="nq-option ${grade === '400uf' ? 'selected' : ''}" onclick="baseState.selections.coax.grade='400uf';renderBaseCoax()">
+        <div class="nq-check">${grade === '400uf' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">⭐ 400 Ultra Flex — Recommended</div>
+          <div class="nq-detail">Premium low-loss coax. Best performance, especially for longer runs. $5/ft (≤50ft) or $3.50/ft (>50ft).</div>
+        </div>
+      </div>
+      <div class="nq-option ${grade === '240uf' ? 'selected' : ''}" onclick="baseState.selections.coax.grade='240uf';renderBaseCoax()">
+        <div class="nq-check">${grade === '240uf' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">240 Ultra Flex — Budget-friendly</div>
+          <div class="nq-detail">Thinner, more flexible, slightly more signal loss. $3/ft (≤50ft) or $2/ft (>50ft).</div>
+        </div>
+      </div>
+
+      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Length (feet)</label>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="range" id="coax-slider" min="10" max="150" step="5" value="${len}"
+          style="flex:1;accent-color:var(--gold)"
+          oninput="baseState.selections.coax.length=parseInt(this.value);document.getElementById('coax-len').textContent=this.value;renderBaseCoax()">
+        <div id="coax-len" style="font-size:20px;font-weight:700;color:var(--gold);min-width:50px;text-align:center">${len}</div>
+        <span style="color:#888;font-size:13px">ft</span>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:#1a1800;border:1px solid var(--gold-dim);text-align:center">
+        <div style="font-size:13px;color:#ddd">${len}ft of ${grade === '400uf' ? '400' : '240'} Ultra Flex @ $${pricePerFt}/ft</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">$${coaxTotal.toFixed(2)}</div>
+      </div>
+      <div style="font-size:11px;color:#888;margin-top:8px">Tip: Add a few extra feet for routing around corners and through walls. It's better to have too much than too little.</div>
+    </div>
+  `;
+}
+
+function renderBasePower() {
+  const c = document.getElementById('base-step-content');
+  const sel = baseState.selections;
+  if (!sel.power) sel.power = null;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Power Supply</h2><p>Your base station needs a 12V power source. We recommend the LiFePO4 battery for most setups — it doubles as emergency backup power.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      <div class="nq-option ${sel.power === 'lifepo4' ? 'selected' : ''}" onclick="baseState.selections.power='lifepo4';renderBasePower()" style="align-items:flex-start">
+        <div class="nq-check">${sel.power === 'lifepo4' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">⭐ Recommended: 20Ah LiFePO4 Battery + AC Charger ($158)</div>
+          <div class="nq-detail">Portable 12V power with AC wall charger. Radio runs off the battery even during a power outage. Recharges from any outlet.</div>
+        </div>
+      </div>
+      <div class="nq-option ${sel.power === 'ac-psu' ? 'selected' : ''}" onclick="baseState.selections.power='ac-psu';renderBasePower()">
+        <div class="nq-check">${sel.power === 'ac-psu' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">AC Power Supply ($149)</div>
+          <div class="nq-detail">Best if you have whole-home battery backup or generator. No operation during power outage otherwise.</div>
+        </div>
+      </div>
+      <div class="nq-option ${sel.power === 'both' ? 'selected' : ''}" onclick="baseState.selections.power='both';renderBasePower()">
+        <div class="nq-check">${sel.power === 'both' ? '✓' : ''}</div>
+        <div>
+          <div class="nq-label">Both — Battery + AC Power Supply ($307)</div>
+          <div class="nq-detail">Battery for emergency/portable use, AC power supply for daily base station operation.</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderBaseAccessories() {
+  const c = document.getElementById('base-step-content');
+  const sel = baseState.selections;
+  if (!sel.accessories) sel.accessories = [];
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Accessories</h2><p>Add accessories to complete your base station setup.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${mobileProducts.accessories.map(a => `
+        <div class="nq-option ${sel.accessories.includes(a.key) ? 'selected' : ''}" onclick="toggleBaseAccessory('${a.key}')">
+          <div class="nq-check">${sel.accessories.includes(a.key) ? '✓' : ''}</div>
+          <div style="flex:1"><div class="nq-label">${a.name} ($${a.price})</div><div class="nq-detail">${a.desc}</div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleBaseAccessory(key) {
+  const arr = baseState.selections.accessories;
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  renderBaseAccessories();
+}
+
+function renderBaseProgramming() {
+  // Reuse mobile programming renderer with base state
+  const c = document.getElementById('base-step-content');
+  const radio = mobileRadioLineup.find(r => r.key === baseState.radioKey);
+  const isDMR = radio && radio.digital;
+  const sel = baseState.selections;
+  if (!sel.programming) sel.programming = { zip: '', notes: '', brandmeisterId: '' };
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Custom Programming</h2><p>Every Radio Made Easy kit comes custom programmed with GMRS, FRS, NOAA weather, and local repeaters for your area — included at no extra charge.</p></div>
+    <div style="max-width:500px;margin:0 auto">
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Base station location (ZIP code)</label>
+        <input type="text" value="${sel.programming.zip}" placeholder="Enter ZIP code" maxlength="5"
+          style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%;max-width:200px"
+          oninput="baseState.selections.programming.zip=this.value">
+      </div>
+      ${isDMR ? `
+      <div style="margin-bottom:16px;padding:14px;background:#1a1800;border:1px solid var(--gold-dim)">
+        <label style="font-size:12px;color:var(--gold);display:block;margin-bottom:4px">Brandmeister DMR ID (optional)</label>
+        <input type="text" value="${sel.programming.brandmeisterId}" placeholder="e.g. 3141234"
+          style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%;max-width:200px"
+          oninput="baseState.selections.programming.brandmeisterId=this.value">
+        <div style="font-size:11px;color:#ddd;margin-top:4px">Applies only to amateur radio license holders. <a href="https://brandmeister.network" target="_blank" style="color:var(--gold)">Apply at Brandmeister.network</a>.</div>
+      </div>
+      ` : ''}
+      <div>
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Special instructions (optional)</label>
+        <textarea placeholder="Any special frequencies, channels, or notes..."
+          style="background:#111;border:1px solid var(--border);color:var(--text);padding:8px;width:100%;min-height:60px"
+          oninput="baseState.selections.programming.notes=this.value">${sel.programming.notes}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderBaseReview() {
+  const c = document.getElementById('base-step-content');
+  const radio = mobileRadioLineup.find(r => r.key === baseState.radioKey);
+  const sel = baseState.selections;
+  let items = [{ name: radio.name, price: radio.price, id: radio.id }];
+  let total = radio.price;
+
+  // Antenna path
+  if (sel.antennaPath === 'quick') {
+    baseProducts.antennaPath.quick.items.forEach(i => { items.push({ name: i.name, price: i.price, id: i.id }); total += i.price; });
+  } else if (sel.antennaPath === 'permanent') {
+    if (sel.baseAntenna) {
+      const a = baseProducts.antennaPath.permanent.antennas.find(x => x.key === sel.baseAntenna);
+      if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
+    }
+    if (sel.mastMount) {
+      const m = baseProducts.antennaPath.permanent.mounts.find(x => x.key === sel.mastMount);
+      if (m) { items.push({ name: m.name, price: m.price, id: m.id }); total += m.price; }
+    }
+  }
+
+  // Coax
+  if (sel.coax) {
+    const isOver50 = sel.coax.length > 50;
+    const pricePerFt = sel.coax.grade === '400uf' ? (isOver50 ? 3.50 : 5) : (isOver50 ? 2 : 3);
+    const coaxTotal = Math.round(sel.coax.length * pricePerFt * 100) / 100;
+    const productId = sel.coax.grade === '400uf' ? (isOver50 ? 6950 : 6718) : (isOver50 ? 6952 : 6951);
+    items.push({ name: `${sel.coax.length}ft ${sel.coax.grade === '400uf' ? '400' : '240'} Ultra Flex Coax`, price: coaxTotal, id: productId, qty: sel.coax.length });
+    total += coaxTotal;
+  }
+
+  // Power
+  if (sel.power === 'lifepo4' || sel.power === 'both') {
+    items.push({ name: '20Ah LiFePO4 Battery', price: 129, id: 6631 }); total += 129;
+    items.push({ name: 'LiFePO4 AC Charger', price: 29, id: 6632 }); total += 29;
+  }
+  if (sel.power === 'ac-psu' || sel.power === 'both') {
+    items.push({ name: 'AC to 30A DC Power Supply', price: 149, id: 6969 }); total += 149;
+  }
+
+  // Accessories
+  (sel.accessories || []).forEach(key => {
+    const a = mobileProducts.accessories.find(x => x.key === key);
+    if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
+  });
+
+  baseState.cartItems = items;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Review Your Base Station Kit</h2><p>${radio.name} — base station configuration.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${items.map(item => `
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:#ddd">${item.name}</span>
+          <span style="color:var(--gold);font-weight:600">$${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</span>
+        </div>
+      `).join('')}
+      <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:16px;font-weight:700">
+        <span style="color:var(--gold)">Total</span>
+        <span style="color:var(--gold)">$${total.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ── HF FLOW ──
+// ══════════════════════════════════════════════════════
+
+let hfState = {};
+
+function startHfFlow() {
+  hfState = { radioKey: null, selections: {}, cartItems: [], step: 0 };
+  document.getElementById('breadcrumb').innerHTML = '<a href="#">Shop</a> / <a href="#" onclick="backToKitPlan();return false">Kit Plan</a> / HF Radio';
+  if (!document.getElementById('hf-phase')) {
+    const div = document.createElement('div');
+    div.id = 'hf-phase';
+    div.className = 'selector-phase';
+    document.querySelector('.page').appendChild(div);
+  }
+  document.getElementById('hf-phase').style.display = 'block';
+  document.getElementById('hf-phase').innerHTML = '';
+  renderHfRadioChoice();
+}
+
+function renderHfRadioChoice() {
+  const phase = document.getElementById('hf-phase');
+  phase.innerHTML = `
+    <div class="selector-landing">
+      <h2>Choose Your HF Radio</h2>
+      <p>HF radios provide long-distance communication — hundreds or thousands of miles depending on conditions and antenna.</p>
+      <div class="radio-grid" style="max-width:700px;margin:0 auto">
+        ${hfRadioLineup.map(r => `
+          <div class="radio-pick ${hfState.radioKey === r.key ? 'selected' : ''} ${r.outOfStock ? '' : ''}" onclick="${r.outOfStock ? '' : `selectHfRadio('${r.key}')`}" style="${r.outOfStock ? 'opacity:0.5;cursor:not-allowed' : ''}">
+            <div class="rp-img">${r.img ? `<img src="${r.img}" alt="${r.name}" onerror="this.parentElement.innerHTML='📻'">` : '📻'}</div>
+            <h4>${r.name.replace(' Mobile Radio Kit','')}</h4>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${r.tagline}</div>
+            <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${r.price}</div>
+            ${r.outOfStock ? '<div style="font-size:11px;padding:4px 8px;background:#3a1111;border:1px solid var(--red);color:var(--red);display:inline-block">Out of Stock</div>' : ''}
+            <ul style="text-align:left;font-size:12px;color:#ccc;margin-top:8px;padding-left:16px">${r.features.map(f=>'<li>'+f+'</li>').join('')}</ul>
+          </div>
+        `).join('')}
+      </div>
+      <div class="needs-btns" style="margin-top:20px">
+        <button class="btn-nav btn-back" onclick="backToKitPlan()">← Back to Kit Plan</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectHfRadio(key) {
+  hfState.radioKey = key;
+  hfState.step = 0;
+  renderHfWizard();
+}
+
+function getHfSteps() {
+  return [
+    { name: 'Antenna', render: renderHfAntenna },
+    { name: 'Coax', render: renderHfCoax },
+    { name: 'Power', render: renderHfPower },
+    { name: 'Accessories', render: renderHfAccessories },
+    { name: 'Review', render: renderHfReview },
+  ];
+}
+
+function renderHfWizard() {
+  const phase = document.getElementById('hf-phase');
+  const radio = hfRadioLineup.find(r => r.key === hfState.radioKey);
+  const steps = getHfSteps();
+  const step = steps[hfState.step];
+
+  phase.innerHTML = `
+    <div class="hero" style="margin-bottom:20px">
+      <div class="hero-img" style="max-width:200px">
+        ${radio.img ? `<img src="${radio.img}" alt="${radio.name}" style="width:100%">` : '<div style="font-size:48px;text-align:center">📻</div>'}
+      </div>
+      <div class="hero-info">
+        <h1 style="font-size:22px">${radio.name}</h1>
+        <div class="base-price">$${radio.price}.00</div>
+        <div style="font-size:13px;color:#ddd;margin-top:8px">Kit includes: radio with MARS/CAP mod, hand mic, mounting bracket, power cable with Powerpoles, cigarette lighter adapter.</div>
+      </div>
+    </div>
+    <div class="step-labels" style="margin-bottom:16px">
+      ${steps.map((s, i) => `<div class="step-label ${i === hfState.step ? 'active' : ''}" onclick="hfState.step=${i};renderHfWizard()">${s.name}</div>`).join('')}
+    </div>
+    <div id="hf-step-content"></div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+      ${hfState.step > 0 ? '<button class="btn-nav btn-back" onclick="hfState.step--;renderHfWizard()">← Back</button>' : '<button class="btn-nav btn-back" onclick="hfState.radioKey=null;renderHfRadioChoice()">← Change Radio</button>'}
+      <button class="btn-nav btn-next" onclick="advanceHfStep()">
+        ${hfState.step < steps.length - 1 ? 'Next: ' + steps[hfState.step + 1].name + ' →' : 'Save Kit & Continue →'}
+      </button>
+    </div>
+  `;
+  step.render();
+}
+
+function advanceHfStep() {
+  const steps = getHfSteps();
+  if (hfState.step < steps.length - 1) { hfState.step++; renderHfWizard(); }
+  else completeCurrentKit(hfState.cartItems);
+}
+
+function renderHfAntenna() {
+  const c = document.getElementById('hf-step-content');
+  const sel = hfState.selections;
+  if (!sel.antenna) sel.antenna = null;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>HF Antenna</h2><p>Your HF antenna is the most important part of your station. Pick based on your deployment style and band coverage needs.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${hfProducts.antennas.map(a => `
+        <div class="nq-option ${sel.antenna === a.key ? 'selected' : ''}" onclick="hfState.selections.antenna='${a.key}';renderHfAntenna()">
+          <div class="nq-check">${sel.antenna === a.key ? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="nq-label">${a.name} ($${a.price})</div>
+            <div class="nq-detail">${a.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+      <div style="font-size:11px;color:#888;margin-top:8px">More HF antenna options coming soon.</div>
+    </div>
+  `;
+}
+
+function renderHfCoax() {
+  const c = document.getElementById('hf-step-content');
+  const sel = hfState.selections;
+  if (!sel.coax) sel.coax = { grade: '400uf', length: 25 };
+
+  const grade = sel.coax.grade;
+  const len = sel.coax.length;
+  const isOver50 = len > 50;
+  const pricePerFt = grade === '400uf' ? (isOver50 ? 3.50 : 5) : (isOver50 ? 2 : 3);
+  const coaxTotal = Math.round(len * pricePerFt * 100) / 100;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Coax Cable</h2><p>Connect your radio to the antenna. For HF, lower-loss coax makes a bigger difference on longer runs.</p></div>
+    <div style="max-width:500px;margin:0 auto">
+      <label style="font-size:14px;color:var(--gold);display:block;margin-bottom:8px">Cable Grade</label>
+      <div class="nq-option ${grade === '400uf' ? 'selected' : ''}" onclick="hfState.selections.coax.grade='400uf';renderHfCoax()">
+        <div class="nq-check">${grade === '400uf' ? '✓' : ''}</div>
+        <div><div class="nq-label">⭐ 400 Ultra Flex — Recommended</div><div class="nq-detail">Premium low-loss. $5/ft (≤50ft) or $3.50/ft (>50ft).</div></div>
+      </div>
+      <div class="nq-option ${grade === '240uf' ? 'selected' : ''}" onclick="hfState.selections.coax.grade='240uf';renderHfCoax()">
+        <div class="nq-check">${grade === '240uf' ? '✓' : ''}</div>
+        <div><div class="nq-label">240 Ultra Flex — Budget-friendly</div><div class="nq-detail">Thinner, more flexible. $3/ft (≤50ft) or $2/ft (>50ft).</div></div>
+      </div>
+
+      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Length (feet)</label>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="range" min="10" max="150" step="5" value="${len}" style="flex:1;accent-color:var(--gold)"
+          oninput="hfState.selections.coax.length=parseInt(this.value);renderHfCoax()">
+        <div style="font-size:20px;font-weight:700;color:var(--gold);min-width:50px;text-align:center">${len}</div>
+        <span style="color:#888;font-size:13px">ft</span>
+      </div>
+      <div style="margin-top:16px;padding:12px;background:#1a1800;border:1px solid var(--gold-dim);text-align:center">
+        <div style="font-size:13px;color:#ddd">${len}ft @ $${pricePerFt}/ft</div>
+        <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">$${coaxTotal.toFixed(2)}</div>
+      </div>
+
+      <div style="margin-top:16px">
+        <div class="nq-option ${sel.prebuiltCoax ? 'selected' : ''}" onclick="hfState.selections.prebuiltCoax=!hfState.selections.prebuiltCoax;renderHfCoax()">
+          <div class="nq-check">${sel.prebuiltCoax ? '✓' : ''}</div>
+          <div><div class="nq-label">Also add: 25ft RG-316 Coax with Choke ($79)</div><div class="nq-detail">Thin, flexible coax with choke for portable/field use.</div></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHfPower() {
+  const c = document.getElementById('hf-step-content');
+  const sel = hfState.selections;
+  if (!sel.power) sel.power = [];
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Power</h2><p>HF radios need a solid 12V power source. Select what fits your setup.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${mobileProducts.power.map(p => `
+        <div class="nq-option ${sel.power.includes(p.key) ? 'selected' : ''}" onclick="toggleHfPower('${p.key}')">
+          <div class="nq-check">${sel.power.includes(p.key) ? '✓' : ''}</div>
+          <div style="flex:1"><div class="nq-label">${p.name} ($${p.price})</div><div class="nq-detail">${p.desc}</div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleHfPower(key) {
+  const arr = hfState.selections.power;
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  renderHfPower();
+}
+
+function renderHfAccessories() {
+  const c = document.getElementById('hf-step-content');
+  const sel = hfState.selections;
+  if (!sel.accessories) sel.accessories = [];
+
+  // Filter radio-specific accessories
+  const radioKey = hfState.radioKey;
+  const available = hfProducts.accessories.filter(a => !a.radioMatch || a.radioMatch === radioKey);
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Accessories</h2><p>Digital interfaces, cable management, and field gear for your HF setup.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${available.map(a => `
+        <div class="nq-option ${sel.accessories.includes(a.key) ? 'selected' : ''}" onclick="toggleHfAccessory('${a.key}')">
+          <div class="nq-check">${sel.accessories.includes(a.key) ? '✓' : ''}</div>
+          <div style="flex:1"><div class="nq-label">${a.name} ($${a.price})</div><div class="nq-detail">${a.desc}</div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function toggleHfAccessory(key) {
+  const arr = hfState.selections.accessories;
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
+  renderHfAccessories();
+}
+
+function renderHfReview() {
+  const c = document.getElementById('hf-step-content');
+  const radio = hfRadioLineup.find(r => r.key === hfState.radioKey);
+  const sel = hfState.selections;
+  let items = [{ name: radio.name, price: radio.price, id: radio.id }];
+  let total = radio.price;
+
+  // Antenna
+  if (sel.antenna) {
+    const a = hfProducts.antennas.find(x => x.key === sel.antenna);
+    if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
+  }
+
+  // Coax
+  if (sel.coax) {
+    const isOver50 = sel.coax.length > 50;
+    const pricePerFt = sel.coax.grade === '400uf' ? (isOver50 ? 3.50 : 5) : (isOver50 ? 2 : 3);
+    const coaxTotal = Math.round(sel.coax.length * pricePerFt * 100) / 100;
+    items.push({ name: `${sel.coax.length}ft ${sel.coax.grade === '400uf' ? '400' : '240'} Ultra Flex Coax`, price: coaxTotal });
+    total += coaxTotal;
+  }
+  if (sel.prebuiltCoax) {
+    items.push({ name: '25ft RG-316 Coax with Choke', price: 79, id: 7075 }); total += 79;
+  }
+
+  // Power
+  (sel.power || []).forEach(key => {
+    const p = mobileProducts.power.find(x => x.key === key);
+    if (p) { items.push({ name: p.name, price: p.price, id: p.id }); total += p.price; }
+  });
+
+  // Accessories
+  (sel.accessories || []).forEach(key => {
+    const a = hfProducts.accessories.find(x => x.key === key);
+    if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
+  });
+
+  hfState.cartItems = items;
+
+  c.innerHTML = `
+    <div class="section-head"><h2>Review Your HF Kit</h2><p>${radio.name} — ready for long-distance communication.</p></div>
+    <div style="max-width:600px;margin:0 auto">
+      ${items.map(item => `
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:#ddd">${item.name}</span>
+          <span style="color:var(--gold);font-weight:600">$${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</span>
+        </div>
+      `).join('')}
+      <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:16px;font-weight:700">
+        <span style="color:var(--gold)">Total</span>
+        <span style="color:var(--gold)">$${total.toFixed(2)}</span>
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:8px">HF radios are shipped without custom programming. Setup guidance is available upon request.</div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ── COMBINED REVIEW (all kits) ──
+// ══════════════════════════════════════════════════════
+
+function showCombinedReview() {
+  const container = document.getElementById('kit-plan-container');
+  let grandTotal = 0;
+
+  const kitsHtml = kitSession.kits.map((kit, i) => {
+    const kitTotal = kit.cartItems.reduce((sum, item) => sum + (typeof item.price === 'number' ? item.price : 0), 0);
+    grandTotal += kitTotal;
+    return `
+      <div style="margin-bottom:20px;padding:16px;border:1px solid var(--border);background:var(--card)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+          <div style="font-size:15px;font-weight:600;color:var(--gold)">${categoryMeta[kit.category].icon} ${kit.label}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--gold)">$${kitTotal.toFixed(2)}</div>
+        </div>
+        ${kit.cartItems.map(item => `
+          <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px">
+            <span style="color:#ddd">${item.name}</span>
+            <span style="color:var(--muted)">$${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="kit-plan">
+      <h2>Review All Kits</h2>
+      <p class="plan-sub">${kitSession.kits.length} kit${kitSession.kits.length > 1 ? 's' : ''} — everything you need, all in one order.</p>
+      <div style="text-align:left">${kitsHtml}</div>
+      <div style="display:flex;justify-content:space-between;padding:16px;background:#1a1800;border:2px solid var(--gold);font-size:18px;font-weight:700;margin-bottom:24px">
+        <span style="color:var(--gold)">Grand Total</span>
+        <span style="color:var(--gold)">$${grandTotal.toFixed(2)}</span>
+      </div>
+      <button class="btn-nav btn-next" style="font-size:16px;padding:14px 32px" onclick="alert('Add to Cart — coming soon! This will add all ${kitSession.kits.reduce((s,k) => s + k.cartItems.length, 0)} items to your WooCommerce cart.')">
+        Add All to Cart →
+      </button>
+      <div style="margin-top:12px">
+        <button class="btn-nav btn-back" onclick="renderKitPlan()">← Back to Kit Plan</button>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ── EXISTING HANDHELD KIT BUILDER STATE ──
+// ══════════════════════════════════════════════════════
+
 let BASE_PRICE = 59;
 let currentStep = 0;
 let totalSteps = 6;
@@ -714,6 +2414,7 @@ let progConfirmedPrimary = ''; // resolved city/state for primary
 let progConfirmedExtras = []; // resolved city/state for extras
 let progCoords = { primary: null, extras: [] }; // {lat, lon} for proximity checks
 let progNotes = '';
+let progBrandmeisterId = '';
 
 // ── Product data (radio-specific) ──
 // Items are keyed per radio. getItems(category) returns the right set for the selected radio.
@@ -1069,8 +2770,17 @@ function renderProgramming() {
 
   // Notes field (always visible unless 'none')
   if (programmingChoice !== 'none') {
+    const isDmr = selectedRadioKey === 'dmr-6x2' || selectedRadioKey === 'da-7x2';
     html += `
       <div class="prog-section">
+        ${isDmr ? `
+        <div class="prog-field">
+          <label>Brandmeister DMR ID <span style="color:var(--muted);font-weight:400">(optional — amateur radio license holders only)</span></label>
+          <input type="text" maxlength="10" placeholder="e.g. 1234567" value="${progBrandmeisterId}"
+                 oninput="progBrandmeisterId=this.value" onfocus="event.stopPropagation()">
+          <div class="prog-note">If you have an amateur radio license and a Brandmeister ID, we'll program it into your radio for DMR digital voice. Don't have one yet? <a href="https://brandmeister.network" target="_blank" rel="noopener" style="color:var(--gold)">Register at brandmeister.network</a></div>
+        </div>
+        ` : ''}
         <div class="prog-field">
           <label>Anything else we should know about your programming preferences?</label>
           <textarea placeholder="e.g. Custom channel names, specific repeater frequencies, Part 90 channels (license required), etc."
@@ -1765,6 +3475,42 @@ function countAddons() {
   return count;
 }
 
+function collectHandheldCartItems() {
+  const selRadio = radioLineup.find(r => r.key === selectedRadioKey) || radioLineup[0];
+  let items = [{ name: selRadio.name, price: selRadio.price, id: selRadio.id }];
+
+  selectedAntennas.forEach(key => {
+    const a = antennaUpgrades.find(x => x.key === key);
+    if (a) items.push({ name: a.name, price: a.price, ids: a.ids });
+  });
+
+  const hasUpgrade = selectedAntennas.size > 0;
+  const anyBNC = hasUpgrade || [...selectedAddlAntennas].some(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    return a && a.needsAdapter;
+  });
+  if (anyBNC && !adapterSuppressed) items.push({ name: 'SMA-F to BNC-F Adapter', price: 5 });
+
+  selectedAddlAntennas.forEach(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    if (a && !a.isAdapter) items.push({ name: a.name, price: a.price || 0, ids: a.ids });
+  });
+
+  selectedBatteries.forEach((qty, key) => {
+    const bat = batteryUpgrades.find(b => b.key === key);
+    if (bat) items.push({ name: bat.name + (qty > 1 ? ' x' + qty : ''), price: bat.price * qty, ids: bat.ids });
+  });
+
+  if (programmingChoice === 'multi') items.push({ name: 'Multi-Location Programming', price: 10 });
+
+  selectedAccessories.forEach(key => {
+    const a = accessories.find(x => x.key === key);
+    if (a) items.push({ name: a.name, price: a.price || 0, ids: a.ids });
+  });
+
+  return items;
+}
+
 function updateBottomBar() {
   const total = calcTotal();
   const adds = total - BASE_PRICE;
@@ -1818,9 +3564,16 @@ function goStep(n) {
 
   if (n === steps.length - 1) {
     // Review step
-    next.textContent = '🛒  Add to Cart';
+    const inSession = kitSession.kits.length > 0;
+    next.textContent = inSession ? '✓ Complete Kit' : '🛒  Add to Cart';
     next.className = 'btn-nav btn-cart';
-    next.onclick = function() { alert('Added to cart! (Demo — this would add ' + (countAddons() + 1) + ' items to WooCommerce cart)'); };
+    next.onclick = function() {
+      if (inSession) {
+        completeCurrentKit(collectHandheldCartItems());
+      } else {
+        alert('Added to cart! (Demo — this would add ' + (countAddons() + 1) + ' items to WooCommerce cart)');
+      }
+    };
   } else {
     next.textContent = 'Next: ' + steps[n + 1].name + ' →';
     next.className = 'btn-nav btn-next';
