@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kit Builder Admin — RadioMadeEasy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --gold: #fdd351;
+    --gold-dim: #d4af37;
+    --dark: #000;
+    --card: #0a0a0a;
+    --card-hover: #111;
+    --border: #2a2a2a;
+    --border-lit: #444;
+    --text: #e0e0e0;
+    --muted: #c4a83a;
+    --green: #4caf50;
+    --red: #e55;
+    --radius: 0px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--dark); color: var(--text); font-family: Inter, system-ui, sans-serif; min-height: 100vh; }
+
+  /* ── Header ── */
+  .admin-header {
+    padding: 20px 24px; border-bottom: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .admin-header h1 {
+    font-family: 'Abhaya Libre', serif; color: var(--gold); font-size: 22px;
+    text-transform: uppercase; letter-spacing: 4px;
+  }
+  .admin-header .actions { display: flex; gap: 8px; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex; border-bottom: 1px solid var(--border);
+    background: var(--card); overflow-x: auto;
+  }
+  .tab {
+    padding: 12px 20px; cursor: pointer; font-size: 13px; font-weight: 500;
+    color: var(--text); border-bottom: 2px solid transparent;
+    white-space: nowrap; transition: all 0.2s;
+  }
+  .tab:hover { color: var(--gold); background: #111; }
+  .tab.active { color: var(--gold); border-bottom-color: var(--gold); background: #111; }
+
+  /* ── Content ── */
+  .tab-content { display: none; padding: 24px; max-width: 1100px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-gold { background: var(--gold); color: #111; border-color: var(--gold); font-weight: 600; }
+  .btn-gold:hover { background: #e6c043; }
+  .btn-red { border-color: var(--red); color: var(--red); }
+  .btn-red:hover { background: #3a1111; }
+  .btn-sm { padding: 4px 10px; font-size: 12px; }
+
+  /* ── Forms ── */
+  input, textarea, select {
+    background: #111; border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; font-size: 13px; font-family: Inter, system-ui, sans-serif;
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--gold); }
+  textarea { resize: vertical; min-height: 60px; }
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+  .field { margin-bottom: 12px; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row .field { flex: 1; }
+
+  /* ── Cards / Tables ── */
+  .admin-card {
+    background: var(--card); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px;
+    position: relative;
+  }
+  .admin-card:hover { border-color: var(--border-lit); }
+  .admin-card .card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .admin-card .card-title { font-size: 14px; font-weight: 600; color: var(--gold); }
+  .admin-card .card-actions { display: flex; gap: 6px; }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; font-size: 11px;
+    background: #1a1800; border: 1px solid var(--gold-dim); color: var(--gold);
+    margin: 2px;
+  }
+
+  /* ── Section headers ── */
+  .section-title {
+    font-family: 'Abhaya Libre', serif; color: var(--gold); font-size: 18px;
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .section-sub { color: #aaa; font-size: 13px; margin-bottom: 16px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
+    background: var(--green); color: #fff; font-size: 13px; font-weight: 500;
+    z-index: 9999; opacity: 0; transition: opacity 0.3s;
+  }
+  .toast.show { opacity: 1; }
+  .toast.error { background: var(--red); }
+
+  /* ── Drag handle ── */
+  .drag-handle {
+    cursor: grab; color: var(--border-lit); font-size: 16px; margin-right: 8px;
+    user-select: none;
+  }
+  .drag-handle:active { cursor: grabbing; }
+
+  /* ── Scoring table ── */
+  .score-table { width: 100%; border-collapse: collapse; }
+  .score-table th { text-align: left; padding: 8px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .score-table td { padding: 8px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .score-table input[type="number"] { width: 60px; text-align: center; }
+
+  /* ── Conflict banner ── */
+  .conflict-banner {
+    padding: 10px 16px; margin-bottom: 16px;
+    background: #3a1111; border: 1px solid var(--red);
+    font-size: 13px; color: #fcc;
+  }
+  .conflict-banner strong { color: var(--red); }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 1000; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card); border: 2px solid var(--gold); padding: 24px;
+    max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+  }
+  .modal h3 { font-family: 'Abhaya Libre', serif; color: var(--gold); font-size: 18px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+  <h1>Kit Builder Admin</h1>
+  <div class="actions">
+    <button class="btn" onclick="exportConfig()">Export JSON</button>
+    <button class="btn" onclick="document.getElementById('import-file').click()">Import JSON</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importConfig(event)">
+    <button class="btn btn-red" onclick="resetToDefaults()">Reset to Defaults</button>
+    <button class="btn btn-gold" onclick="saveConfig()">Save Config</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('scoring')">Scoring</div>
+  <div class="tab" onclick="switchTab('interview')">Interview</div>
+  <div class="tab" onclick="switchTab('radios')">Radios</div>
+  <div class="tab" onclick="switchTab('products')">Products</div>
+  <div class="tab" onclick="switchTab('mismatches')">Mismatches</div>
+</div>
+
+<!-- ═══════════════ SCORING TAB ═══════════════ -->
+<div id="tab-scoring" class="tab-content active">
+  <div class="section-title">Scoring Algorithm</div>
+  <div class="section-sub">Control how radios are scored during the interview. Each tag match = base weight. Water bonuses add extra points for water-related needs.</div>
+
+  <div id="scoring-conflicts"></div>
+
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">Base Tag Weight</div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Points per tag match</label>
+        <input type="number" id="score-base-weight" min="1" max="10" value="1">
+        <div style="font-size:11px;color:#888;margin-top:4px">Each time a radio's tag matches an answer's tag, it earns this many points.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">Water Resistance Bonuses</div>
+    </div>
+    <div class="section-sub" style="margin-bottom:12px">Explicit = user selects "On or near water" or "Waterproof" feature. Indirect = user selects "Outdoors" (implies rain).</div>
+    <table class="score-table">
+      <tr><th></th><th>IP67 (waterproof)</th><th>IP54 (water-resistant)</th></tr>
+      <tr>
+        <td><strong>Explicit water need</strong></td>
+        <td><input type="number" id="score-explicit-ip67" min="0" max="20" value="5"></td>
+        <td><input type="number" id="score-explicit-ip54" min="0" max="20" value="1"></td>
+      </tr>
+      <tr>
+        <td><strong>Indirect / outdoors</strong></td>
+        <td><input type="number" id="score-indirect-ip67" min="0" max="20" value="1"></td>
+        <td><input type="number" id="score-indirect-ip54" min="0" max="20" value="0"></td>
+      </tr>
+    </table>
+    <div style="font-size:11px;color:#888;margin-top:8px">
+      Tip: To make UV-PRO always win with explicit water, set IP67 bonus high enough that tag advantages can't overtake it. Current max other-tag advantage is ~4 points.
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">Custom Tag Weights</div>
+      <button class="btn btn-sm" onclick="addCustomWeight()">+ Add Override</button>
+    </div>
+    <div class="section-sub">Override the base weight for specific tags. Useful for making certain features count more or less.</div>
+    <div id="custom-weights-list"></div>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">Scoring Simulator</div>
+    </div>
+    <div class="section-sub">Test scoring scenarios to verify results.</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Budget</label>
+        <select id="sim-budget"><option value="">— skip —</option><option value="low">Economical</option><option value="mid">Mid-range</option><option value="high">Best of best</option></select>
+      </div>
+      <div class="field">
+        <label>Use case</label>
+        <select id="sim-use"><option value="">— skip —</option><option value="general">Around town</option><option value="outdoor">Outdoors</option><option value="water">On/near water</option><option value="professional">Work/commercial</option><option value="emergency">Emergency</option></select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Features (comma-sep keys)</label>
+      <input type="text" id="sim-features" placeholder="e.g. waterproof,encryption">
+    </div>
+    <button class="btn" onclick="runSimulation()" style="margin-top:8px">Run Simulation</button>
+    <div id="sim-results" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ INTERVIEW TAB ═══════════════ -->
+<div id="tab-interview" class="tab-content">
+  <div class="section-title">Interview Questions</div>
+  <div class="section-sub">Manage the quiz questions, options, and their scoring tags. Drag to reorder.</div>
+
+  <div id="interview-conflicts"></div>
+  <div id="interview-questions-list"></div>
+  <button class="btn" onclick="addQuestion()" style="margin-top:12px">+ Add Question</button>
+</div>
+
+<!-- ═══════════════ RADIOS TAB ═══════════════ -->
+<div id="tab-radios" class="tab-content">
+  <div class="section-title">Radio Lineup</div>
+  <div class="section-sub">Manage radios, their tags, pricing, and metadata. Order determines tiebreaker (first wins ties).</div>
+
+  <div id="radio-conflicts"></div>
+  <div id="radios-list"></div>
+  <button class="btn" onclick="addRadio()" style="margin-top:12px">+ Add Radio</button>
+</div>
+
+<!-- ═══════════════ PRODUCTS TAB ═══════════════ -->
+<div id="tab-products" class="tab-content">
+  <div class="section-title">Product Catalog</div>
+  <div class="section-sub">Manage batteries, accessories, and antennas for each radio.</div>
+
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">Shared Antenna Upgrades</div>
+      <button class="btn btn-sm" onclick="addSharedAntenna('upgrades')">+ Add</button>
+    </div>
+    <div id="shared-antennas-list"></div>
+  </div>
+
+  <div class="admin-card">
+    <div class="card-header">
+      <div class="card-title">Shared Additional Antennas</div>
+      <button class="btn btn-sm" onclick="addSharedAntenna('additional')">+ Add</button>
+    </div>
+    <div id="shared-additional-list"></div>
+  </div>
+
+  <div style="margin-top:16px">
+    <label style="font-size:14px;color:var(--gold)">Select radio to edit products:</label>
+    <select id="product-radio-select" onchange="renderRadioProducts()" style="margin-top:6px;max-width:300px">
+    </select>
+  </div>
+  <div id="radio-products-editor" style="margin-top:16px"></div>
+</div>
+
+<!-- ═══════════════ MISMATCHES TAB ═══════════════ -->
+<div id="tab-mismatches" class="tab-content">
+  <div class="section-title">Mismatch Rules</div>
+  <div class="section-sub">Define warnings shown when a user picks a radio that doesn't match their stated needs.</div>
+
+  <div id="mismatch-conflicts"></div>
+  <div id="mismatches-list"></div>
+  <button class="btn" onclick="addMismatchRule()" style="margin-top:12px">+ Add Rule</button>
+</div>
+
+<!-- ── Toast ── -->
+<div id="toast" class="toast"></div>
+
+<!-- ── Modal ── -->
+<div id="modal-overlay" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DEFAULT CONFIG — mirrors kit-builder-demo.html exactly
+// ══════════════════════════════════════════════════════
+
+const DEFAULTS = {
+  scoring: {
+    baseWeight: 1,
+    explicitIp67: 5,
+    explicitIp54: 1,
+    indirectIp67: 1,
+    indirectIp54: 0,
+    customWeights: {} // tag → weight override
+  },
+  radioLineup: [
+    {
+      key: 'uv5r', name: 'UV-5R Essentials Kit', price: 59, id: 106,
+      img: '2022/08/20250904_100309-EDIT.jpg',
+      tagline: 'The reliable standard',
+      pitch: 'The most popular two-way radio on the planet. Massive accessory ecosystem — batteries, antennas, cases, and chargers are widely available and affordable.',
+      features: ['128 memory channels', 'Dual-band VHF/UHF', 'Huge accessory ecosystem', 'Most affordable option'],
+      tags: ['budget', 'simple', 'compatible', 'compact']
+    },
+    {
+      key: 'uv5r-mini', name: 'UV-5R Mini Essentials Kit', price: 39, id: 8438,
+      img: '2025/12/1000009129-scaled.jpg',
+      tagline: 'More channels, smaller price',
+      pitch: 'Packs 999 memory channels into the most affordable kit we offer. Built-in USB-C charging and Bluetooth programming from your phone.',
+      features: ['999 memory channels', 'USB-C charging built in', 'Airband receive', 'Automatic NOAA weather alerts', 'Bluetooth phone programming'],
+      tags: ['budget', 'simple', 'channels', 'airband', 'usbc', 'compact', 'noaa']
+    },
+    {
+      key: 'uv-pro', name: 'UV-PRO Essentials Kit', price: 159, id: 7862,
+      img: '2025/09/20250904_100414-EDIT.jpg',
+      tagline: 'Waterproof & connected',
+      pitch: 'IP67 waterproof, GPS location sharing, text messaging, and full Bluetooth TNC support for APRS and Winlink.',
+      features: ['IP67 waterproof', '180 memory channels', 'GPS + APRS built in', 'USB-C charging built in', 'Analog text messaging', 'Bluetooth TNC', 'Mobile app control', 'Airband receive', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+      tags: ['waterproof', 'gps', 'bluetooth', 'airband', 'grow', 'professional', 'usbc', 'channels', 'noaa', 'commercial']
+    },
+    {
+      key: 'dmr-6x2', name: 'DMR 6X2 PRO Essentials Kit', price: 249, id: 2931,
+      img: '2023/11/20250904_100231-EDIT.jpg',
+      tagline: 'Digital & encryption capable',
+      pitch: 'Full DMR digital radio with encryption capability for private communications. 4000 memory channels, GPS, APRS, and digital text messaging.',
+      features: ['DMR digital + analog', 'Encryption capable', '4000 memory channels', 'GPS + APRS', 'Digital text messaging', 'USB-C battery', 'IP54 water resistant', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+      tags: ['encryption', 'digital', 'channels', 'gps', 'professional', 'bluetooth', 'water-resistant', 'usbc', 'grow', 'noaa', 'commercial']
+    },
+    {
+      key: 'da-7x2', name: 'DA-7X2 Essentials Kit', price: 299, id: 9050,
+      img: '2026/02/1000011350.jpg',
+      tagline: 'The best we offer',
+      pitch: 'Everything the DMR 6X2 PRO does, plus true dual receive, crossband repeat, airband monitoring, NXDN digital mode, and Bluetooth PTT.',
+      features: ['DMR + NXDN digital modes', 'Encryption capable', '4000 memory channels', 'Crossband repeat', 'True dual receive', 'Digital text messaging', 'GPS + APRS', 'Airband receive', 'Bluetooth PTT', 'USB-C battery', 'IP54 water resistant', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+      tags: ['encryption', 'digital', 'crossband', 'airband', 'professional', 'premium', 'bluetooth', 'water-resistant', 'usbc', 'gps', 'grow', 'channels', 'noaa', 'commercial']
+    },
+  ],
+  interviewQuestions: [
+    {
+      id: 'budget',
+      question: "What kind of radio are you looking for?",
+      sub: "This helps us match you with the right tier.",
+      multi: false,
+      options: [
+        { key: 'low', icon: '💵', label: 'Economical', detail: 'A solid, reliable radio without the extras', tags: ['budget'] },
+        { key: 'mid', icon: '💰', label: 'Mid-range', detail: 'More features and durability — the sweet spot for most people', tags: ['waterproof', 'gps', 'bluetooth', 'grow'] },
+        { key: 'high', icon: '💎', label: 'The best of the best', detail: 'Maximum capability, no compromises', tags: ['encryption', 'digital', 'premium', 'crossband'] },
+      ]
+    },
+    {
+      id: 'use',
+      question: "Where will you use it most?",
+      sub: "Pick the one that fits best.",
+      multi: false,
+      options: [
+        { key: 'general', icon: '🏘️', label: 'Around town / neighborhood', detail: 'Family, neighborhood, or local communication', tags: ['budget', 'simple'] },
+        { key: 'outdoor', icon: '🏕️', label: 'Outdoors — hiking, camping, overlanding', detail: 'Trail, campsite, or off-road use', tags: ['gps', 'grow', 'waterproof'] },
+        { key: 'water', icon: '🚤', label: 'On or near water', detail: 'Kayaking, boating, beach, or wet environments', tags: ['waterproof'] },
+        { key: 'professional', icon: '🏗️', label: 'Work / commercial / business use', detail: 'Worksite, security, event coordination, business ops', tags: ['professional', 'commercial', 'waterproof', 'gps'] },
+        { key: 'emergency', icon: '🆘', label: 'Emergency preparedness', detail: 'Disaster readiness, backup comms', tags: ['channels', 'durable'] },
+      ]
+    },
+    {
+      id: 'features',
+      question: "What matters most to you?",
+      sub: "Pick up to two. Skip if nothing stands out.",
+      multi: true,
+      options: [
+        { key: 'price', icon: '🏷️', label: 'Lowest price', detail: 'Just get me on the air affordably', tags: ['budget'] },
+        { key: 'waterproof', icon: '💧', label: 'Waterproof', detail: "It's going to get wet", tags: ['waterproof'] },
+        { key: 'encryption', icon: '🔒', label: 'Privacy / encryption', detail: "I want the option for secure, encrypted communications", tags: ['encryption', 'digital'] },
+        { key: 'channels', icon: '📊', label: 'Maximum channels / coverage', detail: 'I want lots of repeaters and memory slots', tags: ['channels'] },
+        { key: 'airband', icon: '✈️', label: 'Listen to aircraft', detail: 'I want to monitor aviation frequencies', tags: ['airband'] },
+        { key: 'bluetooth', icon: '🎧', label: 'Bluetooth headset', detail: 'Helmet comms, wireless earpiece, or hands-free operation', tags: ['bluetooth'] },
+        { key: 'grow', icon: '📈', label: 'Room to grow', detail: "I'm new but want advanced features later", tags: ['grow'] },
+        { key: 'noaa', icon: '🌦️', label: 'Automatic weather alerts', detail: 'Auto-notifies you of severe weather', tags: ['noaa'] },
+        { key: 'compact', icon: '📏', label: 'Small & lightweight', detail: 'I want the most compact, pocketable radio', tags: ['compact'] },
+        { key: 'compatible', icon: '🔄', label: 'UV-5R compatible', detail: 'I already have UV-5Rs or their accessories', tags: ['compatible', 'budget'] },
+      ]
+    },
+  ],
+  mismatchRules: [
+    {
+      id: 'water-none',
+      needKey: 'water|waterproof', needSource: 'use|features',
+      radioMustHaveTag: '', radioMustNotHaveAnyTag: 'waterproof,water-resistant',
+      warning: 'has no water resistance rating',
+      need: 'you mentioned water use or waterproofing is important to you',
+      suggestTags: ['waterproof', 'water-resistant'],
+    },
+    {
+      id: 'encryption',
+      needKey: 'encryption', needSource: 'features',
+      radioMustHaveTag: '', radioMustNotHaveAnyTag: 'encryption',
+      warning: 'does not have encryption capability — only DMR radios support encrypted communications',
+      need: 'you mentioned privacy or encryption is important',
+      suggestTags: ['encryption'],
+    },
+    {
+      id: 'professional',
+      needKey: 'professional', needSource: 'use',
+      radioMustHaveTag: '', radioMustNotHaveAnyTag: 'professional',
+      warning: 'is a great radio for personal use, but may not hold up to the demands of commercial or business use',
+      need: 'you mentioned this is for work or business',
+      suggestTags: ['professional'],
+    },
+    {
+      id: 'airband',
+      needKey: 'airband', needSource: 'features',
+      radioMustHaveTag: '', radioMustNotHaveAnyTag: 'airband',
+      warning: 'cannot receive aircraft/aviation frequencies',
+      need: 'you said listening to aircraft is important',
+      suggestTags: ['airband'],
+    },
+    {
+      id: 'bluetooth',
+      needKey: 'bluetooth', needSource: 'features',
+      radioMustHaveTag: '', radioMustNotHaveAnyTag: 'bluetooth',
+      warning: 'does not support Bluetooth headsets',
+      need: 'you mentioned Bluetooth headset connectivity is important',
+      suggestTags: ['bluetooth'],
+    },
+    {
+      id: 'channels',
+      needKey: 'channels', needSource: 'features',
+      radioMustHaveTag: '', radioMustNotHaveAnyTag: 'channels',
+      warning: 'has limited memory channels compared to other options',
+      need: 'you said maximum channels/coverage is important',
+      suggestTags: ['channels'],
+    },
+  ],
+  sharedAntennaUpgrades: [
+    { key: 'stubby', name: 'Stubby Antenna with BNC Adapter', desc: 'Compact, low-profile antenna.', price: 39, ids: [816, 456] },
+    { key: 'foulweather', name: 'Foul Weather Whip with BNC Adapter', desc: 'Flexible whip that bends without breaking.', price: 40, ids: [3916, 456] },
+    { key: 'signalstick', name: 'Signal Stick with BNC Adapter', desc: 'Super elastic, nearly indestructible flexible antenna.', price: 25, ids: [39, 456] },
+  ],
+  sharedAdditionalAntennas: [
+    { key: 'wearable', name: 'Wearable BNC Antenna', desc: 'Low-profile antenna designed for body-worn setups.', price: 69, id: 460 },
+    { key: 'slimjim', name: 'Roll Up Slim Jim Antenna', desc: 'Portable VHF/UHF antenna you can hang from a tree branch.', price: 49, id: 99 },
+    { key: 'magmount', name: 'Magnetic BNC Antenna Base', desc: 'Magnetic base mount for any BNC antenna.', price: 39, id: 521 },
+    { key: 'mollemount', name: 'BNC MOLLE Antenna Mount', desc: 'Attach any BNC antenna to MOLLE webbing.', price: 19, id: 8717 },
+    { key: 'extraadapter', name: 'Extra SMA-F to BNC-F Adapter', desc: 'Spare BNC adapter.', price: 5, id: 456 },
+  ],
+  radioProducts: {
+    'uv5r': {
+      batteryLabel: 'Factory Battery (1800mAh)',
+      batteryDesc: 'Standard battery included with your kit. Requires charging cradle (included).',
+      batteries: [
+        { key: 'usbc-standard', name: 'USB-C Battery (1300mAh) with Cable', desc: 'Standard-size rechargeable battery with built-in USB-C port.', price: 25, id: 2367 },
+        { key: 'usbc-extended', name: 'USB-C Extended Battery (3800mAh) with Cable', desc: 'High-capacity extended battery with built-in USB-C port.', price: 29, id: 749 },
+      ],
+      accessories: [
+        { key: 'cheatsheets', name: 'Radio Cheat Sheets', price: 19, id: 966 },
+        { key: 'speakermic', name: 'UV-5R Speakermic', price: 29, id: 1430 },
+        { key: 'eartube', name: 'Acoustic Eartube Headset', price: 19, id: 1431 },
+        { key: 'aprs', name: 'APRS Cable', price: 25, id: 1177 },
+        { key: 'progcable', name: 'USB Programming Cable', price: 25, id: 4838 },
+        { key: 'exo', name: 'Exoskeleton', price: 29, id: 38 },
+        { key: 'saddle', name: 'Kenwood Plug Saddle', price: 9, id: 3701 },
+        { key: 'monocable', name: 'Speakermic to Earpro Cable', price: 9, id: 1438 },
+      ],
+    },
+    'uv5r-mini': {
+      batteryLabel: 'Built-in USB-C Battery',
+      batteryDesc: 'The UV-5R Mini has a built-in USB-C rechargeable battery.',
+      batteries: [],
+      accessories: [
+        { key: 'cheatsheets', name: 'Radio Cheat Sheets', price: 19, id: 966 },
+        { key: 'speakermic', name: 'UV-5R Speakermic', price: 29, id: 1430 },
+        { key: 'eartube', name: 'Acoustic Eartube Headset', price: 19, id: 1431 },
+        { key: 'progcable', name: 'USB Programming Cable', price: 25, id: 4838 },
+        { key: 'saddle', name: 'Kenwood Plug Saddle', price: 9, id: 3701 },
+        { key: 'monocable', name: 'Speakermic to Earpro Cable', price: 9, id: 1438 },
+      ],
+    },
+    'uv-pro': {
+      batteryLabel: 'USB-C Rechargeable Battery (2600mAh)',
+      batteryDesc: 'The UV-PRO includes a USB-C rechargeable battery.',
+      batteries: [
+        { key: 'uvpro-spare', name: 'Extra UV-PRO Battery (2600mAh)', price: 25, id: 8312 },
+      ],
+      accessories: [
+        { key: 'cheatsheets', name: 'Radio Cheat Sheets', price: 19, id: 966 },
+        { key: 'bs22', name: 'BS-22 Wireless Speakermic', price: 59, id: 8491 },
+        { key: 'kplug', name: 'K-Plug Adapter', price: 25, id: 8268 },
+        { key: 'eartube', name: 'Acoustic Eartube Headset', price: 19, id: 1431 },
+        { key: 'monocable', name: 'Speakermic to Earpro Cable', price: 9, id: 1438 },
+      ],
+    },
+    'dmr-6x2': {
+      batteryLabel: 'USB-C Rechargeable Battery (3100mAh)',
+      batteryDesc: 'The DMR 6X2 PRO includes a high-capacity 3100mAh USB-C rechargeable battery.',
+      batteries: [
+        { key: 'dmr6x2-spare', name: 'Extra DMR 6X2 PRO Battery (3100mAh)', price: 45, id: 6868 },
+      ],
+      accessories: [
+        { key: 'cheatsheets', name: 'Radio Cheat Sheets', price: 19, id: 966 },
+        { key: 'speakermic', name: 'UV-5R Speakermic', price: 29, id: 1430 },
+        { key: 'eartube', name: 'Acoustic Eartube Headset', price: 19, id: 1431 },
+        { key: 'progcable', name: 'Spare DMR 6X2 PRO Programming Cable', price: 12, id: 8711 },
+        { key: 'saddle', name: 'Kenwood Plug Saddle', price: 9, id: 3701 },
+        { key: 'monocable', name: 'Speakermic to Earpro Cable', price: 9, id: 1438 },
+      ],
+    },
+    'da-7x2': {
+      batteryLabel: 'USB-C Rechargeable Battery (3100mAh)',
+      batteryDesc: 'The DA-7X2 includes a high-capacity 3100mAh USB-C rechargeable battery.',
+      batteries: [
+        { key: 'da7x2-spare', name: 'Extra DA-7X2 Battery (3100mAh)', price: 45, id: 6868 },
+      ],
+      accessories: [
+        { key: 'cheatsheets', name: 'Radio Cheat Sheets', price: 19, id: 966 },
+        { key: 'speakermic', name: 'UV-5R Speakermic', price: 29, id: 1430 },
+        { key: 'eartube', name: 'Acoustic Eartube Headset', price: 19, id: 1431 },
+        { key: 'progcable', name: 'Spare DA-7X2 Programming Cable', price: 12, id: 8711 },
+        { key: 'saddle', name: 'Kenwood Plug Saddle', price: 9, id: 3701 },
+        { key: 'monocable', name: 'Speakermic to Earpro Cable', price: 9, id: 1438 },
+      ],
+    },
+  },
+};
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+
+const STORAGE_KEY = 'rme-kit-builder-config';
+let config = {};
+
+function loadConfig() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try { config = JSON.parse(saved); } catch { config = JSON.parse(JSON.stringify(DEFAULTS)); }
+  } else {
+    config = JSON.parse(JSON.stringify(DEFAULTS));
+  }
+  // Ensure all keys exist (forward-compat)
+  for (const k in DEFAULTS) {
+    if (!(k in config)) config[k] = JSON.parse(JSON.stringify(DEFAULTS[k]));
+  }
+}
+
+function saveConfig() {
+  const errors = validateAll();
+  if (errors.length > 0) {
+    showToast('Fix errors before saving: ' + errors[0], true);
+    return;
+  }
+  // Read form values into config
+  config.scoring.baseWeight = parseInt(document.getElementById('score-base-weight').value) || 1;
+  config.scoring.explicitIp67 = parseInt(document.getElementById('score-explicit-ip67').value) || 0;
+  config.scoring.explicitIp54 = parseInt(document.getElementById('score-explicit-ip54').value) || 0;
+  config.scoring.indirectIp67 = parseInt(document.getElementById('score-indirect-ip67').value) || 0;
+  config.scoring.indirectIp54 = parseInt(document.getElementById('score-indirect-ip54').value) || 0;
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  showToast('Config saved to localStorage');
+}
+
+function resetToDefaults() {
+  if (!confirm('Reset all config to factory defaults? This cannot be undone.')) return;
+  config = JSON.parse(JSON.stringify(DEFAULTS));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  renderAll();
+  showToast('Reset to defaults');
+}
+
+function exportConfig() {
+  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'kit-builder-config.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Config exported');
+}
+
+function importConfig(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      // Validate structure
+      if (!imported.scoring || !imported.radioLineup || !imported.interviewQuestions) {
+        showToast('Invalid config file — missing required sections', true);
+        return;
+      }
+      config = imported;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      renderAll();
+      showToast('Config imported successfully');
+    } catch {
+      showToast('Invalid JSON file', true);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ══════════════════════════════════════════════════════
+// VALIDATION
+// ══════════════════════════════════════════════════════
+
+function validateAll() {
+  const errors = [];
+
+  // Check for duplicate radio keys
+  const radioKeys = config.radioLineup.map(r => r.key);
+  const dupeRadios = radioKeys.filter((k, i) => radioKeys.indexOf(k) !== i);
+  if (dupeRadios.length) errors.push('Duplicate radio key(s): ' + dupeRadios.join(', '));
+
+  // Check for duplicate question IDs
+  const qIds = config.interviewQuestions.map(q => q.id);
+  const dupeQs = qIds.filter((k, i) => qIds.indexOf(k) !== i);
+  if (dupeQs.length) errors.push('Duplicate question ID(s): ' + dupeQs.join(', '));
+
+  // Check for duplicate option keys within each question
+  config.interviewQuestions.forEach(q => {
+    const optKeys = q.options.map(o => o.key);
+    const dupeOpts = optKeys.filter((k, i) => optKeys.indexOf(k) !== i);
+    if (dupeOpts.length) errors.push(`Question "${q.id}": duplicate option key(s): ${dupeOpts.join(', ')}`);
+  });
+
+  // Check that all interview option tags exist in at least one radio
+  const allRadioTags = new Set(config.radioLineup.flatMap(r => r.tags));
+  config.interviewQuestions.forEach(q => {
+    q.options.forEach(opt => {
+      opt.tags.forEach(tag => {
+        if (!allRadioTags.has(tag) && tag !== 'durable') {
+          errors.push(`Tag "${tag}" in question "${q.id}" option "${opt.key}" doesn't match any radio`);
+        }
+      });
+    });
+  });
+
+  // Check mismatch suggestTags reference real radio tags
+  config.mismatchRules.forEach(rule => {
+    rule.suggestTags.forEach(tag => {
+      if (!allRadioTags.has(tag)) {
+        errors.push(`Mismatch rule "${rule.id}": suggestTag "${tag}" doesn't match any radio`);
+      }
+    });
+  });
+
+  // Check radios with no tags
+  config.radioLineup.forEach(r => {
+    if (!r.tags || r.tags.length === 0) errors.push(`Radio "${r.key}" has no tags`);
+  });
+
+  // Check radios have required fields
+  config.radioLineup.forEach(r => {
+    if (!r.key) errors.push('A radio is missing its key');
+    if (!r.name) errors.push(`Radio "${r.key}" is missing its name`);
+    if (!r.price && r.price !== 0) errors.push(`Radio "${r.key}" is missing its price`);
+  });
+
+  return errors;
+}
+
+function renderConflicts() {
+  const errors = validateAll();
+
+  // Group by tab
+  const scoringErrors = errors.filter(e => e.includes('Tag "') || e.includes('tag'));
+  const interviewErrors = errors.filter(e => e.includes('question') || e.includes('Question') || e.includes('option'));
+  const radioErrors = errors.filter(e => e.includes('radio') || e.includes('Radio') || e.includes('tags'));
+  const mismatchErrors = errors.filter(e => e.includes('Mismatch') || e.includes('mismatch'));
+
+  renderConflictBanner('scoring-conflicts', scoringErrors);
+  renderConflictBanner('interview-conflicts', interviewErrors);
+  renderConflictBanner('radio-conflicts', radioErrors);
+  renderConflictBanner('mismatch-conflicts', mismatchErrors);
+}
+
+function renderConflictBanner(containerId, errors) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (errors.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="conflict-banner"><strong>⚠ Issues detected:</strong><ul style="margin:6px 0 0 16px">${errors.map(e => `<li>${e}</li>`).join('')}</ul></div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER — SCORING
+// ══════════════════════════════════════════════════════
+
+function renderScoring() {
+  const s = config.scoring;
+  document.getElementById('score-base-weight').value = s.baseWeight;
+  document.getElementById('score-explicit-ip67').value = s.explicitIp67;
+  document.getElementById('score-explicit-ip54').value = s.explicitIp54;
+  document.getElementById('score-indirect-ip67').value = s.indirectIp67;
+  document.getElementById('score-indirect-ip54').value = s.indirectIp54;
+  renderCustomWeights();
+}
+
+function renderCustomWeights() {
+  const container = document.getElementById('custom-weights-list');
+  const weights = config.scoring.customWeights || {};
+  const tags = Object.keys(weights);
+  if (tags.length === 0) {
+    container.innerHTML = '<div style="color:#888;font-size:13px;padding:8px">No custom weight overrides. All tags use the base weight.</div>';
+    return;
+  }
+  container.innerHTML = tags.map(tag => `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
+      <input type="text" value="${tag}" style="width:140px" onchange="renameCustomWeight('${tag}', this.value)">
+      <input type="number" value="${weights[tag]}" min="0" max="20" style="width:60px" onchange="config.scoring.customWeights['${tag}']=parseInt(this.value)">
+      <button class="btn btn-sm btn-red" onclick="delete config.scoring.customWeights['${tag}'];renderCustomWeights()">×</button>
+    </div>
+  `).join('');
+}
+
+function addCustomWeight() {
+  const tag = prompt('Tag name to override:');
+  if (!tag) return;
+  if (config.scoring.customWeights[tag] !== undefined) {
+    showToast('That tag already has an override', true);
+    return;
+  }
+  config.scoring.customWeights[tag] = 2;
+  renderCustomWeights();
+}
+
+function renameCustomWeight(oldTag, newTag) {
+  if (oldTag === newTag) return;
+  const val = config.scoring.customWeights[oldTag];
+  delete config.scoring.customWeights[oldTag];
+  config.scoring.customWeights[newTag] = val;
+  renderCustomWeights();
+}
+
+// Scoring simulator
+function runSimulation() {
+  const budget = document.getElementById('sim-budget').value;
+  const use = document.getElementById('sim-use').value;
+  const featuresRaw = document.getElementById('sim-features').value.trim();
+  const features = featuresRaw ? featuresRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  const answers = {};
+  if (budget) answers.budget = budget;
+  if (use) answers.use = use;
+  if (features.length) answers.features = features;
+
+  const scores = {};
+  config.radioLineup.forEach(r => { scores[r.key] = 0; });
+
+  let waterExplicit = false, waterIndirect = false;
+  const baseWeight = config.scoring.baseWeight || 1;
+  const customWeights = config.scoring.customWeights || {};
+
+  config.interviewQuestions.forEach(q => {
+    const answer = answers[q.id];
+    if (!answer) return;
+    const keys = Array.isArray(answer) ? answer : [answer];
+    keys.forEach(k => {
+      const opt = q.options.find(o => o.key === k);
+      if (!opt) return;
+      if (opt.key === 'water' || opt.key === 'waterproof') waterExplicit = true;
+      else if (opt.key === 'outdoor' && opt.tags.includes('waterproof')) waterIndirect = true;
+      config.radioLineup.forEach(r => {
+        opt.tags.forEach(tag => {
+          if (r.tags.includes(tag)) {
+            scores[r.key] += (customWeights[tag] !== undefined ? customWeights[tag] : baseWeight);
+          }
+        });
+      });
+    });
+  });
+
+  if (waterExplicit) {
+    config.radioLineup.forEach(r => {
+      if (r.tags.includes('waterproof')) scores[r.key] += config.scoring.explicitIp67;
+      else if (r.tags.includes('water-resistant')) scores[r.key] += config.scoring.explicitIp54;
+    });
+  } else if (waterIndirect) {
+    config.radioLineup.forEach(r => {
+      if (r.tags.includes('waterproof')) scores[r.key] += config.scoring.indirectIp67;
+      else if (r.tags.includes('water-resistant')) scores[r.key] += config.scoring.indirectIp54;
+    });
+  }
+
+  const ranked = config.radioLineup.slice().sort((a, b) => scores[b.key] - scores[a.key]);
+  const container = document.getElementById('sim-results');
+  container.innerHTML = `
+    <table class="score-table">
+      <tr><th>#</th><th>Radio</th><th>Score</th><th>Tags Matched</th></tr>
+      ${ranked.map((r, i) => `
+        <tr style="${i === 0 ? 'color:var(--gold);font-weight:600' : ''}">
+          <td>${i + 1}</td>
+          <td>${r.name.replace(' Essentials Kit', '')}</td>
+          <td>${scores[r.key]}</td>
+          <td>${r.tags.filter(t => {
+            let matched = false;
+            config.interviewQuestions.forEach(q => {
+              const answer = answers[q.id];
+              if (!answer) return;
+              const keys = Array.isArray(answer) ? answer : [answer];
+              keys.forEach(k => {
+                const opt = q.options.find(o => o.key === k);
+                if (opt && opt.tags.includes(t)) matched = true;
+              });
+            });
+            return matched;
+          }).map(t => `<span class="tag">${t}</span>`).join(' ')}</td>
+        </tr>
+      `).join('')}
+    </table>
+    ${waterExplicit ? '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Water bonus applied: Explicit (+' + config.scoring.explicitIp67 + ' IP67, +' + config.scoring.explicitIp54 + ' IP54)</div>' : ''}
+    ${waterIndirect && !waterExplicit ? '<div style="margin-top:8px;font-size:12px;color:var(--muted)">Water bonus applied: Indirect/Outdoors (+' + config.scoring.indirectIp67 + ' IP67, +' + config.scoring.indirectIp54 + ' IP54)</div>' : ''}
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER — INTERVIEW QUESTIONS
+// ══════════════════════════════════════════════════════
+
+function renderInterview() {
+  const container = document.getElementById('interview-questions-list');
+  container.innerHTML = config.interviewQuestions.map((q, qi) => `
+    <div class="admin-card" draggable="true" ondragstart="qDragStart(event,${qi})" ondragover="event.preventDefault()" ondrop="qDrop(event,${qi})" ondragend="qDragEnd(event)">
+      <div class="card-header">
+        <div style="display:flex;align-items:center">
+          <span class="drag-handle">⠿</span>
+          <div class="card-title">Q${qi + 1}: ${q.question}</div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="editQuestion(${qi})">Edit</button>
+          <button class="btn btn-sm btn-red" onclick="removeQuestion(${qi})">Delete</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#888;margin-bottom:8px">ID: ${q.id} | ${q.multi ? 'Multi-select' : 'Single select'} | Sub: ${q.sub}</div>
+      <div>
+        ${q.options.map((opt, oi) => `
+          <div style="display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--border);margin-bottom:4px;background:#111">
+            <span style="font-size:18px">${opt.icon}</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500">${opt.label} <span style="color:#888;font-size:11px">(${opt.key})</span></div>
+              <div style="font-size:11px;color:#888">${opt.detail}</div>
+            </div>
+            <div>${opt.tags.map(t => `<span class="tag">${t}</span>`).join(' ')}</div>
+            <button class="btn btn-sm" onclick="editOption(${qi},${oi})">Edit</button>
+            <button class="btn btn-sm btn-red" onclick="removeOption(${qi},${oi})">×</button>
+          </div>
+        `).join('')}
+        <button class="btn btn-sm" onclick="addOption(${qi})" style="margin-top:6px">+ Add Option</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+let qDragIdx = null;
+function qDragStart(e, idx) { qDragIdx = idx; e.dataTransfer.effectAllowed = 'move'; }
+function qDrop(e, targetIdx) {
+  e.preventDefault();
+  if (qDragIdx === null || qDragIdx === targetIdx) return;
+  const item = config.interviewQuestions.splice(qDragIdx, 1)[0];
+  config.interviewQuestions.splice(targetIdx, 0, item);
+  qDragIdx = null;
+  renderInterview();
+}
+function qDragEnd() { qDragIdx = null; }
+
+function addQuestion() {
+  config.interviewQuestions.push({
+    id: 'new_q_' + Date.now(),
+    question: 'New Question',
+    sub: 'Subtitle here',
+    multi: false,
+    options: []
+  });
+  renderInterview();
+}
+
+function removeQuestion(qi) {
+  if (!confirm('Delete this question?')) return;
+  config.interviewQuestions.splice(qi, 1);
+  renderInterview();
+}
+
+function editQuestion(qi) {
+  const q = config.interviewQuestions[qi];
+  openModal(`
+    <h3>Edit Question</h3>
+    <div class="field"><label>ID (used in scoring code)</label><input type="text" id="eq-id" value="${q.id}"></div>
+    <div class="field"><label>Question text</label><input type="text" id="eq-question" value="${esc(q.question)}"></div>
+    <div class="field"><label>Subtitle</label><input type="text" id="eq-sub" value="${esc(q.sub)}"></div>
+    <div class="field"><label>Multi-select</label><select id="eq-multi"><option value="false" ${!q.multi?'selected':''}>No (single)</option><option value="true" ${q.multi?'selected':''}>Yes (multi)</option></select></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveQuestion(${qi})">Save</button>
+    </div>
+  `);
+}
+
+function saveQuestion(qi) {
+  const q = config.interviewQuestions[qi];
+  const newId = document.getElementById('eq-id').value.trim();
+  // Check for duplicate IDs
+  if (newId !== q.id && config.interviewQuestions.some(x => x.id === newId)) {
+    showToast('Question ID "' + newId + '" already exists', true);
+    return;
+  }
+  q.id = newId;
+  q.question = document.getElementById('eq-question').value;
+  q.sub = document.getElementById('eq-sub').value;
+  q.multi = document.getElementById('eq-multi').value === 'true';
+  closeModal();
+  renderInterview();
+  renderConflicts();
+}
+
+function editOption(qi, oi) {
+  const opt = config.interviewQuestions[qi].options[oi];
+  openModal(`
+    <h3>Edit Option</h3>
+    <div class="field-row">
+      <div class="field"><label>Key</label><input type="text" id="eo-key" value="${opt.key}"></div>
+      <div class="field"><label>Icon (emoji)</label><input type="text" id="eo-icon" value="${opt.icon}"></div>
+    </div>
+    <div class="field"><label>Label</label><input type="text" id="eo-label" value="${esc(opt.label)}"></div>
+    <div class="field"><label>Detail</label><input type="text" id="eo-detail" value="${esc(opt.detail)}"></div>
+    <div class="field"><label>Tags (comma-separated)</label><input type="text" id="eo-tags" value="${opt.tags.join(', ')}"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveOption(${qi},${oi})">Save</button>
+    </div>
+  `);
+}
+
+function saveOption(qi, oi) {
+  const opt = config.interviewQuestions[qi].options[oi];
+  const newKey = document.getElementById('eo-key').value.trim();
+  // Check for duplicate keys within this question
+  if (newKey !== opt.key && config.interviewQuestions[qi].options.some(x => x.key === newKey)) {
+    showToast('Option key "' + newKey + '" already exists in this question', true);
+    return;
+  }
+  opt.key = newKey;
+  opt.icon = document.getElementById('eo-icon').value;
+  opt.label = document.getElementById('eo-label').value;
+  opt.detail = document.getElementById('eo-detail').value;
+  opt.tags = document.getElementById('eo-tags').value.split(',').map(s => s.trim()).filter(Boolean);
+  closeModal();
+  renderInterview();
+  renderConflicts();
+}
+
+function addOption(qi) {
+  config.interviewQuestions[qi].options.push({
+    key: 'new_opt_' + Date.now(),
+    icon: '❓',
+    label: 'New Option',
+    detail: 'Description here',
+    tags: []
+  });
+  renderInterview();
+}
+
+function removeOption(qi, oi) {
+  config.interviewQuestions[qi].options.splice(oi, 1);
+  renderInterview();
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER — RADIOS
+// ══════════════════════════════════════════════════════
+
+function renderRadios() {
+  const container = document.getElementById('radios-list');
+  container.innerHTML = config.radioLineup.map((r, ri) => `
+    <div class="admin-card" draggable="true" ondragstart="rDragStart(event,${ri})" ondragover="event.preventDefault()" ondrop="rDrop(event,${ri})" ondragend="rDragEnd(event)">
+      <div class="card-header">
+        <div style="display:flex;align-items:center">
+          <span class="drag-handle">⠿</span>
+          <div class="card-title">${r.name}</div>
+          <span style="font-size:12px;color:#888;margin-left:8px">(${r.key})</span>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="editRadio(${ri})">Edit</button>
+          <button class="btn btn-sm btn-red" onclick="removeRadio(${ri})">Delete</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
+        <div><strong style="color:var(--muted)">Price:</strong> $${r.price}</div>
+        <div><strong style="color:var(--muted)">WC ID:</strong> ${r.id}</div>
+        <div><strong style="color:var(--muted)">Tagline:</strong> ${r.tagline}</div>
+      </div>
+      <div style="margin-top:8px">${r.tags.map(t => `<span class="tag">${t}</span>`).join(' ')}</div>
+      <div style="margin-top:8px;font-size:11px;color:#888">${r.features.join(' · ')}</div>
+    </div>
+  `).join('');
+}
+
+let rDragIdx = null;
+function rDragStart(e, idx) { rDragIdx = idx; e.dataTransfer.effectAllowed = 'move'; }
+function rDrop(e, targetIdx) {
+  e.preventDefault();
+  if (rDragIdx === null || rDragIdx === targetIdx) return;
+  const item = config.radioLineup.splice(rDragIdx, 1)[0];
+  config.radioLineup.splice(targetIdx, 0, item);
+  rDragIdx = null;
+  renderRadios();
+}
+function rDragEnd() { rDragIdx = null; }
+
+function editRadio(ri) {
+  const r = config.radioLineup[ri];
+  openModal(`
+    <h3>Edit Radio</h3>
+    <div class="field-row">
+      <div class="field"><label>Key (unique ID)</label><input type="text" id="er-key" value="${r.key}"></div>
+      <div class="field"><label>WooCommerce Product ID</label><input type="number" id="er-id" value="${r.id}"></div>
+    </div>
+    <div class="field"><label>Name</label><input type="text" id="er-name" value="${esc(r.name)}"></div>
+    <div class="field-row">
+      <div class="field"><label>Price ($)</label><input type="number" id="er-price" value="${r.price}"></div>
+      <div class="field"><label>Tagline</label><input type="text" id="er-tagline" value="${esc(r.tagline)}"></div>
+    </div>
+    <div class="field"><label>Image path (relative)</label><input type="text" id="er-img" value="${r.img}"></div>
+    <div class="field"><label>Pitch (sales copy)</label><textarea id="er-pitch">${esc(r.pitch)}</textarea></div>
+    <div class="field"><label>Tags (comma-separated)</label><input type="text" id="er-tags" value="${r.tags.join(', ')}"></div>
+    <div class="field"><label>Features (one per line)</label><textarea id="er-features" rows="6">${r.features.join('\n')}</textarea></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveRadio(${ri})">Save</button>
+    </div>
+  `);
+}
+
+function saveRadio(ri) {
+  const r = config.radioLineup[ri];
+  const newKey = document.getElementById('er-key').value.trim();
+  if (newKey !== r.key && config.radioLineup.some(x => x.key === newKey)) {
+    showToast('Radio key "' + newKey + '" already exists', true);
+    return;
+  }
+  r.key = newKey;
+  r.id = parseInt(document.getElementById('er-id').value) || 0;
+  r.name = document.getElementById('er-name').value;
+  r.price = parseInt(document.getElementById('er-price').value) || 0;
+  r.tagline = document.getElementById('er-tagline').value;
+  r.img = document.getElementById('er-img').value;
+  r.pitch = document.getElementById('er-pitch').value;
+  r.tags = document.getElementById('er-tags').value.split(',').map(s => s.trim()).filter(Boolean);
+  r.features = document.getElementById('er-features').value.split('\n').map(s => s.trim()).filter(Boolean);
+  closeModal();
+  renderRadios();
+  renderConflicts();
+}
+
+function addRadio() {
+  config.radioLineup.push({
+    key: 'new-radio-' + Date.now(),
+    name: 'New Radio Kit',
+    price: 0,
+    id: 0,
+    img: '',
+    tagline: '',
+    pitch: '',
+    features: [],
+    tags: []
+  });
+  renderRadios();
+}
+
+function removeRadio(ri) {
+  if (!confirm('Delete ' + config.radioLineup[ri].name + '? This also removes its product catalog.')) return;
+  const key = config.radioLineup[ri].key;
+  config.radioLineup.splice(ri, 1);
+  delete config.radioProducts[key];
+  renderRadios();
+  renderConflicts();
+  populateProductRadioSelect();
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER — PRODUCTS
+// ══════════════════════════════════════════════════════
+
+function renderProducts() {
+  renderSharedAntennas();
+  populateProductRadioSelect();
+}
+
+function renderSharedAntennas() {
+  const upgradesContainer = document.getElementById('shared-antennas-list');
+  const additionalContainer = document.getElementById('shared-additional-list');
+
+  upgradesContainer.innerHTML = (config.sharedAntennaUpgrades || []).map((a, i) => `
+    <div style="display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--border);margin-bottom:4px;background:#111">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${a.name} <span style="color:var(--green)">$${a.price}</span></div>
+        <div style="font-size:11px;color:#888">Key: ${a.key} | IDs: ${(a.ids||[a.id]).join(', ')}</div>
+      </div>
+      <button class="btn btn-sm" onclick="editSharedAntenna('upgrades',${i})">Edit</button>
+      <button class="btn btn-sm btn-red" onclick="config.sharedAntennaUpgrades.splice(${i},1);renderSharedAntennas()">×</button>
+    </div>
+  `).join('') || '<div style="color:#888;font-size:13px;padding:8px">None</div>';
+
+  additionalContainer.innerHTML = (config.sharedAdditionalAntennas || []).map((a, i) => `
+    <div style="display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--border);margin-bottom:4px;background:#111">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${a.name} <span style="color:var(--green)">$${a.price}</span></div>
+        <div style="font-size:11px;color:#888">Key: ${a.key} | ID: ${a.id}</div>
+      </div>
+      <button class="btn btn-sm" onclick="editSharedAntenna('additional',${i})">Edit</button>
+      <button class="btn btn-sm btn-red" onclick="config.sharedAdditionalAntennas.splice(${i},1);renderSharedAntennas()">×</button>
+    </div>
+  `).join('') || '<div style="color:#888;font-size:13px;padding:8px">None</div>';
+}
+
+function editSharedAntenna(type, idx) {
+  const list = type === 'upgrades' ? config.sharedAntennaUpgrades : config.sharedAdditionalAntennas;
+  const a = list[idx];
+  const idsStr = (a.ids || [a.id]).join(', ');
+  openModal(`
+    <h3>Edit Antenna</h3>
+    <div class="field-row">
+      <div class="field"><label>Key</label><input type="text" id="ea-key" value="${a.key}"></div>
+      <div class="field"><label>Price ($)</label><input type="number" id="ea-price" value="${a.price}"></div>
+    </div>
+    <div class="field"><label>Name</label><input type="text" id="ea-name" value="${esc(a.name)}"></div>
+    <div class="field"><label>Description</label><textarea id="ea-desc">${esc(a.desc || '')}</textarea></div>
+    <div class="field"><label>Product ID(s) (comma-separated)</label><input type="text" id="ea-ids" value="${idsStr}"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveSharedAntenna('${type}',${idx})">Save</button>
+    </div>
+  `);
+}
+
+function saveSharedAntenna(type, idx) {
+  const list = type === 'upgrades' ? config.sharedAntennaUpgrades : config.sharedAdditionalAntennas;
+  const a = list[idx];
+  a.key = document.getElementById('ea-key').value.trim();
+  a.name = document.getElementById('ea-name').value;
+  a.desc = document.getElementById('ea-desc').value;
+  a.price = parseInt(document.getElementById('ea-price').value) || 0;
+  const idsRaw = document.getElementById('ea-ids').value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  if (type === 'upgrades') a.ids = idsRaw;
+  else a.id = idsRaw[0] || 0;
+  closeModal();
+  renderSharedAntennas();
+}
+
+function addSharedAntenna(type) {
+  const list = type === 'upgrades' ? config.sharedAntennaUpgrades : config.sharedAdditionalAntennas;
+  if (type === 'upgrades') {
+    list.push({ key: 'new-antenna', name: 'New Antenna', desc: '', price: 0, ids: [0] });
+  } else {
+    list.push({ key: 'new-antenna', name: 'New Antenna', desc: '', price: 0, id: 0 });
+  }
+  renderSharedAntennas();
+}
+
+function populateProductRadioSelect() {
+  const sel = document.getElementById('product-radio-select');
+  sel.innerHTML = '<option value="">— Select a radio —</option>' +
+    config.radioLineup.map(r => `<option value="${r.key}">${r.name}</option>`).join('');
+}
+
+function renderRadioProducts() {
+  const key = document.getElementById('product-radio-select').value;
+  const container = document.getElementById('radio-products-editor');
+  if (!key) { container.innerHTML = ''; return; }
+
+  // Ensure product entry exists
+  if (!config.radioProducts[key]) {
+    config.radioProducts[key] = { batteryLabel: '', batteryDesc: '', batteries: [], accessories: [] };
+  }
+  const rp = config.radioProducts[key];
+
+  container.innerHTML = `
+    <div class="admin-card">
+      <div class="card-header"><div class="card-title">Battery Config</div></div>
+      <div class="field"><label>Default Battery Label</label><input type="text" value="${esc(rp.batteryLabel)}" onchange="config.radioProducts['${key}'].batteryLabel=this.value"></div>
+      <div class="field"><label>Default Battery Description</label><textarea onchange="config.radioProducts['${key}'].batteryDesc=this.value">${esc(rp.batteryDesc)}</textarea></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">Battery Upgrades</div>
+        <button class="btn btn-sm" onclick="addRadioProduct('${key}','batteries')">+ Add</button>
+      </div>
+      ${rp.batteries.map((b, i) => `
+        <div style="display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--border);margin-bottom:4px;background:#111">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">${b.name} <span style="color:var(--green)">$${b.price}</span></div>
+            <div style="font-size:11px;color:#888">Key: ${b.key} | ID: ${b.id}</div>
+          </div>
+          <button class="btn btn-sm" onclick="editRadioProduct('${key}','batteries',${i})">Edit</button>
+          <button class="btn btn-sm btn-red" onclick="config.radioProducts['${key}'].batteries.splice(${i},1);renderRadioProducts()">×</button>
+        </div>
+      `).join('') || '<div style="color:#888;font-size:13px;padding:8px">No battery upgrades (built-in battery)</div>'}
+    </div>
+
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">Accessories</div>
+        <button class="btn btn-sm" onclick="addRadioProduct('${key}','accessories')">+ Add</button>
+      </div>
+      ${rp.accessories.map((a, i) => `
+        <div style="display:flex;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--border);margin-bottom:4px;background:#111">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500">${a.name} <span style="color:var(--green)">$${a.price}</span></div>
+            <div style="font-size:11px;color:#888">Key: ${a.key} | ID: ${a.id}</div>
+          </div>
+          <button class="btn btn-sm" onclick="editRadioProduct('${key}','accessories',${i})">Edit</button>
+          <button class="btn btn-sm btn-red" onclick="config.radioProducts['${key}'].accessories.splice(${i},1);renderRadioProducts()">×</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function editRadioProduct(radioKey, category, idx) {
+  const item = config.radioProducts[radioKey][category][idx];
+  openModal(`
+    <h3>Edit ${category === 'batteries' ? 'Battery' : 'Accessory'}</h3>
+    <div class="field-row">
+      <div class="field"><label>Key</label><input type="text" id="ep-key" value="${item.key}"></div>
+      <div class="field"><label>Product ID</label><input type="number" id="ep-id" value="${item.id}"></div>
+    </div>
+    <div class="field"><label>Name</label><input type="text" id="ep-name" value="${esc(item.name)}"></div>
+    <div class="field"><label>Description</label><textarea id="ep-desc">${esc(item.desc || '')}</textarea></div>
+    <div class="field"><label>Price ($)</label><input type="number" id="ep-price" value="${item.price}"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveRadioProduct('${radioKey}','${category}',${idx})">Save</button>
+    </div>
+  `);
+}
+
+function saveRadioProduct(radioKey, category, idx) {
+  const item = config.radioProducts[radioKey][category][idx];
+  item.key = document.getElementById('ep-key').value.trim();
+  item.id = parseInt(document.getElementById('ep-id').value) || 0;
+  item.name = document.getElementById('ep-name').value;
+  item.desc = document.getElementById('ep-desc').value;
+  item.price = parseInt(document.getElementById('ep-price').value) || 0;
+  closeModal();
+  renderRadioProducts();
+}
+
+function addRadioProduct(radioKey, category) {
+  config.radioProducts[radioKey][category].push({
+    key: 'new-item-' + Date.now(),
+    name: 'New Item',
+    desc: '',
+    price: 0,
+    id: 0
+  });
+  renderRadioProducts();
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER — MISMATCHES
+// ══════════════════════════════════════════════════════
+
+function renderMismatches() {
+  const container = document.getElementById('mismatches-list');
+  container.innerHTML = config.mismatchRules.map((rule, i) => `
+    <div class="admin-card">
+      <div class="card-header">
+        <div class="card-title">${rule.id}</div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="editMismatchRule(${i})">Edit</button>
+          <button class="btn btn-sm btn-red" onclick="config.mismatchRules.splice(${i},1);renderMismatches()">Delete</button>
+        </div>
+      </div>
+      <div style="font-size:12px;margin-bottom:4px"><strong style="color:var(--muted)">Triggers when:</strong> answer key matches <code>${rule.needKey}</code> in question(s) <code>${rule.needSource}</code></div>
+      <div style="font-size:12px;margin-bottom:4px"><strong style="color:var(--muted)">Radio must NOT have:</strong> ${rule.radioMustNotHaveAnyTag || '(none)'}</div>
+      <div style="font-size:12px;margin-bottom:4px"><strong style="color:var(--red)">Warning:</strong> ${rule.warning}</div>
+      <div style="font-size:12px;margin-bottom:4px"><strong style="color:var(--muted)">Reason shown:</strong> ${rule.need}</div>
+      <div style="font-size:12px"><strong style="color:var(--muted)">Suggest radios with:</strong> ${rule.suggestTags.map(t => `<span class="tag">${t}</span>`).join(' ')}</div>
+    </div>
+  `).join('');
+}
+
+function editMismatchRule(idx) {
+  const rule = config.mismatchRules[idx];
+  openModal(`
+    <h3>Edit Mismatch Rule</h3>
+    <div class="field"><label>Rule ID</label><input type="text" id="em-id" value="${rule.id}"></div>
+    <div class="field-row">
+      <div class="field"><label>Need key(s) (pipe-separated, e.g. water|waterproof)</label><input type="text" id="em-needkey" value="${rule.needKey}"></div>
+      <div class="field"><label>Source question ID(s) (pipe-separated)</label><input type="text" id="em-needsource" value="${rule.needSource}"></div>
+    </div>
+    <div class="field"><label>Radio must NOT have any of these tags (comma-separated)</label><input type="text" id="em-mustnot" value="${rule.radioMustNotHaveAnyTag}"></div>
+    <div class="field"><label>Warning message (shown after radio name)</label><textarea id="em-warning">${esc(rule.warning)}</textarea></div>
+    <div class="field"><label>Need reason (shown to user)</label><textarea id="em-need">${esc(rule.need)}</textarea></div>
+    <div class="field"><label>Suggest tags (comma-separated — radios with these tags are suggested)</label><input type="text" id="em-suggest" value="${rule.suggestTags.join(', ')}"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="saveMismatchRule(${idx})">Save</button>
+    </div>
+  `);
+}
+
+function saveMismatchRule(idx) {
+  const rule = config.mismatchRules[idx];
+  rule.id = document.getElementById('em-id').value.trim();
+  rule.needKey = document.getElementById('em-needkey').value.trim();
+  rule.needSource = document.getElementById('em-needsource').value.trim();
+  rule.radioMustNotHaveAnyTag = document.getElementById('em-mustnot').value.trim();
+  rule.warning = document.getElementById('em-warning').value;
+  rule.need = document.getElementById('em-need').value;
+  rule.suggestTags = document.getElementById('em-suggest').value.split(',').map(s => s.trim()).filter(Boolean);
+  closeModal();
+  renderMismatches();
+  renderConflicts();
+}
+
+function addMismatchRule() {
+  config.mismatchRules.push({
+    id: 'new-rule-' + Date.now(),
+    needKey: '',
+    needSource: '',
+    radioMustHaveTag: '',
+    radioMustNotHaveAnyTag: '',
+    warning: '',
+    need: '',
+    suggestTags: [],
+  });
+  renderMismatches();
+}
+
+// ══════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════
+
+function esc(str) {
+  return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function showToast(msg, isError) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.className = 'toast'; }, 3000);
+}
+
+function openModal(html) {
+  document.getElementById('modal-body').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+
+function renderAll() {
+  renderScoring();
+  renderInterview();
+  renderRadios();
+  renderProducts();
+  renderMismatches();
+  renderConflicts();
+}
+
+loadConfig();
+renderAll();
+</script>
+</body>
+</html>

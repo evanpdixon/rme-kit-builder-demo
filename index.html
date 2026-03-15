@@ -461,6 +461,7 @@
 <div class="topbar">
   <div class="logo">Radio Made Easy</div>
   <div class="breadcrumb"><a href="#">Shop</a> / <a href="#">Handheld Radios</a> / Kit Builder</div>
+  <a href="kit-builder-admin.html" style="color:var(--muted);font-size:11px;text-decoration:none;border:1px solid var(--border);padding:4px 10px;letter-spacing:1px;text-transform:uppercase">Admin</a>
   <div class="demo-badge">WIREFRAME DEMO</div>
 </div>
 
@@ -646,6 +647,14 @@
 </div>
 
 <script>
+// ── Admin config override (from kit-builder-admin.html → localStorage) ──
+const _adminConfig = (() => {
+  try {
+    const raw = localStorage.getItem('rme-kit-builder-config');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+})();
+
 const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
 let BASE_PRICE = 59;
 let currentStep = 0;
@@ -1949,6 +1958,27 @@ const interviewQuestions = [
   },
 ];
 
+// ── Apply admin config overrides ──
+if (_adminConfig) {
+  if (_adminConfig.radioLineup) {
+    // Merge admin radios: rebuild with admin data but keep img prefix from S
+    radioLineup.length = 0;
+    _adminConfig.radioLineup.forEach(r => {
+      radioLineup.push({
+        ...r,
+        img: r.img.startsWith('http') ? r.img : S + r.img,
+        solves: r.solves || [],
+        features: r.features || [],
+        tags: r.tags || []
+      });
+    });
+  }
+  if (_adminConfig.interviewQuestions) {
+    interviewQuestions.length = 0;
+    _adminConfig.interviewQuestions.forEach(q => interviewQuestions.push(q));
+  }
+}
+
 let interviewStep = 0;
 let interviewAnswers = {};
 
@@ -2100,26 +2130,32 @@ function showInterviewResults() {
       if (opt.key === 'water' || opt.key === 'waterproof') waterExplicit = true;
       // Indirect: outdoors implies weather exposure
       else if (opt.key === 'outdoor' && opt.tags.includes('waterproof')) waterIndirect = true;
+      const _sc = _adminConfig && _adminConfig.scoring || null;
+      const _baseW = _sc ? (_sc.baseWeight || 1) : 1;
+      const _cw = _sc ? (_sc.customWeights || {}) : {};
       radioLineup.forEach(r => {
         opt.tags.forEach(tag => {
-          if (r.tags.includes(tag)) scores[r.key] += 1;
+          if (r.tags.includes(tag)) scores[r.key] += (_cw[tag] !== undefined ? _cw[tag] : _baseW);
         });
       });
     });
   });
 
-  // Water resistance bonus:
-  // Explicit water need (+5 IP67, +1 IP54) — UV-PRO should always win
-  // Indirect/outdoors (+2 IP67, +1 IP54) — UV-PRO favored but DMR can overtake with digital/encryption tags
+  // Water resistance bonus (admin-configurable)
+  const _sc = _adminConfig && _adminConfig.scoring || null;
+  const _eIp67 = _sc ? _sc.explicitIp67 : 5;
+  const _eIp54 = _sc ? _sc.explicitIp54 : 1;
+  const _iIp67 = _sc ? _sc.indirectIp67 : 1;
+  const _iIp54 = _sc ? _sc.indirectIp54 : 0;
   if (waterExplicit) {
     radioLineup.forEach(r => {
-      if (r.tags.includes('waterproof')) scores[r.key] += 5;
-      else if (r.tags.includes('water-resistant')) scores[r.key] += 1;
+      if (r.tags.includes('waterproof')) scores[r.key] += _eIp67;
+      else if (r.tags.includes('water-resistant')) scores[r.key] += _eIp54;
     });
   } else if (waterIndirect) {
     radioLineup.forEach(r => {
-      if (r.tags.includes('waterproof')) scores[r.key] += 1;
-      // IP54 gets no extra bonus for indirect — base tag match is enough
+      if (r.tags.includes('waterproof')) scores[r.key] += _iIp67;
+      else if (r.tags.includes('water-resistant')) scores[r.key] += _iIp54;
     });
   }
 
@@ -2243,6 +2279,36 @@ const mismatchRules = [
     suggestTags: ['channels'],
   },
 ];
+
+// ── Apply admin mismatch overrides ──
+if (_adminConfig && _adminConfig.mismatchRules) {
+  mismatchRules.length = 0;
+  _adminConfig.mismatchRules.forEach(rule => {
+    const needKeys = (rule.needKey || '').split('|').map(s => s.trim()).filter(Boolean);
+    const needSources = (rule.needSource || '').split('|').map(s => s.trim()).filter(Boolean);
+    const mustNotTags = (rule.radioMustNotHaveAnyTag || '').split(',').map(s => s.trim()).filter(Boolean);
+    mismatchRules.push({
+      check: (answers, radio) => {
+        // Check if user indicated this need
+        let wantsIt = false;
+        needKeys.forEach(nk => {
+          needSources.forEach(ns => {
+            const a = answers[ns];
+            if (!a) return;
+            if (Array.isArray(a)) { if (a.includes(nk)) wantsIt = true; }
+            else { if (a === nk) wantsIt = true; }
+          });
+        });
+        if (!wantsIt) return false;
+        // Check if radio lacks the required tags
+        return mustNotTags.length > 0 && !mustNotTags.some(t => radio.tags.includes(t));
+      },
+      warning: rule.warning,
+      need: rule.need,
+      suggestTags: rule.suggestTags || [],
+    });
+  });
+}
 
 let pendingRadioKey = null;
 
