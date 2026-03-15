@@ -253,6 +253,12 @@
   }
   .prog-add-zip:hover { border-color: var(--gold-dim); background: #1a1800; }
   .prog-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .prog-lookup-btn {
+    padding: 8px 16px; background: var(--gold); color: #111; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .prog-lookup-btn:hover { background: var(--gold-dim); }
+  .prog-confirmed { font-size: 13px; color: var(--green); margin-top: 6px; padding: 6px 10px; background: #1a2a1a; border-radius: 6px; }
   .prog-radio-row {
     display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; font-size: 14px;
   }
@@ -615,7 +621,9 @@ let adapterSuppressed = false; // user chose to supply their own adapter
 let programmingChoice = 'standard'; // 'none', 'standard', 'multi'
 let progUseShipping = true; // use shipping address for programming location
 let progZipPrimary = '';
-let progZipsExtra = []; // up to 3 extra zips (4 total with primary)
+let progZipsExtra = []; // up to 3 extra locations (4 total with primary)
+let progConfirmedPrimary = ''; // resolved city/state for primary
+let progConfirmedExtras = []; // resolved city/state for extras
 let progNotes = '';
 
 // ── Product data (real image URLs from WooCommerce) ──
@@ -865,6 +873,7 @@ function renderProgramming() {
 function renderProgLocationFields() {
   const shipChecked = progUseShipping ? 'checked' : '';
   const diffChecked = !progUseShipping ? 'checked' : '';
+  const confirmedHtml = progConfirmedPrimary ? `<div class="prog-confirmed">✅ ${progConfirmedPrimary}</div>` : '';
   return `
     <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
       <div class="prog-field">
@@ -878,9 +887,15 @@ function renderProgLocationFields() {
       </div>
       ${!progUseShipping ? `
         <div class="prog-field">
-          <label>Zip code for programming</label>
-          <input type="text" maxlength="5" placeholder="e.g. 90210" value="${progZipPrimary}"
-                 oninput="progZipPrimary=this.value" onfocus="event.stopPropagation()">
+          <label>Zip code or City, State</label>
+          <div class="prog-zip-row">
+            <input type="text" maxlength="60" placeholder="e.g. 90210 or Denver, CO" value="${progZipPrimary}"
+                   oninput="progZipPrimary=this.value;clearProgConfirm('primary')" onfocus="event.stopPropagation()"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();lookupLocation('primary')}">
+            <button class="prog-lookup-btn" onclick="event.stopPropagation();lookupLocation('primary')">Verify</button>
+          </div>
+          ${confirmedHtml}
+          <div class="prog-note">We use this as the center point of our repeater search, pulling in repeaters from the surrounding area. One central location usually covers a wide radius — no need to add nearby cities separately.</div>
         </div>
       ` : ''}
     </div>
@@ -891,24 +906,34 @@ function renderProgMultiFields() {
   let zipsHtml = '';
 
   // Primary location
+  const confirmedPri = progConfirmedPrimary ? `<div class="prog-confirmed">✅ ${progConfirmedPrimary}</div>` : '';
   zipsHtml += `
     <div class="prog-field">
       <label>Location 1 (primary)</label>
-      <input type="text" maxlength="5" placeholder="Zip code" value="${progZipPrimary}"
-             oninput="progZipPrimary=this.value" onfocus="event.stopPropagation()">
+      <div class="prog-zip-row">
+        <input type="text" maxlength="60" placeholder="Zip code or City, State" value="${progZipPrimary}"
+               oninput="progZipPrimary=this.value;clearProgConfirm('primary')" onfocus="event.stopPropagation()"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();lookupLocation('primary')}">
+        <button class="prog-lookup-btn" onclick="event.stopPropagation();lookupLocation('primary')">Verify</button>
+      </div>
+      ${confirmedPri}
     </div>
   `;
 
   // Extra locations (up to 3 more = 4 total)
   for (let i = 0; i < progZipsExtra.length; i++) {
+    const confirmedExtra = progConfirmedExtras[i] ? `<div class="prog-confirmed">✅ ${progConfirmedExtras[i]}</div>` : '';
     zipsHtml += `
       <div class="prog-field">
         <label>Location ${i + 2}</label>
         <div class="prog-zip-row">
-          <input type="text" maxlength="5" placeholder="Zip code" value="${progZipsExtra[i]}"
-                 oninput="progZipsExtra[${i}]=this.value" onfocus="event.stopPropagation()">
+          <input type="text" maxlength="60" placeholder="Zip code or City, State" value="${progZipsExtra[i]}"
+                 oninput="progZipsExtra[${i}]=this.value;clearProgConfirm('extra',${i})" onfocus="event.stopPropagation()"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();lookupLocation('extra',${i})}">
+          <button class="prog-lookup-btn" onclick="event.stopPropagation();lookupLocation('extra',${i})">Verify</button>
           <button class="prog-zip-remove" onclick="event.stopPropagation();removeProgZip(${i})" title="Remove">&times;</button>
         </div>
+        ${confirmedExtra}
       </div>
     `;
   }
@@ -919,14 +944,14 @@ function renderProgMultiFields() {
     <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
       ${zipsHtml}
       ${canAddMore ? '<div class="prog-add-zip" onclick="event.stopPropagation();addProgZip()">+ Add another location</div>' : '<div class="prog-note">Maximum 4 locations reached.</div>'}
-      <div class="prog-note" style="margin-top:12px">Radio memory slots are evenly divided between locations by default. Mention in the notes below if you need a different split.</div>
+      <div class="prog-note" style="margin-top:12px">Each location is used as a center point for a repeater search of the surrounding area. Only add separate locations for areas that are far apart (e.g. home vs. vacation cabin). Memory slots are evenly divided between locations by default — mention in notes if you need a different split.</div>
     </div>
   `;
 }
 
 function selectProgramming(choice) {
   programmingChoice = choice;
-  if (choice === 'standard') { progZipsExtra = []; }
+  if (choice === 'standard') { progZipsExtra = []; progConfirmedExtras = []; }
   renderProgramming();
   updateBottomBar();
 }
@@ -939,14 +964,94 @@ function setProgShipping(useShipping) {
 function addProgZip() {
   if (progZipsExtra.length < 3) {
     progZipsExtra.push('');
+    progConfirmedExtras.push('');
     renderProgramming();
   }
 }
 
 function removeProgZip(index) {
   progZipsExtra.splice(index, 1);
+  progConfirmedExtras.splice(index, 1);
   renderProgramming();
 }
+
+function clearProgConfirm(which, index) {
+  if (which === 'primary') progConfirmedPrimary = '';
+  else if (which === 'extra' && index !== undefined) progConfirmedExtras[index] = '';
+}
+
+async function lookupLocation(which, index) {
+  const raw = which === 'primary' ? progZipPrimary : progZipsExtra[index];
+  if (!raw || !raw.trim()) return;
+  const val = raw.trim();
+
+  // Determine if zip code or city/state
+  const isZip = /^\d{5}$/.test(val);
+
+  try {
+    let city, state, zip;
+    if (isZip) {
+      // Zip code lookup via Zippopotam.us
+      const resp = await fetch(`https://api.zippopotam.us/us/${val}`);
+      if (!resp.ok) throw new Error('not found');
+      const data = await resp.json();
+      city = data.places[0]['place name'];
+      state = data.places[0]['state abbreviation'];
+      zip = val;
+    } else {
+      // City/state — try to parse and look up
+      const parts = val.split(',').map(s => s.trim());
+      if (parts.length < 2) {
+        showProgError(which, index, 'Please enter as "City, State" (e.g. Denver, CO) or a 5-digit zip code.');
+        return;
+      }
+      const searchCity = parts[0];
+      const searchState = parts[1].replace(/\./g, '').toUpperCase();
+      // Use Nominatim for city/state → confirmation
+      const q = encodeURIComponent(`${searchCity}, ${searchState}, US`);
+      const resp = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&countrycodes=us&limit=1&addressdetails=1`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!resp.ok) throw new Error('lookup failed');
+      const results = await resp.json();
+      if (!results.length) throw new Error('not found');
+      const addr = results[0].address;
+      city = addr.city || addr.town || addr.village || addr.hamlet || searchCity;
+      state = addr.state ? getStateAbbr(addr.state) || addr.state : searchState;
+      zip = addr.postcode || '';
+    }
+
+    const display = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+    if (which === 'primary') {
+      progConfirmedPrimary = display;
+    } else {
+      progConfirmedExtras[index] = display;
+    }
+    renderProgramming();
+  } catch (e) {
+    showProgError(which, index, 'Could not verify that location. Please check and try again.');
+  }
+}
+
+function showProgError(which, index, msg) {
+  // Briefly show error inline
+  const label = which === 'primary' ? 'primary' : `extra-${index}`;
+  const existing = document.querySelector(`.prog-error-${label}`);
+  if (existing) existing.remove();
+  const inputs = document.querySelectorAll('.prog-zip-row');
+  const target = which === 'primary' ? inputs[0] : inputs[index + (programmingChoice === 'multi' ? 1 : 0)];
+  if (!target) return;
+  const err = document.createElement('div');
+  err.className = `prog-confirmed prog-error-${label}`;
+  err.style.color = 'var(--red)';
+  err.textContent = msg;
+  target.parentElement.insertBefore(err, target.nextElementSibling);
+  setTimeout(() => err.remove(), 5000);
+}
+
+// US state name → abbreviation
+const _stateMap = {Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',Connecticut:'CT',Delaware:'DE',Florida:'FL',Georgia:'GA',Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY'};
+function getStateAbbr(name) { return _stateMap[name] || null; }
 
 function renderReview() {
   const list = document.getElementById('review-list');
