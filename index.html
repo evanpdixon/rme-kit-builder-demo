@@ -1565,13 +1565,13 @@ const radioLineup = [
 const interviewQuestions = [
   {
     id: 'budget',
-    question: "What's your budget per radio?",
-    sub: "This helps us narrow down the best options for you.",
+    question: "What kind of radio are you looking for?",
+    sub: "This helps us match you with the right tier.",
     multi: false,
     options: [
-      { key: 'low', icon: '💵', label: 'Keep it affordable', detail: 'Under $75 — best value for the money', tags: ['budget'] },
-      { key: 'mid', icon: '💰', label: 'Mid-range is fine', detail: '$75–$250 — willing to pay for the right features', tags: ['waterproof', 'gps', 'bluetooth', 'grow'] },
-      { key: 'high', icon: '💎', label: "I want the best", detail: '$250+ — no compromises', tags: ['encryption', 'digital', 'premium', 'crossband'] },
+      { key: 'low', icon: '💵', label: 'Economical', detail: 'A solid, reliable radio without the extras', tags: ['budget'] },
+      { key: 'mid', icon: '💰', label: 'Mid-range', detail: 'More features and durability — the sweet spot for most people', tags: ['waterproof', 'gps', 'bluetooth', 'grow'] },
+      { key: 'high', icon: '💎', label: 'The best of the best', detail: 'Maximum capability, no compromises', tags: ['encryption', 'digital', 'premium', 'crossband'] },
     ]
   },
   {
@@ -1705,9 +1705,9 @@ function getPersonalizedReasons(radio) {
   const a = interviewAnswers;
 
   // Budget match
-  if (a.budget === 'low' && radio.price < 75) reasons.push('Fits your budget — affordable without cutting corners');
-  if (a.budget === 'mid' && radio.price >= 75 && radio.price <= 250) reasons.push('Right in your price range with premium features');
-  if (a.budget === 'high' && radio.price >= 200) reasons.push('Top-tier option with no compromises');
+  if (a.budget === 'low' && radio.tags.includes('budget')) reasons.push('Economical and reliable — gets you on the air without the extras');
+  if (a.budget === 'mid' && radio.tags.includes('grow')) reasons.push('Great mid-range option — solid features with room to grow');
+  if (a.budget === 'high' && radio.tags.includes('premium')) reasons.push('Top-tier — maximum capability with no compromises');
 
   // Use case match
   if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the wet environments you described');
