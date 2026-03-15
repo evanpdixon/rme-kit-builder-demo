@@ -427,6 +427,7 @@ let selectedAntennas = new Set(); // multiselect
 let selectedAddlAntennas = new Set(); // multiselect
 let selectedBattery = 'factory'; // single select — default factory
 let selectedAccessories = new Set(); // multiselect
+let adapterSuppressed = false; // user chose to supply their own adapter
 
 // ── Product data (real image URLs from WooCommerce) ──
 // Antenna upgrades mount DIRECTLY on the radio.
@@ -608,7 +609,7 @@ function renderReview() {
     const a = additionalAntennas.find(x => x.key === key);
     return a && a.needsAdapter;
   });
-  if (anyBNCNeeded) {
+  if (anyBNCNeeded && !adapterSuppressed) {
     items.push(`
       <div class="review-item" style="opacity:0.7">
         <div class="ri-img"><img src="${S}2022/09/smaftobncf.jpg" alt=""></div>
@@ -750,6 +751,14 @@ function adapterWarnKeep() {
   document.getElementById('adapter-warn-modal').classList.remove('open');
 }
 
+function adapterWarnRemoveOnly() {
+  // Remove adapter from order but keep all antennas — user has their own
+  adapterSuppressed = true;
+  document.getElementById('adapter-warn-modal').classList.remove('open');
+  updateBottomBar();
+  renderReview();
+}
+
 function adapterWarnRemoveAll() {
   // Remove all BNC antennas and the adapter
   selectedAntennas.clear();
@@ -765,7 +774,7 @@ function adapterWarnRemoveAll() {
 // ── Selection handlers ──────────────────────────────
 function toggleAntenna(key) {
   if (selectedAntennas.has(key)) selectedAntennas.delete(key);
-  else selectedAntennas.add(key);
+  else { selectedAntennas.add(key); adapterSuppressed = false; }
   renderAntennaUpgrades();
   updateBottomBar();
 }
@@ -797,6 +806,7 @@ let pendingAntennaKey = null;
 
 function adapterModalAdd() {
   // Add both the adapter and the pending antenna
+  adapterSuppressed = false;
   selectedAddlAntennas.add('extraadapter');
   selectedAddlAntennas.add(pendingAntennaKey);
   pendingAntennaKey = null;
@@ -855,7 +865,7 @@ function calcTotal() {
     const a = additionalAntennas.find(x => x.key === key);
     return a && a.needsAdapter;
   });
-  if (anyBNC) total += ADAPTER_PRICE;
+  if (anyBNC && !adapterSuppressed) total += ADAPTER_PRICE;
 
   // Battery upgrade
   if (selectedBattery && selectedBattery !== 'factory') {
@@ -1005,6 +1015,7 @@ wizardInitialized = true;
     <div class="modal-btns" style="flex-direction:column;gap:8px">
       <button class="modal-btn-add" onclick="adapterWarnKeep()">Keep adapter in my kit</button>
       <button class="modal-btn-cancel" onclick="adapterWarnRemoveAll()">Remove adapter and all BNC antennas</button>
+      <button class="modal-btn-cancel" onclick="adapterWarnRemoveOnly()" style="font-size:12px">Remove adapter only — I'll supply my own</button>
     </div>
   </div>
 </div>
