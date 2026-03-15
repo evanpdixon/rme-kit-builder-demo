@@ -209,6 +209,41 @@
   }
   .ri-remove:hover { background: #3a1515; border-color: var(--red); color: var(--red); }
 
+  /* ── Programming step ──────────────────────── */
+  .prog-section { margin-top: 16px; }
+  .prog-field { margin-bottom: 16px; }
+  .prog-field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .prog-field input[type="text"], .prog-field textarea {
+    width: 100%; padding: 10px 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 14px; font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .prog-field input:focus, .prog-field textarea:focus { outline: none; border-color: var(--gold-dim); }
+  .prog-field textarea { resize: vertical; min-height: 70px; }
+  .prog-zip-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .prog-zip-row input { flex: 1; }
+  .prog-zip-remove {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .prog-zip-remove:hover { border-color: var(--red); color: var(--red); }
+  .prog-add-zip {
+    display: inline-block; padding: 6px 14px; font-size: 13px; color: var(--gold);
+    background: transparent; border: 1px dashed var(--border); border-radius: 6px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .prog-add-zip:hover { border-color: var(--gold-dim); background: #1a1800; }
+  .prog-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .prog-radio-row {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; font-size: 14px;
+  }
+  .prog-radio-row input[type="radio"] { accent-color: var(--gold); width: 16px; height: 16px; cursor: pointer; }
+  .prog-included { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #1a2a1a; color: var(--green); margin-left: 8px; }
+  .prog-upcharge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #2a2000; color: var(--gold); margin-left: 8px; }
+  .prog-deemph { opacity: 0.5; }
+  .prog-deemph:hover { opacity: 0.8; }
+
   /* ── Adapter prompt modal ──────────────────── */
   .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 998;
@@ -325,9 +360,10 @@
 
   <!-- Mobile step indicator -->
   <div class="step-mobile" id="step-mobile">
-    <div class="sm-label" id="sm-label">Step 1 of 5 — Antenna Upgrade</div>
+    <div class="sm-label" id="sm-label">Step 1 of 6 — Antenna Upgrade</div>
     <div class="sm-dots" id="sm-dots">
       <div class="sm-dot active"></div>
+      <div class="sm-dot"></div>
       <div class="sm-dot"></div>
       <div class="sm-dot"></div>
       <div class="sm-dot"></div>
@@ -337,14 +373,16 @@
 
   <!-- Progress (desktop) -->
   <div class="step-labels" id="step-labels">
-    <div class="step-label active" onclick="goStep(0)">Antenna Upgrade</div>
-    <div class="step-label" onclick="goStep(1)">Additional Antennas</div>
+    <div class="step-label active" onclick="goStep(0)">Antennas</div>
+    <div class="step-label" onclick="goStep(1)">More Antennas</div>
     <div class="step-label" onclick="goStep(2)">Battery</div>
     <div class="step-label" onclick="goStep(3)">Accessories</div>
-    <div class="step-label" onclick="goStep(4)">Review</div>
+    <div class="step-label" onclick="goStep(4)">Programming</div>
+    <div class="step-label" onclick="goStep(5)">Review</div>
   </div>
   <div class="progress" id="progress">
     <div class="progress-step active"></div>
+    <div class="progress-step"></div>
     <div class="progress-step"></div>
     <div class="progress-step"></div>
     <div class="progress-step"></div>
@@ -392,8 +430,18 @@
     </div>
   </div>
 
-  <!-- STEP 4: Review -->
+  <!-- STEP 4: Programming -->
   <div class="wizard-section" id="step-4">
+    <div class="section-head">
+      <h2>Custom Programming</h2>
+      <p>Every RME kit comes custom programmed with GMRS, FRS, NOAA weather, and local repeaters for your area — included at no extra charge.</p>
+    </div>
+    <div class="options-grid" id="programming-options">
+    </div>
+  </div>
+
+  <!-- STEP 5: Review -->
+  <div class="wizard-section" id="step-5">
     <div class="section-head">
       <h2>Review Your Kit</h2>
       <p>Here's everything in your customized UV-5R Essentials Kit. Make sure it looks good, then add to cart.</p>
@@ -420,7 +468,7 @@
 const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
 const BASE_PRICE = 59;
 let currentStep = 0;
-const totalSteps = 5;
+const totalSteps = 6;
 
 // Selected state
 let selectedAntennas = new Set(); // multiselect
@@ -428,6 +476,13 @@ let selectedAddlAntennas = new Set(); // multiselect
 let selectedBattery = 'factory'; // single select — default factory
 let selectedAccessories = new Set(); // multiselect
 let adapterSuppressed = false; // user chose to supply their own adapter
+
+// Programming state
+let programmingChoice = 'standard'; // 'none', 'standard', 'multi'
+let progUseShipping = true; // use shipping address for programming location
+let progZipPrimary = '';
+let progZipsExtra = []; // up to 3 extra zips (4 total with primary)
+let progNotes = '';
 
 // ── Product data (real image URLs from WooCommerce) ──
 // Antenna upgrades mount DIRECTLY on the radio.
@@ -575,6 +630,163 @@ function renderAccessories() {
   `).join('');
 }
 
+function renderProgramming() {
+  const container = document.getElementById('programming-options');
+
+  const standardChecked = programmingChoice === 'standard' ? 'checked' : '';
+  const multiChecked = programmingChoice === 'multi' ? 'checked' : '';
+  const noneChecked = programmingChoice === 'none' ? 'checked' : '';
+
+  let html = '';
+
+  // Option 1: Standard (included)
+  html += `
+    <div class="opt-card ${programmingChoice === 'standard' ? 'selected' : ''}"
+         onclick="selectProgramming('standard')" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="oc-radio"></div>
+        <div class="oc-body">
+          <div class="oc-name">Standard Custom Programming <span class="prog-included">Included</span></div>
+          <div class="oc-desc" style="max-height:none">GMRS channels (1-22 + repeater pairs), FRS, NOAA weather, and local repeaters for one location. Our recommended channel layout — ready to use out of the box.</div>
+        </div>
+        <div class="oc-price free" style="color:var(--green)">Included</div>
+      </div>
+      ${programmingChoice === 'standard' ? renderProgLocationFields() : ''}
+    </div>
+  `;
+
+  // Option 2: Multi-location (+$10)
+  html += `
+    <div class="opt-card ${programmingChoice === 'multi' ? 'selected' : ''}"
+         onclick="selectProgramming('multi')" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="oc-radio"></div>
+        <div class="oc-body">
+          <div class="oc-name">Multi-Location Programming <span class="prog-upcharge">+$10</span></div>
+          <div class="oc-desc" style="max-height:none">Program repeaters for up to 4 locations. Radio memory slots are evenly divided between locations by default. Perfect if you travel between home, work, cabin, or other areas.</div>
+        </div>
+        <div class="oc-price">+$10</div>
+      </div>
+      ${programmingChoice === 'multi' ? renderProgMultiFields() : ''}
+    </div>
+  `;
+
+  // Option 3: No programming (deemphasized)
+  html += `
+    <div class="opt-card prog-deemph ${programmingChoice === 'none' ? 'selected' : ''}"
+         onclick="selectProgramming('none')">
+      <div class="oc-radio"></div>
+      <div class="oc-body">
+        <div class="oc-name">Skip Programming — Ship Immediately</div>
+        <div class="oc-desc" style="max-height:none">Radio ships with factory default channels only. Choose this if you plan to program it yourself via CHIRP or another method.</div>
+      </div>
+      <div class="oc-price free" style="color:var(--muted)">—</div>
+    </div>
+  `;
+
+  // Notes field (always visible unless 'none')
+  if (programmingChoice !== 'none') {
+    html += `
+      <div class="prog-section">
+        <div class="prog-field">
+          <label>Anything else we should know about your programming preferences?</label>
+          <textarea placeholder="e.g. Custom channel names, specific repeater frequencies, Part 90 channels (license required), etc."
+                    onchange="progNotes=this.value" onfocus="event.stopPropagation()">${progNotes}</textarea>
+          <div class="prog-note">Optional — leave blank if standard programming is all you need.</div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+function renderProgLocationFields() {
+  const shipChecked = progUseShipping ? 'checked' : '';
+  const diffChecked = !progUseShipping ? 'checked' : '';
+  return `
+    <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="prog-field">
+        <label>Where will you primarily use this radio?</label>
+        <div class="prog-radio-row" onclick="setProgShipping(true)">
+          <input type="radio" name="prog-loc" ${shipChecked}> Same as my shipping address
+        </div>
+        <div class="prog-radio-row" onclick="setProgShipping(false)">
+          <input type="radio" name="prog-loc" ${diffChecked}> A different location
+        </div>
+      </div>
+      ${!progUseShipping ? `
+        <div class="prog-field">
+          <label>Zip code for programming</label>
+          <input type="text" maxlength="5" placeholder="e.g. 90210" value="${progZipPrimary}"
+                 oninput="progZipPrimary=this.value" onfocus="event.stopPropagation()">
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderProgMultiFields() {
+  let zipsHtml = '';
+
+  // Primary location
+  zipsHtml += `
+    <div class="prog-field">
+      <label>Location 1 (primary)</label>
+      <input type="text" maxlength="5" placeholder="Zip code" value="${progZipPrimary}"
+             oninput="progZipPrimary=this.value" onfocus="event.stopPropagation()">
+    </div>
+  `;
+
+  // Extra locations (up to 3 more = 4 total)
+  for (let i = 0; i < progZipsExtra.length; i++) {
+    zipsHtml += `
+      <div class="prog-field">
+        <label>Location ${i + 2}</label>
+        <div class="prog-zip-row">
+          <input type="text" maxlength="5" placeholder="Zip code" value="${progZipsExtra[i]}"
+                 oninput="progZipsExtra[${i}]=this.value" onfocus="event.stopPropagation()">
+          <button class="prog-zip-remove" onclick="event.stopPropagation();removeProgZip(${i})" title="Remove">&times;</button>
+        </div>
+      </div>
+    `;
+  }
+
+  const canAddMore = progZipsExtra.length < 3;
+
+  return `
+    <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      ${zipsHtml}
+      ${canAddMore ? '<div class="prog-add-zip" onclick="event.stopPropagation();addProgZip()">+ Add another location</div>' : '<div class="prog-note">Maximum 4 locations reached.</div>'}
+      <div class="prog-note" style="margin-top:12px">Radio memory slots are evenly divided between locations by default. Mention in the notes below if you need a different split.</div>
+    </div>
+  `;
+}
+
+function selectProgramming(choice) {
+  programmingChoice = choice;
+  if (choice === 'standard') { progZipsExtra = []; }
+  renderProgramming();
+  updateBottomBar();
+}
+
+function setProgShipping(useShipping) {
+  progUseShipping = useShipping;
+  renderProgramming();
+}
+
+function addProgZip() {
+  if (progZipsExtra.length < 3) {
+    progZipsExtra.push('');
+    renderProgramming();
+  }
+}
+
+function removeProgZip(index) {
+  progZipsExtra.splice(index, 1);
+  renderProgramming();
+}
+
 function renderReview() {
   const list = document.getElementById('review-list');
   let items = [];
@@ -677,6 +889,36 @@ function renderReview() {
     }
   });
 
+  // Programming
+  if (programmingChoice === 'standard') {
+    const loc = progUseShipping ? 'shipping address' : (progZipPrimary || 'TBD');
+    items.push(`
+      <div class="review-item" style="opacity:0.7">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+        <div class="ri-name">Custom Programming<small>Standard — local repeaters for ${loc}</small></div>
+        <div class="ri-price" style="color:var(--green)">Included</div>
+      </div>
+    `);
+  } else if (programmingChoice === 'multi') {
+    const locs = [progZipPrimary, ...progZipsExtra].filter(z => z).join(', ') || 'TBD';
+    items.push(`
+      <div class="review-item">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+        <div class="ri-name">Multi-Location Programming<small>Up to 4 locations: ${locs}</small></div>
+        <div class="ri-price">+$10</div>
+        <button class="ri-remove" onclick="reviewRemove('programming')" title="Remove">&times;</button>
+      </div>
+    `);
+  } else {
+    items.push(`
+      <div class="review-item" style="opacity:0.5">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+        <div class="ri-name">No Programming<small>Ships with factory defaults — program it yourself</small></div>
+        <div class="ri-price" style="color:var(--muted)">—</div>
+      </div>
+    `);
+  }
+
   if (items.length === 1) {
     items.push('<div class="empty-state">No upgrades or accessories selected — just the base kit.</div>');
   }
@@ -697,6 +939,7 @@ function reviewRemove(type, key) {
   if (type === 'antenna') { selectedAntennas.delete(key); }
   else if (type === 'addl') { selectedAddlAntennas.delete(key); }
   else if (type === 'battery') { selectedBattery = 'factory'; }
+  else if (type === 'programming') { programmingChoice = 'standard'; }
   else if (type === 'accessory') { selectedAccessories.delete(key); }
   updateBottomBar();
   renderReview();
@@ -873,6 +1116,9 @@ function calcTotal() {
     if (bat) total += bat.price;
   }
 
+  // Programming upcharge
+  if (programmingChoice === 'multi') total += 10;
+
   // Accessories
   selectedAccessories.forEach(key => {
     const a = accessories.find(x => x.key === key);
@@ -885,6 +1131,7 @@ function countAddons() {
   let count = selectedAntennas.size;
   count += selectedAddlAntennas.size;
   if (selectedBattery && selectedBattery !== 'factory') count++;
+  if (programmingChoice === 'multi') count++;
   count += selectedAccessories.size;
   return count;
 }
@@ -899,7 +1146,7 @@ function updateBottomBar() {
 }
 
 // ── Navigation ──────────────────────────────────────
-const stepNames = ['Antenna Upgrade', 'Additional Antennas', 'Battery', 'Accessories', 'Review'];
+const stepNames = ['Antenna Upgrade', 'Additional Antennas', 'Battery', 'Accessories', 'Programming', 'Review'];
 
 function goStep(n) {
   if (n < 0 || n >= totalSteps) return;
@@ -954,6 +1201,7 @@ function goStep(n) {
   else if (n === 1) renderAdditionalAntennas();
   else if (n === 2) renderBatteryUpgrades();
   else if (n === 3) renderAccessories();
+  else if (n === 4) renderProgramming();
 
   // Scroll to top of wizard (skip on initial load)
   if (wizardInitialized) {
