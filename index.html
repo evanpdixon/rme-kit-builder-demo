@@ -268,6 +268,36 @@
   .prog-deemph { opacity: 0.5; }
   .prog-deemph:hover { opacity: 0.8; }
 
+  /* Color swatches (UV-PRO) */
+  .color-picker { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .color-picker-label { font-size: 13px; color: var(--muted); }
+  .color-swatch {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+    cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .color-swatch:hover { border-color: var(--gold-dim); transform: scale(1.1); }
+  .color-swatch.active { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+  .color-swatch.active::after {
+    content: '✓'; position: absolute; inset: 0; display: flex;
+    align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
+  }
+  .color-swatch--black { background: #1a1a1a; }
+  .color-swatch--black.active::after { color: var(--gold); }
+  .color-swatch--tan { background: #b89a6a; }
+  .color-swatch--tan.active::after { color: #1a1a1a; }
+  .color-swatch-name { font-size: 12px; color: var(--text); }
+
+  /* Drag-and-drop for location reordering */
+  .prog-drag-handle {
+    cursor: grab; color: var(--muted); font-size: 18px; padding: 0 4px;
+    user-select: none; transition: color 0.2s; line-height: 1;
+  }
+  .prog-drag-handle:hover { color: var(--gold); }
+  .prog-drag-handle:active { cursor: grabbing; }
+  .prog-field[draggable="true"] { transition: opacity 0.2s, transform 0.2s; }
+  .prog-field.dragging { opacity: 0.4; transform: scale(0.98); }
+  .prog-field.drag-over { border-top: 2px solid var(--gold); }
+
   /* ── Radio selector / interview ─────────────── */
   .selector-phase { animation: fadeIn 0.3s ease; }
   .selector-landing { text-align: center; padding: 40px 0; }
@@ -617,6 +647,10 @@ let selectedBatteries = new Map(); // key → quantity (e.g. 'usbc-standard' →
 let selectedAccessories = new Set(); // multiselect
 let adapterSuppressed = false; // user chose to supply their own adapter
 
+// UV-PRO color choices (variation attribute)
+let uvproRadioColor = 'black'; // 'black' or 'tan'
+let uvproBatteryColors = new Map(); // battery key → 'black' or 'tan'
+
 // Programming state
 let programmingChoice = 'standard'; // 'none', 'standard', 'multi'
 let progUseShipping = true; // use shipping address for programming location
@@ -624,6 +658,7 @@ let progZipPrimary = '';
 let progZipsExtra = []; // up to 3 extra locations (4 total with primary)
 let progConfirmedPrimary = ''; // resolved city/state for primary
 let progConfirmedExtras = []; // resolved city/state for extras
+let progCoords = { primary: null, extras: [] }; // {lat, lon} for proximity checks
 let progNotes = '';
 
 // ── Product data (radio-specific) ──
@@ -702,7 +737,7 @@ const radioProducts = {
       { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
       { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DMR 6X2 PRO.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
       { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Kenwood plug — plugs directly into the DMR 6X2 PRO.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
-      { key: 'progcable', name: 'DMR 6X2 PRO Programming Cable', desc: 'USB programming cable for the DMR 6X2 PRO. Required for CPS software programming and firmware updates.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
+      { key: 'progcable', name: 'Spare DMR 6X2 PRO Programming Cable', desc: 'Additional spare USB programming cable. One is already included with your kit — this is a backup for a second location or travel bag.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
       { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
       { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
     ],
@@ -717,7 +752,7 @@ const radioProducts = {
       { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
       { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DA-7X2.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
       { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Kenwood plug — plugs directly into the DA-7X2.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
-      { key: 'progcable', name: 'DA-7X2 Programming Cable', desc: 'USB programming cable for the DA-7X2. Required for CPS software programming and firmware updates.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
+      { key: 'progcable', name: 'Spare DA-7X2 Programming Cable', desc: 'Additional spare USB programming cable. One is already included with your kit — this is a backup for a second location or travel bag.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
       { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
       { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
     ],
@@ -844,6 +879,8 @@ function renderBatteryUpgrades() {
   container.innerHTML = factoryHtml + note + batteryUpgrades.map(b => {
     const qty = selectedBatteries.get(b.key) || 0;
     const isSelected = qty > 0;
+    const showColorPicker = selectedRadioKey === 'uv-pro' && isSelected;
+    const batColor = uvproBatteryColors.get(b.key) || uvproRadioColor; // default to radio color
     return `
     <div class="opt-card ${isSelected ? 'selected' : ''}"
          onclick="toggleBattery('${b.key}')">
@@ -852,6 +889,16 @@ function renderBatteryUpgrades() {
       <div class="oc-body">
         <div class="oc-name">${b.name}</div>
         <div class="oc-desc">${b.desc}</div>
+        ${showColorPicker ? `
+          <div class="color-picker" style="margin-top:6px" onclick="event.stopPropagation()">
+            <span class="color-picker-label">Color:</span>
+            <div class="color-swatch color-swatch--black ${batColor === 'black' ? 'active' : ''}"
+                 onclick="setUvproBatteryColor('${b.key}','black')" title="Black"></div>
+            <div class="color-swatch color-swatch--tan ${batColor === 'tan' ? 'active' : ''}"
+                 onclick="setUvproBatteryColor('${b.key}','tan')" title="Tan / Coyote"></div>
+            <span class="color-swatch-name">${batColor === 'black' ? 'Black' : 'Tan / Coyote'}</span>
+          </div>
+        ` : ''}
       </div>
       ${isSelected ? `
         <div class="qty-stepper" onclick="event.stopPropagation()">
@@ -988,11 +1035,16 @@ function renderProgLocationFields() {
 function renderProgMultiFields() {
   let zipsHtml = '';
 
+  // Build ordered list: index 0 = primary, index 1+ = extras
+  const totalLocs = 1 + progZipsExtra.length;
+
   // Primary location
-  const confirmedPri = progConfirmedPrimary ? `<div class="prog-confirmed">✅ ${progConfirmedPrimary}</div>` : '';
+  const confirmedPri = progConfirmedPrimary ? `<div class="prog-confirmed">\u2705 ${progConfirmedPrimary}</div>` : '';
   zipsHtml += `
-    <div class="prog-field">
-      <label>Location 1 (primary)</label>
+    <div class="prog-field" draggable="true" data-loc-idx="0"
+         ondragstart="locDragStart(event,0)" ondragover="locDragOver(event)" ondragenter="locDragEnter(event)"
+         ondragleave="locDragLeave(event)" ondrop="locDrop(event,0)" ondragend="locDragEnd(event)">
+      <label><span class="prog-drag-handle" title="Drag to reorder">\u2630</span> Location 1 (primary)</label>
       <div class="prog-zip-row">
         <input type="text" maxlength="60" placeholder="Zip code or City, State" value="${progZipPrimary}"
                oninput="progZipPrimary=this.value;clearProgConfirm('primary')" onfocus="event.stopPropagation()"
@@ -1005,10 +1057,12 @@ function renderProgMultiFields() {
 
   // Extra locations (up to 3 more = 4 total)
   for (let i = 0; i < progZipsExtra.length; i++) {
-    const confirmedExtra = progConfirmedExtras[i] ? `<div class="prog-confirmed">✅ ${progConfirmedExtras[i]}</div>` : '';
+    const confirmedExtra = progConfirmedExtras[i] ? `<div class="prog-confirmed">\u2705 ${progConfirmedExtras[i]}</div>` : '';
     zipsHtml += `
-      <div class="prog-field">
-        <label>Location ${i + 2}</label>
+      <div class="prog-field" draggable="true" data-loc-idx="${i + 1}"
+           ondragstart="locDragStart(event,${i + 1})" ondragover="locDragOver(event)" ondragenter="locDragEnter(event)"
+           ondragleave="locDragLeave(event)" ondrop="locDrop(event,${i + 1})" ondragend="locDragEnd(event)">
+        <label><span class="prog-drag-handle" title="Drag to reorder">\u2630</span> Location ${i + 2}</label>
         <div class="prog-zip-row">
           <input type="text" maxlength="60" placeholder="Zip code or City, State" value="${progZipsExtra[i]}"
                  oninput="progZipsExtra[${i}]=this.value;clearProgConfirm('extra',${i})" onfocus="event.stopPropagation()"
@@ -1024,17 +1078,17 @@ function renderProgMultiFields() {
   const canAddMore = progZipsExtra.length < 3;
 
   return `
-    <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+    <div class="prog-section prog-locations-container" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
       ${zipsHtml}
       ${canAddMore ? '<div class="prog-add-zip" onclick="event.stopPropagation();addProgZip()">+ Add another location</div>' : '<div class="prog-note">Maximum 4 locations reached.</div>'}
-      <div class="prog-note" style="margin-top:12px">Each location is used as a center point for a repeater search of the surrounding area. Only add separate locations for areas that are far apart (e.g. home vs. vacation cabin). Memory slots are evenly divided between locations by default — mention in notes if you need a different split.</div>
+      <div class="prog-note" style="margin-top:12px">Each location is used as a center point for a repeater search of the surrounding area. Only add separate locations for areas that are far apart (e.g. home vs. vacation cabin). Drag <span style="color:var(--gold)">\u2630</span> to reorder. Memory slots are evenly divided between locations by default \u2014 mention in notes if you need a different split.</div>
     </div>
   `;
 }
 
 function selectProgramming(choice) {
   programmingChoice = choice;
-  if (choice === 'standard') { progZipsExtra = []; progConfirmedExtras = []; }
+  if (choice === 'standard') { progZipsExtra = []; progConfirmedExtras = []; progCoords.extras = []; }
   renderProgramming();
   updateBottomBar();
 }
@@ -1055,12 +1109,75 @@ function addProgZip() {
 function removeProgZip(index) {
   progZipsExtra.splice(index, 1);
   progConfirmedExtras.splice(index, 1);
+  progCoords.extras.splice(index, 1);
   renderProgramming();
 }
 
+// ── Drag-and-drop reordering for locations ──
+let locDragIdx = null;
+
+function locDragStart(e, idx) {
+  locDragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', idx);
+  requestAnimationFrame(() => e.target.closest('.prog-field').classList.add('dragging'));
+}
+
+function locDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+
+function locDragEnter(e) {
+  e.preventDefault();
+  const field = e.target.closest('.prog-field[draggable]');
+  if (field) field.classList.add('drag-over');
+}
+
+function locDragLeave(e) {
+  const field = e.target.closest('.prog-field[draggable]');
+  if (field && !field.contains(e.relatedTarget)) field.classList.remove('drag-over');
+}
+
+function locDrop(e, targetIdx) {
+  e.preventDefault();
+  const field = e.target.closest('.prog-field[draggable]');
+  if (field) field.classList.remove('drag-over');
+  if (locDragIdx === null || locDragIdx === targetIdx) return;
+
+  // Build a flat array of all locations: [primary, ...extras]
+  const allValues = [progZipPrimary, ...progZipsExtra];
+  const allConfirmed = [progConfirmedPrimary, ...progConfirmedExtras];
+  const allCoords = [progCoords.primary, ...progCoords.extras];
+
+  // Reorder: remove from source, insert at target
+  const [movedVal] = allValues.splice(locDragIdx, 1);
+  const [movedConf] = allConfirmed.splice(locDragIdx, 1);
+  const [movedCoord] = allCoords.splice(locDragIdx, 1);
+  allValues.splice(targetIdx, 0, movedVal);
+  allConfirmed.splice(targetIdx, 0, movedConf);
+  allCoords.splice(targetIdx, 0, movedCoord);
+
+  // Write back
+  progZipPrimary = allValues[0];
+  progConfirmedPrimary = allConfirmed[0];
+  progCoords.primary = allCoords[0];
+  progZipsExtra = allValues.slice(1);
+  progConfirmedExtras = allConfirmed.slice(1);
+  progCoords.extras = allCoords.slice(1);
+
+  locDragIdx = null;
+  renderProgramming();
+  checkProximityWarnings();
+}
+
+function locDragEnd(e) {
+  locDragIdx = null;
+  document.querySelectorAll('.prog-field.dragging, .prog-field.drag-over').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
+}
+
 function clearProgConfirm(which, index) {
-  if (which === 'primary') progConfirmedPrimary = '';
-  else if (which === 'extra' && index !== undefined) progConfirmedExtras[index] = '';
+  if (which === 'primary') { progConfirmedPrimary = ''; progCoords.primary = null; }
+  else if (which === 'extra' && index !== undefined) { progConfirmedExtras[index] = ''; progCoords.extras[index] = null; }
 }
 
 async function lookupLocation(which, index) {
@@ -1072,7 +1189,7 @@ async function lookupLocation(which, index) {
   const isZip = /^\d{5}$/.test(val);
 
   try {
-    let city, state, zip;
+    let city, state, zip, lat, lon;
     if (isZip) {
       // Zip code lookup via Zippopotam.us
       const resp = await fetch(`https://api.zippopotam.us/us/${val}`);
@@ -1080,6 +1197,8 @@ async function lookupLocation(which, index) {
       const data = await resp.json();
       city = data.places[0]['place name'];
       state = data.places[0]['state abbreviation'];
+      lat = parseFloat(data.places[0].latitude);
+      lon = parseFloat(data.places[0].longitude);
       zip = val;
     } else {
       // City/state — try to parse and look up
@@ -1102,15 +1221,20 @@ async function lookupLocation(which, index) {
       city = addr.city || addr.town || addr.village || addr.hamlet || searchCity;
       state = addr.state ? getStateAbbr(addr.state) || addr.state : searchState;
       zip = addr.postcode || '';
+      lat = parseFloat(results[0].lat);
+      lon = parseFloat(results[0].lon);
     }
 
     const display = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
     if (which === 'primary') {
       progConfirmedPrimary = display;
+      progCoords.primary = lat != null ? { lat, lon } : null;
     } else {
       progConfirmedExtras[index] = display;
+      progCoords.extras[index] = lat != null ? { lat, lon } : null;
     }
     renderProgramming();
+    checkProximityWarnings();
   } catch (e) {
     showProgError(which, index, 'Could not verify that location. Please check and try again.');
   }
@@ -1132,6 +1256,55 @@ function showProgError(which, index, msg) {
   setTimeout(() => err.remove(), 5000);
 }
 
+// Haversine distance in miles between two {lat, lon} objects
+function haversineMiles(a, b) {
+  const R = 3958.8; // Earth radius in miles
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLon = (b.lon - a.lon) * Math.PI / 180;
+  const sinLat = Math.sin(dLat / 2);
+  const sinLon = Math.sin(dLon / 2);
+  const h = sinLat * sinLat + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * sinLon * sinLon;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function checkProximityWarnings() {
+  // Remove any existing proximity warning
+  document.querySelectorAll('.prog-proximity-warning').forEach(el => el.remove());
+
+  // Gather all confirmed coordinates
+  const locs = [];
+  if (progCoords.primary) locs.push({ coord: progCoords.primary, label: progConfirmedPrimary });
+  progCoords.extras.forEach((c, i) => {
+    if (c) locs.push({ coord: c, label: progConfirmedExtras[i] });
+  });
+
+  if (locs.length < 2) return;
+
+  // Check all pairs
+  const THRESHOLD_MILES = 30;
+  const closePairs = [];
+  for (let i = 0; i < locs.length; i++) {
+    for (let j = i + 1; j < locs.length; j++) {
+      const dist = haversineMiles(locs[i].coord, locs[j].coord);
+      if (dist < THRESHOLD_MILES) {
+        closePairs.push({ a: locs[i].label, b: locs[j].label, dist: Math.round(dist) });
+      }
+    }
+  }
+
+  if (!closePairs.length) return;
+
+  // Show warning after the last prog-field
+  const container = document.querySelector('.prog-section');
+  if (!container) return;
+  const warning = document.createElement('div');
+  warning.className = 'prog-proximity-warning';
+  warning.style.cssText = 'margin-top:12px;padding:10px 14px;background:#2a2000;border:1px solid var(--gold-dim);border-radius:6px;font-size:13px;color:var(--gold);line-height:1.5;';
+  const pairDescs = closePairs.map(p => `<strong>${p.a}</strong> and <strong>${p.b}</strong> (~${p.dist} mi apart)`).join(', ');
+  warning.innerHTML = `⚠️ These locations appear close together: ${pairDescs}. Our repeater search covers a wide area around each center point — one location may be enough to cover both. Consider removing the closer one unless they're in different coverage areas (e.g. separated by mountains).`;
+  container.appendChild(warning);
+}
+
 // US state name → abbreviation
 const _stateMap = {Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',Connecticut:'CT',Delaware:'DE',Florida:'FL',Georgia:'GA',Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY'};
 function getStateAbbr(name) { return _stateMap[name] || null; }
@@ -1142,10 +1315,11 @@ function renderReview() {
 
   // Base kit — no remove button
   const selRadio = radioLineup.find(r => r.key === selectedRadioKey) || radioLineup[0];
+  const colorNote = selectedRadioKey === 'uv-pro' ? ` — ${uvproRadioColor === 'black' ? 'Black' : 'Tan / Coyote'}` : '';
   items.push(`
     <div class="review-item base">
       <div class="ri-img"><img src="${selRadio.img}" alt="" onerror="this.parentElement.innerHTML='📻'"></div>
-      <div class="ri-name">${selRadio.name}<small>Base kit — pre-programmed radio + essentials</small></div>
+      <div class="ri-name">${selRadio.name}<small>Base kit — pre-programmed radio + essentials${colorNote}</small></div>
       <div class="ri-price">$${selRadio.price}</div>
     </div>
   `);
@@ -1216,7 +1390,7 @@ function renderReview() {
       items.push(`
         <div class="review-item">
           <div class="ri-img">${bat.img ? `<img src="${bat.img}" alt="">` : ''}</div>
-          <div class="ri-name">${bat.name}${qty > 1 ? ' <small>×' + qty + '</small>' : ''}<small>Battery upgrade</small></div>
+          <div class="ri-name">${bat.name}${qty > 1 ? ' <small>×' + qty + '</small>' : ''}<small>Battery upgrade${selectedRadioKey === 'uv-pro' ? ` — ${(uvproBatteryColors.get(key) || uvproRadioColor) === 'black' ? 'Black' : 'Tan / Coyote'}` : ''}</small></div>
           <div class="ri-price">+$${bat.price * qty}</div>
           <button class="ri-remove" onclick="reviewRemove('battery','${key}')" title="Remove">&times;</button>
         </div>
@@ -1437,6 +1611,25 @@ function batteryQty(key, delta) {
   else selectedBatteries.set(key, newQty);
   renderBatteryUpgrades();
   updateBottomBar();
+}
+
+// UV-PRO color selection
+function setUvproRadioColor(color) {
+  uvproRadioColor = color;
+  // Update hero color picker
+  const picker = document.getElementById('hero-color-picker');
+  if (picker) {
+    picker.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    picker.querySelector(`.color-swatch--${color}`).classList.add('active');
+    picker.querySelector('.color-swatch-name').textContent = color === 'black' ? 'Black' : 'Tan / Coyote';
+  }
+  // Re-render batteries in case any default to radio color
+  renderBatteryUpgrades();
+}
+
+function setUvproBatteryColor(batteryKey, color) {
+  uvproBatteryColors.set(batteryKey, color);
+  renderBatteryUpgrades();
 }
 
 function toggleAccessory(key) {
@@ -2032,17 +2225,65 @@ function confirmRadioSelection(key) {
   adapterSuppressed = false;
   selectedBatteries = new Map();
   selectedAccessories = new Set();
+  uvproRadioColor = 'black';
+  uvproBatteryColors = new Map();
   programmingChoice = 'standard';
   progUseShipping = true;
   progZipPrimary = '';
   progZipsExtra = [];
   progConfirmedPrimary = '';
   progConfirmedExtras = [];
+  progCoords = { primary: null, extras: [] };
+
+  // Per-radio includes lists and descriptions
+  const radioIncludes = {
+    'uv5r': {
+      desc: 'The go-to starter radio kit. Everything you need to get on the air — pre-programmed and ready to use out of the box. Customize your kit below with antenna upgrades and accessories.',
+      items: ['Baofeng UV-5R radio (pre-programmed)', 'Factory antenna, battery, belt clip', 'Charging cradle', 'RME Quick Start Guide']
+    },
+    'uv5r-mini': {
+      desc: 'The most affordable kit we offer — 999 channels, USB-C charging, and airband receive in the smallest package. Pre-programmed and ready to go.',
+      items: ['Baofeng UV-5R Mini radio (pre-programmed)', 'Factory antenna, USB-C battery, belt clip', 'USB-C charging cable', 'RME Quick Start Guide']
+    },
+    'uv-pro': {
+      desc: 'IP67 waterproof with GPS, text messaging, and Bluetooth. Simple enough to start immediately, powerful enough to grow into APRS and digital modes.',
+      items: ['Baofeng UV-PRO radio (pre-programmed)', 'Factory antenna, USB-C battery, belt clip', 'USB-C charging cable', 'RME Quick Start Guide']
+    },
+    'dmr-6x2': {
+      desc: 'Digital + analog dual-mode radio with encryption capability, GPS, and 4000 memory channels. Includes programming cable for CPS software.',
+      items: ['AnyTone DMR 6X2 PRO radio (pre-programmed)', 'Factory antenna, USB-C battery, belt clip', 'USB-C charging cable', 'USB programming cable', 'RME Quick Start Guide']
+    },
+    'da-7x2': {
+      desc: 'The full-featured flagship — dual receivers, crossband repeat, airband, encryption capable, and 4000 channels. Everything the serious operator needs.',
+      items: ['AnyTone DA-7X2 radio (pre-programmed)', 'Factory antenna, USB-C battery, belt clip', 'USB-C charging cable', 'USB programming cable', 'RME Quick Start Guide']
+    },
+  };
+
+  const info = radioIncludes[key] || radioIncludes['uv5r'];
 
   // Update hero with selected radio
   document.querySelector('.hero-img img').src = radio.img;
   document.querySelector('.hero-info h1').textContent = radio.name;
   document.querySelector('.hero-info .base-price').textContent = '$' + radio.price + '.00';
+  document.querySelector('.hero-info .desc').textContent = info.desc;
+  document.querySelector('.hero-info .includes ul').innerHTML = info.items.map(i => `<li>${i}</li>`).join('');
+
+  // Show/hide color picker for UV-PRO
+  const existingPicker = document.getElementById('hero-color-picker');
+  if (existingPicker) existingPicker.remove();
+  if (key === 'uv-pro') {
+    const pickerHtml = `
+      <div id="hero-color-picker" class="color-picker" style="margin-top:12px">
+        <span class="color-picker-label">Radio color:</span>
+        <div class="color-swatch color-swatch--black ${uvproRadioColor === 'black' ? 'active' : ''}"
+             onclick="setUvproRadioColor('black')" title="Black"></div>
+        <div class="color-swatch color-swatch--tan ${uvproRadioColor === 'tan' ? 'active' : ''}"
+             onclick="setUvproRadioColor('tan')" title="Tan / Coyote"></div>
+        <span class="color-swatch-name">${uvproRadioColor === 'black' ? 'Black' : 'Tan / Coyote'}</span>
+      </div>
+    `;
+    document.querySelector('.hero-info .includes').insertAdjacentHTML('afterend', pickerHtml);
+  }
 
   // Hide selector, show wizard
   document.getElementById('selector-phase').style.display = 'none';
