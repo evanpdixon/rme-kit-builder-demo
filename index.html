@@ -200,6 +200,29 @@
 
   .empty-state { color: var(--muted); font-size: 14px; font-style: italic; padding: 20px 0; }
 
+  /* ── Adapter prompt modal ──────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 998;
+    background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card); border: 2px solid var(--gold); border-radius: 12px;
+    padding: 28px 32px; max-width: 420px; width: 90vw; text-align: center;
+  }
+  .modal-box h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+  .modal-box p { font-size: 14px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+  .modal-box .modal-btns { display: flex; gap: 12px; justify-content: center; }
+  .modal-box .modal-btns button {
+    padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .modal-btn-add { background: var(--gold); color: #111; }
+  .modal-btn-add:hover { background: #ffe87a; }
+  .modal-btn-cancel { background: var(--card); color: var(--muted); border: 1px solid var(--border) !important; }
+  .modal-btn-cancel:hover { color: var(--text); border-color: var(--border-lit) !important; }
+
   /* ── Image lightbox ────────────────────────── */
   .opt-card .oc-img { position: relative; cursor: zoom-in; }
   .opt-card .oc-img::after {
@@ -413,7 +436,7 @@ const ADAPTER_PRICE = 5; // SMA-F to BNC-F Adapter [456] — added once if any B
 // If NOT, and they pick a BNC antenna here, the adapter [456] should be auto-added.
 const additionalAntennas = [
   { key: 'wearable', name: 'Wearable BNC Antenna', desc: 'Low-profile antenna designed for body-worn setups. Lays flat against gear or clothing for a streamlined, covert profile.', price: 69, img: S+'2022/10/20221006_154507.jpg', id: 460, needsAdapter: true },
-  { key: 'slimjim', name: 'Roll Up Slim Jim Antenna', desc: 'Portable VHF/UHF antenna you can hang from a tree branch, window, or tarp ridge line. Dramatically extends your range — essential for base camp ops.', price: 49, img: S+'2022/08/12200-2-scaled.jpg', id: 99, needsAdapter: false },
+  { key: 'slimjim', name: 'Roll Up Slim Jim Antenna', desc: 'Portable VHF/UHF antenna you can hang from a tree branch, window, or tarp ridge line. Dramatically extends your range — essential for base camp ops.', price: 49, img: S+'2022/08/12200-2-scaled.jpg', id: 99, needsAdapter: true },
   { key: 'magmount', name: 'Magnetic BNC Antenna Base', desc: 'Magnetic base mount for any BNC antenna. Stick on a vehicle roof, toolbox, or any metal surface for instant mobile capability.', price: 39, img: S+'2022/10/IMGP8553-scaled.jpg', id: 521, needsAdapter: true },
   { key: 'extraadapter', name: 'Extra SMA-F to BNC-F Adapter', desc: 'Spare BNC adapter so you can leave one on a mag mount or other accessory and still have one for the radio. One adapter is already included if you selected an antenna upgrade.', price: 5, img: S+'2022/09/smaftobncf.jpg', id: 456, needsAdapter: false, isAdapter: true },
 ];
@@ -662,10 +685,44 @@ function toggleAntenna(key) {
 }
 
 function toggleAddlAntenna(key) {
-  if (selectedAddlAntennas.has(key)) selectedAddlAntennas.delete(key);
-  else selectedAddlAntennas.add(key);
+  if (selectedAddlAntennas.has(key)) {
+    selectedAddlAntennas.delete(key);
+    renderAdditionalAntennas();
+    updateBottomBar();
+    return;
+  }
+
+  // Check if this antenna needs a BNC adapter and user doesn't have one yet
+  const item = additionalAntennas.find(x => x.key === key);
+  const hasAdapter = selectedAntennas.size > 0 || selectedAddlAntennas.has('extraadapter');
+  if (item && item.needsAdapter && !hasAdapter) {
+    // Show adapter prompt
+    pendingAntennaKey = key;
+    document.getElementById('adapter-modal').classList.add('open');
+    return;
+  }
+
+  selectedAddlAntennas.add(key);
   renderAdditionalAntennas();
   updateBottomBar();
+}
+
+let pendingAntennaKey = null;
+
+function adapterModalAdd() {
+  // Add both the adapter and the pending antenna
+  selectedAddlAntennas.add('extraadapter');
+  selectedAddlAntennas.add(pendingAntennaKey);
+  pendingAntennaKey = null;
+  document.getElementById('adapter-modal').classList.remove('open');
+  renderAdditionalAntennas();
+  updateBottomBar();
+}
+
+function adapterModalCancel() {
+  // User declined — don't add the antenna
+  pendingAntennaKey = null;
+  document.getElementById('adapter-modal').classList.remove('open');
 }
 
 function selectBattery(key) {
@@ -831,6 +888,18 @@ let wizardInitialized = false;
 goStep(0);
 wizardInitialized = true;
 </script>
+
+<!-- Adapter prompt modal -->
+<div class="modal-overlay" id="adapter-modal">
+  <div class="modal-box">
+    <h3>BNC Adapter Required</h3>
+    <p>This antenna connects via BNC and requires an SMA-F to BNC-F Adapter ($5) to mount on your radio. Would you like to add one?</p>
+    <div class="modal-btns">
+      <button class="modal-btn-add" onclick="adapterModalAdd()">Yes, add adapter — $5</button>
+      <button class="modal-btn-cancel" onclick="adapterModalCancel()">No thanks</button>
+    </div>
+  </div>
+</div>
 
 <!-- Lightbox overlay -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
