@@ -200,6 +200,15 @@
 
   .empty-state { color: var(--muted); font-size: 14px; font-style: italic; padding: 20px 0; }
 
+  /* ── Review remove button ──────────────────── */
+  .ri-remove {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.2s; line-height: 1;
+  }
+  .ri-remove:hover { background: #3a1515; border-color: var(--red); color: var(--red); }
+
   /* ── Adapter prompt modal ──────────────────── */
   .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 998;
@@ -569,7 +578,7 @@ function renderReview() {
   const list = document.getElementById('review-list');
   let items = [];
 
-  // Base kit
+  // Base kit — no remove button
   items.push(`
     <div class="review-item base">
       <div class="ri-img"><img src="https://staging10.radiomadeeasy.com/wp-content/uploads/2022/08/20250904_100309-EDIT.jpg" alt="" onerror="this.parentElement.innerHTML='📻'"></div>
@@ -578,8 +587,7 @@ function renderReview() {
     </div>
   `);
 
-  // Antenna upgrades — each adds the antenna + shared adapter
-  const hasUpgrade = selectedAntennas.size > 0;
+  // Antenna upgrades
   selectedAntennas.forEach(key => {
     const ant = antennaUpgrades.find(a => a.key === key);
     if (ant) {
@@ -588,12 +596,14 @@ function renderReview() {
           <div class="ri-img">${ant.img ? `<img src="${ant.img}" alt="">` : ''}</div>
           <div class="ri-name">${ant.name}<small>Antenna upgrade — mounts directly on radio</small></div>
           <div class="ri-price">+$${ant.price}</div>
+          <button class="ri-remove" onclick="reviewRemove('antenna','${key}')" title="Remove">&times;</button>
         </div>
       `);
     }
   });
 
-  // BNC adapter — auto-included once if any BNC antenna selected (upgrade or additional w/ needsAdapter)
+  // BNC adapter — auto-included, removable with warning
+  const hasUpgrade = selectedAntennas.size > 0;
   const anyBNCNeeded = hasUpgrade || [...selectedAddlAntennas].some(key => {
     const a = additionalAntennas.find(x => x.key === key);
     return a && a.needsAdapter;
@@ -604,11 +614,12 @@ function renderReview() {
         <div class="ri-img"><img src="${S}2022/09/smaftobncf.jpg" alt=""></div>
         <div class="ri-name">SMA-F to BNC-F Adapter<small>${hasUpgrade ? 'Included with antenna upgrade' : 'Auto-added — required for BNC antennas'}</small></div>
         <div class="ri-price">+$5</div>
+        <button class="ri-remove" onclick="reviewRemoveAdapter('auto')" title="Remove">&times;</button>
       </div>
     `);
   }
 
-  // Additional antennas (excluding extra adapter — shown separately)
+  // Additional antennas (excluding extra adapter)
   selectedAddlAntennas.forEach(key => {
     const a = additionalAntennas.find(x => x.key === key);
     if (a && !a.isAdapter) {
@@ -617,18 +628,20 @@ function renderReview() {
           <div class="ri-img">${a.img ? `<img src="${a.img}" alt="">` : ''}</div>
           <div class="ri-name">${a.name}<small>Additional antenna</small></div>
           <div class="ri-price">${a.price ? '+$' + a.price : 'TBD'}</div>
+          <button class="ri-remove" onclick="reviewRemove('addl','${key}')" title="Remove">&times;</button>
         </div>
       `);
     }
   });
 
-  // Extra adapter (if selected in Additional Antennas)
+  // Extra adapter
   if (selectedAddlAntennas.has('extraadapter')) {
     items.push(`
       <div class="review-item">
         <div class="ri-img"><img src="${S}2022/09/smaftobncf.jpg" alt=""></div>
-        <div class="ri-name">Extra SMA-F to BNC-F Adapter<small>Spare adapter — in addition to the one ${anyBNCNeeded ? 'above' : 'included with BNC antennas'}</small></div>
+        <div class="ri-name">Extra SMA-F to BNC-F Adapter<small>Spare adapter</small></div>
         <div class="ri-price">+$5</div>
+        <button class="ri-remove" onclick="reviewRemoveAdapter('extra')" title="Remove">&times;</button>
       </div>
     `);
   }
@@ -642,6 +655,7 @@ function renderReview() {
           <div class="ri-img">${bat.img ? `<img src="${bat.img}" alt="">` : ''}</div>
           <div class="ri-name">${bat.name}<small>Battery upgrade — replaces factory battery</small></div>
           <div class="ri-price">+$${bat.price}</div>
+          <button class="ri-remove" onclick="reviewRemove('battery')" title="Remove">&times;</button>
         </div>
       `);
     }
@@ -656,6 +670,7 @@ function renderReview() {
           <div class="ri-img">${a.img ? `<img src="${a.img}" alt="">` : ''}</div>
           <div class="ri-name">${a.name}<small>Accessory</small></div>
           <div class="ri-price">${a.price ? '+$' + a.price : 'TBD'}</div>
+          <button class="ri-remove" onclick="reviewRemove('accessory','${key}')" title="Remove">&times;</button>
         </div>
       `);
     }
@@ -674,6 +689,77 @@ function renderReview() {
   `);
 
   list.innerHTML = items.join('');
+}
+
+// ── Review remove handlers ──────────────────────────
+function reviewRemove(type, key) {
+  if (type === 'antenna') { selectedAntennas.delete(key); }
+  else if (type === 'addl') { selectedAddlAntennas.delete(key); }
+  else if (type === 'battery') { selectedBattery = 'factory'; }
+  else if (type === 'accessory') { selectedAccessories.delete(key); }
+  updateBottomBar();
+  renderReview();
+}
+
+function reviewRemoveAdapter(which) {
+  // Count how many BNC antennas depend on adapters
+  const bncUpgrades = selectedAntennas.size; // all upgrades are BNC
+  const bncAddl = [...selectedAddlAntennas].filter(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    return a && a.needsAdapter;
+  });
+  const totalBNCAntennas = bncUpgrades + bncAddl.length;
+
+  // Count how many adapters they currently have
+  const hasAutoAdapter = bncUpgrades > 0 || bncAddl.length > 0; // the auto one
+  const hasExtraAdapter = selectedAddlAntennas.has('extraadapter');
+  const adapterCount = (hasAutoAdapter ? 1 : 0) + (hasExtraAdapter ? 1 : 0);
+
+  if (which === 'extra') {
+    // Removing the spare — just remove it
+    selectedAddlAntennas.delete('extraadapter');
+    updateBottomBar();
+    renderReview();
+    return;
+  }
+
+  // Removing the auto adapter — warn if BNC antennas still in cart
+  if (totalBNCAntennas > 0) {
+    // Build list of affected antenna names
+    let affected = [];
+    selectedAntennas.forEach(key => {
+      const a = antennaUpgrades.find(x => x.key === key);
+      if (a) affected.push(a.name);
+    });
+    bncAddl.forEach(key => {
+      const a = additionalAntennas.find(x => x.key === key);
+      if (a) affected.push(a.name);
+    });
+
+    document.getElementById('adapter-warn-list').innerHTML = affected.map(n => '<li>' + n + '</li>').join('');
+    document.getElementById('adapter-warn-modal').classList.add('open');
+    return;
+  }
+
+  // No BNC antennas — safe to remove (shouldn't normally happen)
+  updateBottomBar();
+  renderReview();
+}
+
+function adapterWarnKeep() {
+  document.getElementById('adapter-warn-modal').classList.remove('open');
+}
+
+function adapterWarnRemoveAll() {
+  // Remove all BNC antennas and the adapter
+  selectedAntennas.clear();
+  [...selectedAddlAntennas].forEach(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    if (a && (a.needsAdapter || a.isAdapter)) selectedAddlAntennas.delete(key);
+  });
+  document.getElementById('adapter-warn-modal').classList.remove('open');
+  updateBottomBar();
+  renderReview();
 }
 
 // ── Selection handlers ──────────────────────────────
@@ -906,6 +992,19 @@ wizardInitialized = true;
     <div class="modal-btns" style="flex-direction:column;gap:8px">
       <button class="modal-btn-add" onclick="adapterModalAdd()">Add adapter to my order — $5</button>
       <button class="modal-btn-cancel" onclick="adapterModalSkip()">I already have one</button>
+    </div>
+  </div>
+</div>
+
+<!-- Adapter removal warning modal -->
+<div class="modal-overlay" id="adapter-warn-modal">
+  <div class="modal-box">
+    <h3>⚠ Adapter Required</h3>
+    <p>The following antennas in your kit require an SMA-F to BNC-F Adapter and won't work without it:</p>
+    <ul id="adapter-warn-list" style="text-align:left;margin:0 auto 16px;max-width:280px;font-size:14px;color:var(--red);list-style:none;padding:0;line-height:1.8"></ul>
+    <div class="modal-btns" style="flex-direction:column;gap:8px">
+      <button class="modal-btn-add" onclick="adapterWarnKeep()">Keep adapter in my kit</button>
+      <button class="modal-btn-cancel" onclick="adapterWarnRemoveAll()">Remove adapter and all BNC antennas</button>
     </div>
   </div>
 </div>
