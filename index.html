@@ -1442,8 +1442,8 @@ const radioLineup = [
     tagline: 'Digital encryption',
     pitch: 'Full DMR digital radio with voice encryption for private communications. 4000 memory channels, GPS, and APRS. Our most economical path to encrypted digital radio.',
     solves: ['Privacy / encryption', 'More coverage area / channels', 'GPS / location sharing'],
-    features: ['DMR digital + analog', 'Voice encryption', '4000 memory channels', 'GPS + APRS', 'USB-C battery'],
-    tags: ['encryption', 'digital', 'channels', 'gps', 'professional', 'bluetooth']
+    features: ['DMR digital + analog', 'Voice encryption', '4000 memory channels', 'GPS + APRS', 'USB-C battery', 'IP54 water resistant'],
+    tags: ['encryption', 'digital', 'channels', 'gps', 'professional', 'bluetooth', 'water-resistant']
   },
   {
     key: 'da-7x2', name: 'DA-7X2 Essentials Kit', price: 299, id: 9050,
@@ -1451,8 +1451,8 @@ const radioLineup = [
     tagline: 'The best we offer',
     pitch: 'Everything the DMR 6X2 PRO does, plus true dual receive, crossband repeat (use it as a portable repeater), airband monitoring, NXDN digital mode, and Bluetooth PTT. For operators who want no compromises.',
     solves: ['Privacy / encryption', 'Crossband repeat', 'Listen to aircraft', 'Maximum capability'],
-    features: ['DMR + NXDN digital modes', 'Voice encryption', 'Crossband repeat', 'True dual receive', 'Airband receive', 'Bluetooth PTT'],
-    tags: ['encryption', 'digital', 'crossband', 'airband', 'professional', 'premium', 'bluetooth']
+    features: ['DMR + NXDN digital modes', 'Voice encryption', 'Crossband repeat', 'True dual receive', 'Airband receive', 'Bluetooth PTT', 'IP54 water resistant'],
+    tags: ['encryption', 'digital', 'crossband', 'airband', 'professional', 'premium', 'bluetooth', 'water-resistant']
   },
 ];
 
@@ -1603,7 +1603,8 @@ function getPersonalizedReasons(radio) {
   if (a.budget === 'high' && radio.price >= 200) reasons.push('Top-tier option with no compromises');
 
   // Use case match
-  if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('Waterproof — built for the wet environments you described');
+  if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the wet environments you described');
+  if (a.use === 'water' && !radio.tags.includes('waterproof') && radio.tags.includes('water-resistant')) reasons.push('IP54 water resistant — handles rain and splashes');
   if (a.use === 'outdoor' && radio.tags.includes('gps')) reasons.push('GPS & APRS — perfect for the outdoor use you mentioned');
   if (a.use === 'professional' && radio.tags.includes('encryption')) reasons.push('Encryption — the secure comms your work requires');
   if (a.use === 'general' && radio.tags.includes('budget')) reasons.push('Simple and reliable — great for everyday neighborhood use');
@@ -1611,7 +1612,8 @@ function getPersonalizedReasons(radio) {
 
   // Feature matches
   if (a.features) {
-    if (a.features.includes('waterproof') && radio.tags.includes('waterproof')) reasons.push('Waterproof rated — handles the wet conditions you need');
+    if (a.features.includes('waterproof') && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the conditions you need');
+    if (a.features.includes('waterproof') && !radio.tags.includes('waterproof') && radio.tags.includes('water-resistant')) reasons.push('IP54 water resistant — rated for rain and splashes');
     if (a.features.includes('encryption') && radio.tags.includes('encryption')) reasons.push('Digital encryption for the private comms you asked about');
     if (a.features.includes('airband') && radio.tags.includes('airband')) reasons.push('Airband receive — listen to aircraft like you wanted');
     if (a.features.includes('bluetooth') && radio.tags.includes('bluetooth')) reasons.push('Bluetooth headset support — pairs with helmet comms, earpieces, or wireless PTT');
@@ -1694,15 +1696,15 @@ function showInterviewResults() {
 // radio lacks that capability, warn them and suggest a better fit.
 const mismatchRules = [
   {
-    // User wants waterproof but radio isn't
+    // User wants waterproof but radio has no water protection at all
     check: (answers, radio) => {
       const wantsWater = answers.use === 'water' || (answers.features && answers.features.includes('waterproof'));
-      const isWaterproof = radio.tags.includes('waterproof');
-      return wantsWater && !isWaterproof;
+      const hasWaterProtection = radio.tags.includes('waterproof') || radio.tags.includes('water-resistant');
+      return wantsWater && !hasWaterProtection;
     },
-    warning: "is not waterproof",
+    warning: "has no water resistance rating",
     need: "you mentioned water use or waterproofing is important to you",
-    suggestTags: ['waterproof'],
+    suggestTags: ['waterproof', 'water-resistant'],
   },
   {
     // User wants encryption but radio doesn't have it
