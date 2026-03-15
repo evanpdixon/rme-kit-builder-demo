@@ -228,12 +228,26 @@
   }
   .lightbox .lb-close:hover { color: #fff; }
 
+  /* ── Mobile step indicator ────────────────── */
+  .step-mobile { display: none; text-align: center; margin-bottom: 12px; }
+  .step-mobile .sm-label { font-size: 13px; color: var(--gold); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .step-mobile .sm-dots { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+  .step-mobile .sm-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--border);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .step-mobile .sm-dot.done { background: var(--green); }
+  .step-mobile .sm-dot.active { background: var(--gold); transform: scale(1.3); }
+
   /* ── Responsive ───────────────────────────── */
   @media (max-width: 768px) {
     .hero { flex-direction: column; gap: 20px; }
     .hero-img { width: 100%; max-width: 300px; margin: 0 auto; }
     .opt-card .oc-img { width: 56px; height: 56px; }
     .opt-card .oc-desc { max-height: none; overflow: visible; }
+    .step-labels { display: none; }
+    .progress { display: none; }
+    .step-mobile { display: block; }
     .bottom-bar { flex-wrap: nowrap; gap: 12px; padding: 10px 16px; }
     .bb-summary { gap: 10px; }
     .bb-base, .bb-adds, .bb-items { display: none; }
@@ -277,7 +291,19 @@
     </div>
   </div>
 
-  <!-- Progress -->
+  <!-- Mobile step indicator -->
+  <div class="step-mobile" id="step-mobile">
+    <div class="sm-label" id="sm-label">Step 1 of 5 — Antenna Upgrade</div>
+    <div class="sm-dots" id="sm-dots">
+      <div class="sm-dot active"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+    </div>
+  </div>
+
+  <!-- Progress (desktop) -->
   <div class="step-labels" id="step-labels">
     <div class="step-label active" onclick="goStep(0)">Antenna Upgrade</div>
     <div class="step-label" onclick="goStep(1)">Additional Antennas</div>
@@ -731,6 +757,14 @@ function goStep(n) {
 
   // Update labels
   document.querySelectorAll('.step-label').forEach((el, i) => {
+    el.classList.remove('done', 'active');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+
+  // Update mobile step indicator
+  document.getElementById('sm-label').textContent = 'Step ' + (n + 1) + ' of ' + totalSteps + ' — ' + stepNames[n];
+  document.querySelectorAll('.sm-dot').forEach((el, i) => {
     el.classList.remove('done', 'active');
     if (i < n) el.classList.add('done');
     else if (i === n) el.classList.add('active');
