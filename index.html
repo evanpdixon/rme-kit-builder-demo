@@ -2085,8 +2085,9 @@ function showInterviewResults() {
   const scores = {};
   radioLineup.forEach(r => { scores[r.key] = 0; });
 
-  // Track if user expressed water-related needs
-  let wantsWaterproof = false;
+  // Track water-related needs: explicit (water use / waterproof feature) vs indirect (outdoors)
+  let waterExplicit = false; // "On or near water" or "Waterproof" feature checkbox
+  let waterIndirect = false; // Outdoors — rain likely but not primary concern
 
   interviewQuestions.forEach(q => {
     const answer = interviewAnswers[q.id];
@@ -2095,7 +2096,10 @@ function showInterviewResults() {
     keys.forEach(k => {
       const opt = q.options.find(o => o.key === k);
       if (!opt) return;
-      if (opt.tags.includes('waterproof')) wantsWaterproof = true;
+      // Explicit: water use or waterproof feature selection
+      if (opt.key === 'water' || opt.key === 'waterproof') waterExplicit = true;
+      // Indirect: outdoors implies weather exposure
+      else if (opt.key === 'outdoor' && opt.tags.includes('waterproof')) waterIndirect = true;
       radioLineup.forEach(r => {
         opt.tags.forEach(tag => {
           if (r.tags.includes(tag)) scores[r.key] += 1;
@@ -2104,13 +2108,18 @@ function showInterviewResults() {
     });
   });
 
-  // Heavy bonus: waterproof requests strongly favor UV-PRO (IP67)
-  // IP67 (submersible) is a major safety/durability differentiator over IP54 (splash only)
-  if (wantsWaterproof) {
+  // Water resistance bonus:
+  // Explicit water need (+5 IP67, +1 IP54) — UV-PRO should always win
+  // Indirect/outdoors (+2 IP67, +1 IP54) — UV-PRO favored but DMR can overtake with digital/encryption tags
+  if (waterExplicit) {
     radioLineup.forEach(r => {
-      if (r.tags.includes('waterproof')) scores[r.key] += 5; // IP67 — strong bonus
-      else if (r.tags.includes('water-resistant')) scores[r.key] += 1; // IP54 — slight credit
-      // No water rating = no bonus
+      if (r.tags.includes('waterproof')) scores[r.key] += 5;
+      else if (r.tags.includes('water-resistant')) scores[r.key] += 1;
+    });
+  } else if (waterIndirect) {
+    radioLineup.forEach(r => {
+      if (r.tags.includes('waterproof')) scores[r.key] += 2;
+      else if (r.tags.includes('water-resistant')) scores[r.key] += 1;
     });
   }
 
@@ -2150,7 +2159,7 @@ function showInterviewResults() {
         ${renderResultCard(top, topReasons, true)}
         ${renderResultCard(runner, runnerReasons, false)}
       </div>
-      ${wantsWaterproof && top.tags.includes('waterproof') && runner.tags.includes('water-resistant') ? `
+      ${(waterExplicit || waterIndirect) && top.tags.includes('waterproof') && runner.tags.includes('water-resistant') ? `
         <div style="max-width:600px;margin:20px auto 0;padding:14px 18px;background:#1a1800;border:1px solid var(--gold-dim);font-size:13px;color:#ddd;line-height:1.6;text-align:left">
           <strong style="color:var(--gold)">💧 Water resistance note:</strong> The ${top.name.replace(' Essentials Kit','')} is rated <strong style="color:var(--gold)">IP67</strong> (fully submersible up to 1 meter for 30 minutes). The ${runner.name.replace(' Essentials Kit','')} is rated <strong style="color:var(--gold)">IP54</strong> (splash and dust resistant, but not submersible). If water exposure is a real possibility, IP67 is the safer bet.
         </div>
