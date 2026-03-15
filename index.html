@@ -1434,7 +1434,7 @@ const radioLineup = [
     pitch: 'IP67 waterproof, GPS location sharing, text messaging, and full Bluetooth TNC support for APRS and Winlink. Simple enough to start using immediately, but with room to grow into advanced digital modes. The only handheld we offer with Bluetooth smartphone control.',
     solves: ['Waterproof / water use', 'GPS / location sharing', 'Bluetooth / app control', 'Room to grow'],
     features: ['IP67 waterproof', 'GPS + APRS built in', 'Analog text messaging', 'Bluetooth TNC for APRS/Winlink', 'Mobile app control', 'Airband receive'],
-    tags: ['waterproof', 'gps', 'bluetooth', 'airband', 'grow']
+    tags: ['waterproof', 'gps', 'bluetooth', 'airband', 'grow', 'professional']
   },
   {
     key: 'dmr-6x2', name: 'DMR 6X2 PRO Essentials Kit', price: 249, id: 2931,
@@ -1478,7 +1478,7 @@ const interviewQuestions = [
       { key: 'general', icon: '🏘️', label: 'Around town / neighborhood', detail: 'Family, neighborhood, or local communication', tags: ['budget', 'simple'] },
       { key: 'outdoor', icon: '🏕️', label: 'Outdoors — hiking, camping, overlanding', detail: 'Trail, campsite, or off-road use', tags: ['gps', 'grow'] },
       { key: 'water', icon: '🚤', label: 'On or near water', detail: 'Kayaking, boating, beach, or wet environments', tags: ['waterproof'] },
-      { key: 'professional', icon: '🏗️', label: 'Work / professional use', detail: 'Worksite, security, event coordination', tags: ['encryption', 'professional'] },
+      { key: 'professional', icon: '🏗️', label: 'Work / commercial / business use', detail: 'Worksite, security, event coordination, business ops', tags: ['professional', 'waterproof', 'gps'] },
       { key: 'emergency', icon: '🆘', label: 'Emergency preparedness', detail: 'Disaster readiness, backup comms', tags: ['channels', 'durable'] },
     ]
   },
@@ -1606,7 +1606,7 @@ function getPersonalizedReasons(radio) {
   if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the wet environments you described');
   if (a.use === 'water' && !radio.tags.includes('waterproof') && radio.tags.includes('water-resistant')) reasons.push('IP54 water resistant — handles rain and splashes');
   if (a.use === 'outdoor' && radio.tags.includes('gps')) reasons.push('GPS & APRS — perfect for the outdoor use you mentioned');
-  if (a.use === 'professional' && radio.tags.includes('encryption')) reasons.push('Encryption capable — ready for private comms when you need it');
+  if (a.use === 'professional' && radio.tags.includes('professional')) reasons.push('Built for commercial and business use — durable, feature-rich, and reliable');
   if (a.use === 'general' && radio.tags.includes('budget')) reasons.push('Simple and reliable — great for everyday neighborhood use');
   if (a.use === 'emergency' && radio.tags.includes('channels')) reasons.push('Lots of channels — covers more repeaters for emergency readiness');
 
@@ -1709,13 +1709,24 @@ const mismatchRules = [
   {
     // User wants encryption but radio doesn't have it
     check: (answers, radio) => {
-      const wantsEncryption = answers.use === 'professional' || (answers.features && answers.features.includes('encryption'));
+      const wantsEncryption = answers.features && answers.features.includes('encryption');
       const hasEncryption = radio.tags.includes('encryption');
       return wantsEncryption && !hasEncryption;
     },
     warning: "does not have encryption capability — only DMR radios support encrypted communications",
-    need: "you mentioned privacy or professional use is important",
+    need: "you mentioned privacy or encryption is important",
     suggestTags: ['encryption'],
+  },
+  {
+    // User selected commercial/business use but picked a consumer-grade radio
+    check: (answers, radio) => {
+      const wantsPro = answers.use === 'professional';
+      const isPro = radio.tags.includes('professional');
+      return wantsPro && !isPro;
+    },
+    warning: "is a great radio for personal use, but may not hold up to the demands of commercial or business use",
+    need: "you mentioned this is for work or business",
+    suggestTags: ['professional'],
   },
   {
     // User wants airband but radio doesn't have it
