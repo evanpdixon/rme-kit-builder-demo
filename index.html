@@ -1493,7 +1493,7 @@ const interviewQuestions = [
       { key: 'encryption', icon: '🔒', label: 'Privacy / encryption', detail: "I need secure, private communications", tags: ['encryption', 'digital'] },
       { key: 'channels', icon: '📊', label: 'Maximum channels / coverage', detail: 'I want lots of repeaters and memory slots', tags: ['channels'] },
       { key: 'airband', icon: '✈️', label: 'Listen to aircraft', detail: 'I want to monitor aviation frequencies', tags: ['airband'] },
-      { key: 'bluetooth', icon: '🎧', label: 'Bluetooth headset', detail: 'Use a wireless headset or earpiece', tags: ['bluetooth'] },
+      { key: 'bluetooth', icon: '🎧', label: 'Bluetooth headset', detail: 'Helmet comms, wireless earpiece, or hands-free operation', tags: ['bluetooth'] },
       { key: 'grow', icon: '📈', label: 'Room to grow', detail: "I'm new but want advanced features later", tags: ['grow'] },
       { key: 'compatible', icon: '🔄', label: 'UV-5R compatible', detail: 'I already have UV-5Rs or their accessories', tags: ['compatible', 'budget'] },
     ]
@@ -1614,7 +1614,7 @@ function getPersonalizedReasons(radio) {
     if (a.features.includes('waterproof') && radio.tags.includes('waterproof')) reasons.push('Waterproof rated — handles the wet conditions you need');
     if (a.features.includes('encryption') && radio.tags.includes('encryption')) reasons.push('Digital encryption for the private comms you asked about');
     if (a.features.includes('airband') && radio.tags.includes('airband')) reasons.push('Airband receive — listen to aircraft like you wanted');
-    if (a.features.includes('bluetooth') && radio.tags.includes('bluetooth')) reasons.push('Bluetooth headset support — go hands-free with a wireless earpiece');
+    if (a.features.includes('bluetooth') && radio.tags.includes('bluetooth')) reasons.push('Bluetooth headset support — pairs with helmet comms, earpieces, or wireless PTT');
     if (a.features.includes('channels') && radio.tags.includes('channels')) reasons.push('Extra memory channels for the wide coverage area you need');
     if (a.features.includes('grow') && radio.tags.includes('grow')) reasons.push('Room to grow — simple now, with advanced features when you\'re ready');
     if (a.features.includes('compatible') && radio.tags.includes('compatible')) reasons.push('UV-5R compatible — works with your existing batteries, chargers, and accessories');
