@@ -81,7 +81,7 @@
 
   .section-head { margin-bottom: 20px; }
   .section-head h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); }
-  .section-head p { color: var(--muted); font-size: 14px; }
+  .section-head p { color: var(--text); font-size: 14px; }
 
   /* ── Option cards ─────────────────────────── */
   .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -110,7 +110,7 @@
   .opt-card .oc-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; color: var(--gold); transition: color 0.2s; }
   .opt-card:hover .oc-name { color: var(--gold); }
   .opt-card .oc-desc {
-    font-size: 12px; color: var(--muted); line-height: 1.4;
+    font-size: 12px; color: #bbb; line-height: 1.4;
     max-height: 2.8em; overflow: hidden;
     transition: max-height 0.35s ease, color 0.25s ease;
   }
@@ -316,8 +316,8 @@
   .selector-path p { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
   .interview-q { max-width: 600px; margin: 0 auto; padding: 20px 0; }
-  .interview-q h2 { font-size: 22px; margin-bottom: 6px; }
-  .interview-q .iq-sub { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+  .interview-q h2 { font-size: 22px; margin-bottom: 6px; color: var(--gold); }
+  .interview-q .iq-sub { font-size: 14px; color: var(--text); margin-bottom: 20px; }
   .interview-q .iq-options { display: flex; flex-direction: column; gap: 10px; }
   .iq-option {
     display: flex; align-items: center; gap: 14px;
@@ -328,8 +328,8 @@
   .iq-option.selected { border-color: var(--gold); background: #1a1800; }
   .iq-option .iq-icon { font-size: 22px; flex-shrink: 0; width: 36px; text-align: center; }
   .iq-option .iq-body { flex: 1; }
-  .iq-option .iq-label { font-size: 15px; font-weight: 600; }
-  .iq-option .iq-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .iq-option .iq-label { font-size: 15px; font-weight: 600; color: var(--gold); }
+  .iq-option .iq-detail { font-size: 12px; color: var(--text); margin-top: 2px; }
   .iq-option .oc-check { width: 22px; height: 22px; border: 2px solid var(--border-lit); border-radius: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: transparent; transition: all 0.25s; }
   .iq-option.selected .oc-check { background: var(--gold); border-color: var(--gold); color: #111; }
 
@@ -558,6 +558,16 @@
     <div class="progress-step"></div>
   </div>
 
+  <!-- STEP: Color Choice (UV-PRO only, inserted dynamically) -->
+  <div class="wizard-section" id="step-color" style="display:none">
+    <div class="section-head">
+      <h2>Choose Your Color</h2>
+      <p>The UV-PRO is available in two colors. This applies to the radio and factory battery included in your kit.</p>
+    </div>
+    <div class="options-grid" id="color-options">
+    </div>
+  </div>
+
   <!-- STEP 0: Antenna Upgrade -->
   <div class="wizard-section active" id="step-0">
     <div class="section-head">
@@ -639,7 +649,41 @@
 const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
 let BASE_PRICE = 59;
 let currentStep = 0;
-const totalSteps = 6;
+let totalSteps = 6;
+
+// Radios that need a color choice step
+const radiosWithColor = new Set(['uv-pro']);
+
+// Build step configuration based on selected radio
+function getSteps() {
+  const hasColor = radiosWithColor.has(selectedRadioKey);
+  const steps = [];
+  if (hasColor) steps.push({ id: 'step-color', name: 'Color', render: renderColorChoice });
+  steps.push({ id: 'step-0', name: 'Antennas', render: renderAntennaUpgrades });
+  steps.push({ id: 'step-1', name: 'More Antennas', render: renderAdditionalAntennas });
+  steps.push({ id: 'step-2', name: 'Battery', render: renderBatteryUpgrades });
+  steps.push({ id: 'step-3', name: 'Accessories', render: renderAccessories });
+  steps.push({ id: 'step-4', name: 'Programming', render: renderProgramming });
+  steps.push({ id: 'step-5', name: 'Review', render: renderReview });
+  return steps;
+}
+
+function rebuildStepUI() {
+  const steps = getSteps();
+  totalSteps = steps.length;
+
+  // Rebuild desktop labels
+  const labelsEl = document.getElementById('step-labels');
+  labelsEl.innerHTML = steps.map((s, i) => `<div class="step-label" onclick="goStep(${i})">${s.name}</div>`).join('');
+
+  // Rebuild progress bar
+  const progressEl = document.getElementById('progress');
+  progressEl.innerHTML = steps.map(() => '<div class="progress-step"></div>').join('');
+
+  // Rebuild mobile dots
+  const dotsEl = document.getElementById('sm-dots');
+  dotsEl.innerHTML = steps.map(() => '<div class="sm-dot"></div>').join('');
+}
 
 // Selected state
 let selectedAntennas = new Set(); // multiselect
@@ -775,6 +819,36 @@ function loadRadioProducts(radioKey) {
 }
 
 // ── Render functions ────────────────────────────────
+
+function renderColorChoice() {
+  const container = document.getElementById('color-options');
+  const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
+  const colors = [
+    { key: 'black', name: 'Black', desc: 'Classic black — the standard UV-PRO finish. Discreet, professional look.', img: S+'2025/09/20250904_100414-EDIT.jpg' },
+    { key: 'tan', name: 'Tan / Coyote', desc: 'Desert tan finish — blends with earth tones and tactical gear. Same radio, different look.', img: S+'2025/09/20250904_100414-EDIT.jpg' },
+  ];
+
+  container.innerHTML = colors.map(c => `
+    <div class="opt-card ${uvproRadioColor === c.key ? 'selected' : ''}"
+         onclick="selectRadioColor('${c.key}')">
+      <div class="oc-radio"><span></span></div>
+      <div class="oc-img" style="border-color:${c.key === 'tan' ? '#b89a6a' : 'var(--gold)'}">
+        <img src="${c.img}" alt="${c.name}">
+      </div>
+      <div class="oc-body">
+        <div class="oc-name">${c.name}</div>
+        <div class="oc-desc">${c.desc}</div>
+      </div>
+      <div class="oc-price free" style="color:var(--muted)">—</div>
+    </div>
+  `).join('');
+}
+
+function selectRadioColor(color) {
+  uvproRadioColor = color;
+  renderColorChoice();
+}
+
 function renderAntennaUpgrades() {
   const container = document.getElementById('antenna-options');
   const anySelected = selectedAntennas.size > 0;
@@ -1614,17 +1688,9 @@ function batteryQty(key, delta) {
   updateBottomBar();
 }
 
-// UV-PRO color selection
+// UV-PRO color selection (kept for battery color picker re-render)
 function setUvproRadioColor(color) {
   uvproRadioColor = color;
-  // Update hero color picker
-  const picker = document.getElementById('hero-color-picker');
-  if (picker) {
-    picker.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-    picker.querySelector(`.color-swatch--${color}`).classList.add('active');
-    picker.querySelector('.color-swatch-name').textContent = color === 'black' ? 'Black' : 'Tan / Coyote';
-  }
-  // Re-render batteries in case any default to radio color
   renderBatteryUpgrades();
 }
 
@@ -1700,16 +1766,19 @@ function updateBottomBar() {
 }
 
 // ── Navigation ──────────────────────────────────────
-const stepNames = ['Antenna Upgrade', 'Additional Antennas', 'Battery', 'Accessories', 'Programming', 'Review'];
-
 function goStep(n) {
-  if (n < 0 || n >= totalSteps) return;
+  const steps = getSteps();
+  if (n < 0 || n >= steps.length) return;
   currentStep = n;
 
-  // Show/hide sections
-  document.querySelectorAll('.wizard-section').forEach((el, i) => {
-    el.classList.toggle('active', i === n);
+  // Show/hide sections by ID
+  const allSectionIds = ['step-color', 'step-0', 'step-1', 'step-2', 'step-3', 'step-4', 'step-5'];
+  allSectionIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('active'); el.style.display = 'none'; }
   });
+  const activeEl = document.getElementById(steps[n].id);
+  if (activeEl) { activeEl.classList.add('active'); activeEl.style.display = 'block'; }
 
   // Update progress
   document.querySelectorAll('.progress-step').forEach((el, i) => {
@@ -1726,7 +1795,7 @@ function goStep(n) {
   });
 
   // Update mobile step indicator
-  document.getElementById('sm-label').textContent = 'Step ' + (n + 1) + ' of ' + totalSteps + ' — ' + stepNames[n];
+  document.getElementById('sm-label').textContent = 'Step ' + (n + 1) + ' of ' + steps.length + ' — ' + steps[n].name;
   document.querySelectorAll('.sm-dot').forEach((el, i) => {
     el.classList.remove('done', 'active');
     if (i < n) el.classList.add('done');
@@ -1738,24 +1807,19 @@ function goStep(n) {
   const next = document.getElementById('btn-next');
   back.style.display = n === 0 ? 'none' : '';
 
-  if (n === totalSteps - 1) {
+  if (n === steps.length - 1) {
     // Review step
     next.textContent = '🛒  Add to Cart';
     next.className = 'btn-nav btn-cart';
     next.onclick = function() { alert('Added to cart! (Demo — this would add ' + (countAddons() + 1) + ' items to WooCommerce cart)'); };
-    renderReview();
   } else {
-    next.textContent = 'Next: ' + stepNames[n + 1] + ' →';
+    next.textContent = 'Next: ' + steps[n + 1].name + ' →';
     next.className = 'btn-nav btn-next';
     next.onclick = nextStep;
   }
 
   // Render the current step
-  if (n === 0) renderAntennaUpgrades();
-  else if (n === 1) renderAdditionalAntennas();
-  else if (n === 2) renderBatteryUpgrades();
-  else if (n === 3) renderAccessories();
-  else if (n === 4) renderProgramming();
+  steps[n].render();
 
   // Scroll to top of wizard (skip on initial load)
   if (wizardInitialized) {
@@ -2269,22 +2333,8 @@ function confirmRadioSelection(key) {
   document.querySelector('.hero-info .desc').textContent = info.desc;
   document.querySelector('.hero-info .includes ul').innerHTML = info.items.map(i => `<li>${i}</li>`).join('');
 
-  // Show/hide color picker for UV-PRO
-  const existingPicker = document.getElementById('hero-color-picker');
-  if (existingPicker) existingPicker.remove();
-  if (key === 'uv-pro') {
-    const pickerHtml = `
-      <div id="hero-color-picker" class="color-picker" style="margin-top:12px">
-        <span class="color-picker-label">Radio color:</span>
-        <div class="color-swatch color-swatch--black ${uvproRadioColor === 'black' ? 'active' : ''}"
-             onclick="setUvproRadioColor('black')" title="Black"></div>
-        <div class="color-swatch color-swatch--tan ${uvproRadioColor === 'tan' ? 'active' : ''}"
-             onclick="setUvproRadioColor('tan')" title="Tan / Coyote"></div>
-        <span class="color-swatch-name">${uvproRadioColor === 'black' ? 'Black' : 'Tan / Coyote'}</span>
-      </div>
-    `;
-    document.querySelector('.hero-info .includes').insertAdjacentHTML('afterend', pickerHtml);
-  }
+  // Rebuild step UI (color step appears for UV-PRO)
+  rebuildStepUI();
 
   // Hide selector, show wizard
   document.getElementById('selector-phase').style.display = 'none';
