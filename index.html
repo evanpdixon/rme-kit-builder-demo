@@ -606,7 +606,7 @@
 
 <script>
 const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
-const BASE_PRICE = 59;
+let BASE_PRICE = 59;
 let currentStep = 0;
 const totalSteps = 6;
 
@@ -626,42 +626,111 @@ let progConfirmedPrimary = ''; // resolved city/state for primary
 let progConfirmedExtras = []; // resolved city/state for extras
 let progNotes = '';
 
-// ── Product data (real image URLs from WooCommerce) ──
-// Antenna upgrades mount DIRECTLY on the radio.
-// Each BNC upgrade adds BOTH the antenna AND the SMA-F to BNC-F Adapter [456] to the order.
-// The adapter (~$5 value) is included in the upgrade price.
-// Each antenna price = antenna product price only. Adapter ($5) added once if any upgrade selected.
-const antennaUpgrades = [
+// ── Product data (radio-specific) ──
+// Items are keyed per radio. getItems(category) returns the right set for the selected radio.
+const ADAPTER_PRICE = 5; // SMA-F to BNC-F Adapter [456] — added once if any BNC antenna selected
+
+// Shared items (available for all radios)
+const sharedAntennaUpgrades = [
   { key: 'stubby', name: 'Stubby Antenna with BNC Adapter', desc: 'Compact, low-profile antenna. Great for covert carry, backpacking, or when you need a shorter profile.', price: 39, img: S+'2023/05/20250227_154740.jpg', ids: [816, 456], addsToCart: ['Stubby Antenna [816] — $39'] },
   { key: 'foulweather', name: 'Foul Weather Whip with BNC Adapter', desc: 'Flexible whip that bends without breaking. Ideal for field use, rucking, and mounting on chest rigs or plate carriers.', price: 40, img: S+'2024/03/20240320_115347.jpg', ids: [3916, 456], addsToCart: ['Foul Weather Whip [3916] — $40'] },
   { key: 'signalstick', name: 'Signal Stick with BNC Adapter', desc: 'Super elastic, nearly indestructible flexible antenna. Excellent all-around performer for both transmit and receive.', price: 25, img: S+'2022/07/IMGP8549-scaled.jpg', ids: [39, 456], addsToCart: ['Signal Stick [39] — $25'] },
 ];
-const ADAPTER_PRICE = 5; // SMA-F to BNC-F Adapter [456] — added once if any BNC antenna selected
 
-// Additional antennas are supplemental — for different scenarios (body-worn, base camp, mobile).
-// If the user selected an antenna upgrade above, the BNC adapter is already included.
-// If NOT, and they pick a BNC antenna here, the adapter [456] should be auto-added.
-const additionalAntennas = [
+const sharedAdditionalAntennas = [
   { key: 'wearable', name: 'Wearable BNC Antenna', desc: 'Low-profile antenna designed for body-worn setups. Lays flat against gear or clothing for a streamlined, covert profile.', price: 69, img: S+'2022/10/20221006_154507.jpg', id: 460, needsAdapter: true },
   { key: 'slimjim', name: 'Roll Up Slim Jim Antenna', desc: 'Portable VHF/UHF antenna you can hang from a tree branch, window, or tarp ridge line. Dramatically extends your range — essential for base camp ops.', price: 49, img: S+'2022/08/12200-2-scaled.jpg', id: 99, needsAdapter: true },
   { key: 'magmount', name: 'Magnetic BNC Antenna Base', desc: 'Magnetic base mount for any BNC antenna. Stick on a vehicle roof, toolbox, or any metal surface for instant mobile capability.', price: 39, img: S+'2022/10/IMGP8553-scaled.jpg', id: 521, needsAdapter: true },
+  { key: 'mollemount', name: 'BNC MOLLE Antenna Mount', desc: 'Attach any BNC antenna to MOLLE webbing on your vest, pack, or plate carrier. Keeps the antenna off the radio for a low-profile setup.', price: 19, img: S+'2025/12/1000009993.jpg', id: 8717, needsAdapter: true },
   { key: 'extraadapter', name: 'Extra SMA-F to BNC-F Adapter', desc: 'Spare BNC adapter so you can leave one on a mag mount or other accessory and still have one for the radio. One adapter is already included if you selected an antenna upgrade.', price: 5, img: S+'2022/09/smaftobncf.jpg', id: 456, needsAdapter: false, isAdapter: true },
 ];
 
-// Battery upgrades — multiselect with quantity. Factory is always included.
-const batteryUpgrades = [
-  { key: 'usbc-standard', name: 'USB-C Battery (1300mAh) with Cable', desc: 'Standard-size rechargeable battery with built-in USB-C port. Charge from any USB-C cable — no cradle needed. Includes USB-C cable.', price: 25, img: S+'2023/08/20230831_163401.jpg', id: 2367 },
-  { key: 'usbc-extended', name: 'USB-C Extended Battery (3800mAh) with Cable', desc: 'High-capacity extended battery with built-in USB-C port. Nearly double the runtime of the factory battery. Includes USB-C cable.', price: 29, img: S+'2023/04/20250725_123654.jpg', id: 749 },
-];
+// Radio-specific product catalogs
+const radioProducts = {
+  'uv5r': {
+    batteryLabel: 'Factory Battery (1800mAh)',
+    batteryDesc: 'Standard battery included with your kit. Requires charging cradle (included).',
+    batteries: [
+      { key: 'usbc-standard', name: 'USB-C Battery (1300mAh) with Cable', desc: 'Standard-size rechargeable battery with built-in USB-C port. Charge from any USB-C cable — no cradle needed.', price: 25, img: S+'2023/08/20230831_163401.jpg', id: 2367 },
+      { key: 'usbc-extended', name: 'USB-C Extended Battery (3800mAh) with Cable', desc: 'High-capacity extended battery with built-in USB-C port. Nearly triple the runtime of the factory battery.', price: 29, img: S+'2023/04/20250725_123654.jpg', id: 749 },
+    ],
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone. Mount on your chest rig, collar, or shoulder strap for hands-free communication.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Keeps audio discreet — popular for security, events, and low-profile ops.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'aprs', name: 'APRS Cable', desc: 'Audio interface cable connecting your radio to a smartphone. Run Rattlegram or APRSdroid for off-grid text messaging and position reporting.', price: 25, img: S+'2023/06/20230608_164856-1.jpg', id: 1177 },
+      { key: 'progcable', name: 'USB Programming Cable', desc: 'Program custom frequencies via CHIRP software on your computer. Essential for serious operators who want full channel control.', price: 25, img: S+'2024/08/uv5r-programming-cable.jpg', id: 4838 },
+      { key: 'exo', name: 'Exoskeleton', desc: 'Hard protective shell that prevents accidental PTT button presses and absorbs drops. Essential for field use.', price: 29, img: S+'2022/07/4A7A3860_white_square.png', id: 38 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection. Hear radio traffic through your earpro.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'uv5r-mini': {
+    batteryLabel: 'Built-in USB-C Battery',
+    batteryDesc: 'The UV-5R Mini has a built-in USB-C rechargeable battery. No upgrades needed — just plug in any USB-C cable to charge.',
+    batteries: [], // No battery upgrades — USB-C built in
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone. Mount on your chest rig, collar, or shoulder strap for hands-free communication.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Keeps audio discreet — popular for security, events, and low-profile ops.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'progcable', name: 'USB Programming Cable', desc: 'Program custom frequencies via CHIRP software on your computer.', price: 25, img: S+'2024/08/uv5r-programming-cable.jpg', id: 4838 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'uv-pro': {
+    batteryLabel: 'Built-in USB-C Battery (2600mAh)',
+    batteryDesc: 'The UV-PRO has a built-in USB-C rechargeable battery. No upgrades needed.',
+    batteries: [], // USB-C built in
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'bs22', name: 'BS-22 Wireless Speakermic', desc: 'Bluetooth wireless speaker-microphone designed for the UV-PRO. No cable — clips to your gear and pairs via Bluetooth.', price: 59, img: S+'2025/12/1000009367.jpg', id: 8491 },
+      { key: 'kplug', name: 'K-Plug Adapter', desc: 'Adapter that lets you use standard Kenwood-plug accessories (speakermics, eartubes, headsets) with your UV-PRO.', price: 25, img: S+'2025/11/1000008462.jpg', id: 8268 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Requires K-Plug Adapter for the UV-PRO.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'dmr-6x2': {
+    batteryLabel: 'Included 3100mAh USB-C Battery',
+    batteryDesc: 'The DMR 6X2 PRO includes a high-capacity 3100mAh battery with USB-C charging. 2-3 days of battery life with battery save enabled.',
+    batteries: [], // 3100mAh USB-C included
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DMR 6X2 PRO.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Kenwood plug — plugs directly into the DMR 6X2 PRO.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'progcable', name: 'DMR 6X2 PRO Programming Cable', desc: 'USB programming cable for the DMR 6X2 PRO. Required for CPS software programming and firmware updates.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'da-7x2': {
+    batteryLabel: 'Included 3100mAh USB-C Battery',
+    batteryDesc: 'The DA-7X2 includes a high-capacity 3100mAh battery with USB-C charging. 2-3 days of battery life with battery save enabled.',
+    batteries: [], // 3100mAh USB-C included
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DA-7X2.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Kenwood plug — plugs directly into the DA-7X2.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'progcable', name: 'DA-7X2 Programming Cable', desc: 'USB programming cable for the DA-7X2. Required for CPS software programming and firmware updates.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+};
 
-const accessories = [
-  { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone. Mount on your chest rig, collar, or shoulder strap for hands-free communication.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
-  { key: 'aprs', name: 'APRS Cable', desc: 'Audio interface cable connecting your radio to a smartphone. Run Rattlegram or APRSdroid for off-grid text messaging and position reporting.', price: 25, img: S+'2023/06/20230608_164856-1.jpg', id: 1177 },
-  { key: 'progcable', name: 'USB Programming Cable', desc: 'Program custom frequencies via CHIRP software on your computer. Essential for serious operators who want full channel control.', price: 25, img: S+'2024/08/uv5r-programming-cable.jpg', id: 4838 },
-  { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
-  { key: 'exo', name: 'Exoskeleton', desc: 'Hard protective shell that prevents accidental PTT button presses and absorbs drops. Essential for field use.', price: 29, img: S+'2022/07/4A7A3860_white_square.png', id: 38 },
-  { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
-];
+// Active product lists — populated when radio is selected
+let antennaUpgrades = sharedAntennaUpgrades;
+let additionalAntennas = sharedAdditionalAntennas;
+let batteryUpgrades = radioProducts['uv5r'].batteries;
+let accessories = radioProducts['uv5r'].accessories;
+
+function loadRadioProducts(radioKey) {
+  const rp = radioProducts[radioKey] || radioProducts['uv5r'];
+  antennaUpgrades = sharedAntennaUpgrades;
+  additionalAntennas = sharedAdditionalAntennas;
+  batteryUpgrades = rp.batteries;
+  accessories = rp.accessories;
+}
 
 // ── Render functions ────────────────────────────────
 function renderAntennaUpgrades() {
@@ -674,7 +743,7 @@ function renderAntennaUpgrades() {
       <div class="oc-check" style="background:var(--green);border-color:var(--green);color:#111">✓</div>
       <div class="oc-body">
         <div class="oc-name">Factory Antenna</div>
-        <div class="oc-desc">Standard SMA-F rubber duck antenna included with your UV-5R kit.</div>
+        <div class="oc-desc">Standard rubber duck antenna included with your kit.</div>
       </div>
       <div class="oc-price free" style="color:var(--green)">Included</div>
     </div>
@@ -740,18 +809,25 @@ function renderAdditionalAntennas() {
 
 function renderBatteryUpgrades() {
   const container = document.getElementById('battery-options');
+  const rp = radioProducts[selectedRadioKey] || radioProducts['uv5r'];
 
-  // Factory battery — always included
+  // Factory/included battery — always shown
   let factoryHtml = `
     <div class="opt-card selected" style="cursor:default;opacity:0.85">
       <div class="oc-check" style="background:var(--green);border-color:var(--green);color:#111">✓</div>
       <div class="oc-body">
-        <div class="oc-name">Factory Battery (1800mAh)</div>
-        <div class="oc-desc">Standard battery included with your kit. Requires charging cradle (included).</div>
+        <div class="oc-name">${rp.batteryLabel}</div>
+        <div class="oc-desc">${rp.batteryDesc}</div>
       </div>
       <div class="oc-price free" style="color:var(--green)">Included</div>
     </div>
   `;
+
+  // If no battery upgrades available for this radio
+  if (batteryUpgrades.length === 0) {
+    container.innerHTML = factoryHtml;
+    return;
+  }
 
   const anySelected = selectedBatteries.size > 0;
   let note = anySelected
@@ -1058,11 +1134,12 @@ function renderReview() {
   let items = [];
 
   // Base kit — no remove button
+  const selRadio = radioLineup.find(r => r.key === selectedRadioKey) || radioLineup[0];
   items.push(`
     <div class="review-item base">
-      <div class="ri-img"><img src="https://staging10.radiomadeeasy.com/wp-content/uploads/2022/08/20250904_100309-EDIT.jpg" alt="" onerror="this.parentElement.innerHTML='📻'"></div>
-      <div class="ri-name">UV-5R Essentials Kit<small>Base kit — pre-programmed radio + essentials</small></div>
-      <div class="ri-price">$59</div>
+      <div class="ri-img"><img src="${selRadio.img}" alt="" onerror="this.parentElement.innerHTML='📻'"></div>
+      <div class="ri-name">${selRadio.name}<small>Base kit — pre-programmed radio + essentials</small></div>
+      <div class="ri-price">$${selRadio.price}</div>
     </div>
   `);
 
@@ -1930,10 +2007,30 @@ function showMismatchWarning(m) {
   modal.classList.add('open');
 }
 
+let selectedRadioKey = 'uv5r'; // track which radio is selected
+
 function confirmRadioSelection(key) {
   const radio = radioLineup.find(r => r.key === key);
   if (!radio) return;
   pendingRadioKey = null;
+  selectedRadioKey = key;
+
+  // Load radio-specific products and update base price
+  loadRadioProducts(key);
+  BASE_PRICE = radio.price;
+
+  // Reset selections (items may not exist for new radio)
+  selectedAntennas = new Set();
+  selectedAddlAntennas = new Set();
+  adapterSuppressed = false;
+  selectedBatteries = new Map();
+  selectedAccessories = new Set();
+  programmingChoice = 'standard';
+  progUseShipping = true;
+  progZipPrimary = '';
+  progZipsExtra = [];
+  progConfirmedPrimary = '';
+  progConfirmedExtras = [];
 
   // Update hero with selected radio
   document.querySelector('.hero-img img').src = radio.img;
