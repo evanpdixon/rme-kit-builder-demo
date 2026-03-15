@@ -2085,6 +2085,9 @@ function showInterviewResults() {
   const scores = {};
   radioLineup.forEach(r => { scores[r.key] = 0; });
 
+  // Track if user expressed water-related needs
+  let wantsWaterproof = false;
+
   interviewQuestions.forEach(q => {
     const answer = interviewAnswers[q.id];
     if (!answer) return;
@@ -2092,6 +2095,7 @@ function showInterviewResults() {
     keys.forEach(k => {
       const opt = q.options.find(o => o.key === k);
       if (!opt) return;
+      if (opt.tags.includes('waterproof')) wantsWaterproof = true;
       radioLineup.forEach(r => {
         opt.tags.forEach(tag => {
           if (r.tags.includes(tag)) scores[r.key] += 1;
@@ -2099,6 +2103,16 @@ function showInterviewResults() {
       });
     });
   });
+
+  // Heavy bonus: waterproof requests strongly favor UV-PRO (IP67)
+  // IP67 (submersible) is a major safety/durability differentiator over IP54 (splash only)
+  if (wantsWaterproof) {
+    radioLineup.forEach(r => {
+      if (r.tags.includes('waterproof')) scores[r.key] += 5; // IP67 — strong bonus
+      else if (r.tags.includes('water-resistant')) scores[r.key] += 1; // IP54 — slight credit
+      // No water rating = no bonus
+    });
+  }
 
   // Sort by score descending
   const ranked = radioLineup.slice().sort((a, b) => scores[b.key] - scores[a.key]);
@@ -2136,6 +2150,11 @@ function showInterviewResults() {
         ${renderResultCard(top, topReasons, true)}
         ${renderResultCard(runner, runnerReasons, false)}
       </div>
+      ${wantsWaterproof && top.tags.includes('waterproof') && runner.tags.includes('water-resistant') ? `
+        <div style="max-width:600px;margin:20px auto 0;padding:14px 18px;background:#1a1800;border:1px solid var(--gold-dim);font-size:13px;color:#ddd;line-height:1.6;text-align:left">
+          <strong style="color:var(--gold)">💧 Water resistance note:</strong> The ${top.name.replace(' Essentials Kit','')} is rated <strong style="color:var(--gold)">IP67</strong> (fully submersible up to 1 meter for 30 minutes). The ${runner.name.replace(' Essentials Kit','')} is rated <strong style="color:var(--gold)">IP54</strong> (splash and dust resistant, but not submersible). If water exposure is a real possibility, IP67 is the safer bet.
+        </div>
+      ` : ''}
       <div style="margin-top:24px">
         <button class="btn-nav btn-back" onclick="interviewStep=0;renderInterviewQuestion()">← Retake Quiz</button>
         <button class="btn-nav btn-back" onclick="showRadioPicker()" style="margin-left:8px">See All Radios</button>
