@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kit Builder — BRANDED VERSION | Radio Made Easy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
+<style>
+  :root {
+    --gold: #fdd351;
+    --gold-dim: #d4af37;
+    --dark: #000000;
+    --card: #0a0a0a;
+    --card-hover: #111;
+    --border: #333;
+    --border-lit: #555;
+    --border-accent: #fdd351;
+    --text: #fdd351;
+    --muted: #c4a83a;
+    --green: #4caf50;
+    --red: #e55;
+    --radius: 0px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Abhaya Libre', Georgia, 'Times New Roman', serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+
+  /* ── Top bar ──────────────────────────────── */
+  .topbar {
+    background: #000; border-bottom: 2px solid var(--gold);
+    padding: 12px 24px; display: flex; align-items: center; gap: 16px;
+  }
+  .topbar .logo { font-family: 'Abhaya Libre', serif; font-size: 20px; color: var(--gold); letter-spacing: 4px; text-transform: uppercase; }
+  .topbar .breadcrumb { color: var(--muted); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+  .topbar .breadcrumb a { color: var(--muted); text-decoration: none; }
+  .topbar .breadcrumb a:hover { color: var(--gold); }
+  .topbar .demo-badge { margin-left: auto; font-size: 11px; padding: 3px 10px; border-radius: 0; background: #2a2000; color: var(--gold); border: 1px solid var(--gold); letter-spacing: 2px; text-transform: uppercase; }
+
+  /* ── Layout ───────────────────────────────── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+  .hero { display: flex; gap: 40px; margin-bottom: 40px; align-items: flex-start; }
+  .hero-img {
+    width: 360px; flex-shrink: 0; background: var(--card); border: 3px solid var(--gold);
+    border-radius: 0; overflow: hidden; aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-img img { width: 100%; height: 100%; object-fit: contain; padding: 24px; }
+  .hero-info { flex: 1; padding-top: 8px; }
+  .hero-info h1 { font-family: 'Abhaya Libre', serif; font-size: 30px; font-weight: 400; color: var(--gold); line-height: 1.2; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+  .hero-info .base-price { font-size: 26px; color: var(--gold); font-weight: 300; margin-bottom: 12px; }
+  .hero-info .desc { color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+  .hero-info .includes { font-size: 13px; color: var(--muted); }
+  .hero-info .includes strong { color: var(--text); }
+  .hero-info .includes ul { list-style: none; padding: 0; margin-top: 6px; }
+  .hero-info .includes li { padding: 3px 0; }
+  .hero-info .includes li::before { content: '✓ '; color: var(--green); font-weight: 700; }
+
+  /* ── Progress bar ─────────────────────────── */
+  .progress { display: flex; gap: 4px; margin-bottom: 32px; }
+  .progress-step {
+    flex: 1; height: 4px; border-radius: 2px; background: var(--border);
+    transition: background 0.3s;
+  }
+  .progress-step.done { background: var(--gold); }
+  .progress-step.active { background: var(--gold-dim); }
+
+  .step-labels { display: flex; margin-bottom: 8px; }
+  .step-label {
+    flex: 1; text-align: center; font-size: 11px; color: var(--muted);
+    letter-spacing: 0.5px; text-transform: uppercase; padding-bottom: 8px;
+    cursor: pointer; transition: color 0.2s;
+  }
+  .step-label.active { color: var(--gold); font-weight: 600; }
+  .step-label.done { color: var(--green); }
+
+  /* ── Wizard sections ──────────────────────── */
+  .wizard-section { display: none; animation: fadeIn 0.3s ease; }
+  .wizard-section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-head { margin-bottom: 20px; }
+  .section-head h2 { font-size: 22px; font-weight: 400; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 3px; }
+  .section-head p { color: var(--muted); font-size: 14px; }
+
+  /* ── Option cards ─────────────────────────── */
+  .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .opt-card {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 16px 20px; cursor: pointer;
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    position: relative; overflow: hidden;
+  }
+  .opt-card:hover { border-color: var(--border-lit); background: var(--card-hover); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  .opt-card.selected { border-color: var(--gold); background: #1a1800; box-shadow: 0 0 0 1px var(--gold), 0 4px 20px rgba(253,211,81,0.1); }
+  .opt-card.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+  /* Product image — square 1:1, cover crop */
+  .opt-card .oc-img {
+    width: 80px; height: 80px; border-radius: 0; background: #fff;
+    border: 2px solid var(--gold); overflow: hidden; flex-shrink: 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .opt-card:hover .oc-img { transform: scale(1.08); box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+  .opt-card .oc-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Body text */
+  .opt-card .oc-body { flex: 1; min-width: 0; }
+  .opt-card .oc-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; transition: color 0.2s; }
+  .opt-card:hover .oc-name { color: var(--gold); }
+  .opt-card .oc-desc {
+    font-size: 12px; color: var(--muted); line-height: 1.4;
+    max-height: 2.8em; overflow: hidden;
+    transition: max-height 0.35s ease, color 0.25s ease;
+  }
+  .opt-card:hover .oc-desc { max-height: 10em; color: #aaa; }
+  .opt-card .oc-meta {
+    font-size: 11px; color: #555; margin-top: 4px;
+    opacity: 0; max-height: 0; overflow: hidden;
+    transition: opacity 0.3s ease 0.1s, max-height 0.3s ease 0.1s;
+  }
+  .opt-card:hover .oc-meta { opacity: 1; max-height: 3em; }
+
+  /* Price */
+  .opt-card .oc-price { font-size: 16px; font-weight: 700; color: var(--gold); white-space: nowrap; flex-shrink: 0; margin-left: 8px; }
+  .opt-card .oc-price.free { color: var(--green); }
+
+  .opt-card .oc-badge-missing {
+    display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 8px;
+    background: #2a1515; color: var(--red); border: 1px solid #3a2020; margin-left: 6px;
+  }
+
+  /* Checkbox indicator */
+  .oc-check {
+    width: 22px; height: 22px; border: 2px solid var(--border-lit); border-radius: 0;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease; font-size: 13px; color: transparent;
+  }
+  .opt-card.selected .oc-check { background: var(--gold); border-color: var(--gold); color: #111; transform: scale(1.1); }
+
+  /* Radio indicator */
+  .oc-radio {
+    width: 22px; height: 22px; border: 2px solid var(--border-lit); border-radius: 50%;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+  }
+  .oc-radio::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: background 0.25s ease, transform 0.25s ease; }
+  .opt-card.selected .oc-radio { border-color: var(--gold); transform: scale(1.1); }
+  .opt-card.selected .oc-radio::after { background: var(--gold); transform: scale(1); }
+  .opt-card:hover .oc-radio { border-color: #666; }
+
+  /* ── Bottom bar (sticky cart) ─────────────── */
+  .bottom-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #000; border-top: 2px solid var(--gold);
+    padding: 14px 24px; display: flex; align-items: center; justify-content: center; gap: 24px;
+    z-index: 100;
+  }
+  .bottom-bar .bb-summary { display: flex; align-items: center; gap: 16px; }
+  .bb-base { color: var(--muted); font-size: 13px; }
+  .bb-adds { color: var(--gold); font-size: 13px; }
+  .bb-total-label { color: var(--muted); font-size: 13px; }
+  .bb-total { font-size: 24px; font-weight: 700; color: var(--gold); }
+  .bb-items { color: var(--muted); font-size: 12px; }
+  .bb-divider { width: 1px; height: 32px; background: var(--border); }
+
+  .btn-nav {
+    padding: 12px 28px; border-radius: 0; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 4px; text-transform: uppercase;
+    font-family: 'Abhaya Libre', Georgia, serif;
+  }
+  .btn-back { background: transparent; color: var(--gold); border: 2px solid var(--gold); }
+  .btn-back:hover { background: rgba(253,211,81,0.1); }
+  .btn-next { background: var(--gold); color: #111; }
+  .btn-next:hover { background: #ffe87a; }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-cart { background: var(--gold); color: #111; font-size: 16px; padding: 14px 36px; }
+  .btn-cart:hover { background: #ffe87a; }
+
+  /* ── Review step ──────────────────────────── */
+  .review-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .review-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .review-item .ri-img { width: 48px; height: 48px; border-radius: 0; background: #fff; overflow: hidden; flex-shrink: 0; border: 2px solid var(--gold); }
+  .review-item .ri-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .review-item .ri-name { flex: 1; font-size: 14px; }
+  .review-item .ri-name small { color: var(--muted); font-size: 12px; display: block; }
+  .review-item .ri-price { font-weight: 600; color: var(--gold); font-size: 14px; }
+  .review-item.base { border-color: var(--border-lit); }
+  .review-item.base .ri-price { color: var(--text); }
+  .review-total {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; background: #000; border: 3px solid var(--gold); border-radius: 0;
+    margin-top: 8px;
+  }
+  .review-total .rt-label { font-size: 16px; font-weight: 600; }
+  .review-total .rt-price { font-size: 28px; font-weight: 700; color: var(--gold); }
+
+  .empty-state { color: var(--muted); font-size: 14px; font-style: italic; padding: 20px 0; }
+
+  /* ── Review remove button ──────────────────── */
+  .ri-remove {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.2s; line-height: 1;
+  }
+  .ri-remove:hover { background: #3a1515; border-color: var(--red); color: var(--red); }
+
+  /* ── Quantity stepper ────────────────────────── */
+  .qty-stepper {
+    display: flex; align-items: center; gap: 0; flex-shrink: 0; margin-left: 8px;
+  }
+  .qty-stepper button {
+    width: 28px; height: 28px; border: 1px solid var(--border); background: var(--card);
+    color: var(--text); font-size: 16px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .qty-stepper button:first-child { border-radius: 0; }
+  .qty-stepper button:last-child { border-radius: 0; }
+  .qty-stepper button:hover { background: var(--card-hover); border-color: var(--border-lit); }
+  .qty-stepper .qty-val {
+    width: 32px; height: 28px; display: flex; align-items: center; justify-content: center;
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    font-size: 14px; font-weight: 600; color: var(--gold);
+  }
+
+  /* ── Programming step ──────────────────────── */
+  .prog-section { margin-top: 16px; }
+  .prog-field { margin-bottom: 16px; }
+  .prog-field label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .prog-field input[type="text"], .prog-field textarea {
+    width: 100%; padding: 10px 14px; background: #000; border: 1px solid var(--border);
+    border-radius: 0; color: var(--gold); font-size: 14px; font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .prog-field input:focus, .prog-field textarea:focus { outline: none; border-color: var(--gold-dim); }
+  .prog-field textarea { resize: vertical; min-height: 70px; }
+  .prog-zip-row { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+  .prog-zip-row input { flex: 1; }
+  .prog-zip-remove {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .prog-zip-remove:hover { border-color: var(--red); color: var(--red); }
+  .prog-add-zip {
+    display: inline-block; padding: 6px 14px; font-size: 13px; color: var(--gold);
+    background: transparent; border: 1px dashed var(--border); border-radius: 6px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .prog-add-zip:hover { border-color: var(--gold-dim); background: #1a1800; }
+  .prog-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .prog-lookup-btn {
+    padding: 8px 16px; background: var(--gold); color: #111; border: none; border-radius: 0;
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    text-transform: uppercase; letter-spacing: 2px; font-family: 'Abhaya Libre', Georgia, serif;
+  }
+  .prog-lookup-btn:hover { background: var(--gold-dim); }
+  .prog-confirmed { font-size: 13px; color: var(--green); margin-top: 6px; padding: 6px 10px; background: #1a2a1a; border-radius: 0; }
+  .prog-radio-row {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer; font-size: 14px;
+  }
+  .prog-radio-row input[type="radio"] { accent-color: var(--gold); width: 16px; height: 16px; cursor: pointer; }
+  .prog-included { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 0; background: #1a2a1a; color: var(--green); margin-left: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .prog-upcharge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 0; background: #2a2000; color: var(--gold); margin-left: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .prog-deemph { opacity: 0.5; }
+  .prog-deemph:hover { opacity: 0.8; }
+
+  /* ── Radio selector / interview ─────────────── */
+  .selector-phase { animation: fadeIn 0.3s ease; }
+  .selector-landing { text-align: center; padding: 40px 0; }
+  .selector-landing h2 { font-family: 'Abhaya Libre', serif; font-size: 28px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 4px; font-weight: 400; }
+  .selector-landing p { color: var(--muted); font-size: 15px; max-width: 520px; margin: 0 auto 32px; line-height: 1.6; }
+  .selector-paths { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; max-width: 700px; margin: 0 auto; }
+  .selector-path {
+    flex: 1; min-width: 260px; max-width: 320px; background: #000; border: 2px solid var(--border);
+    border-radius: 0; padding: 28px 24px; cursor: pointer; text-align: center;
+    transition: all 0.25s;
+  }
+  .selector-path:hover { border-color: var(--gold-dim); background: var(--card-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .selector-path .sp-icon { font-size: 36px; margin-bottom: 12px; }
+  .selector-path h3 { font-size: 17px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+  .selector-path p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  .interview-q { max-width: 600px; margin: 0 auto; padding: 20px 0; }
+  .interview-q h2 { font-size: 22px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 3px; font-weight: 400; }
+  .interview-q .iq-sub { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+  .interview-q .iq-options { display: flex; flex-direction: column; gap: 10px; }
+  .iq-option {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; cursor: pointer; transition: all 0.2s;
+  }
+  .iq-option:hover { border-color: var(--border-lit); background: var(--card-hover); }
+  .iq-option.selected { border-color: var(--gold); background: #1a1800; }
+  .iq-option .iq-icon { font-size: 22px; flex-shrink: 0; width: 36px; text-align: center; }
+  .iq-option .iq-body { flex: 1; }
+  .iq-option .iq-label { font-size: 15px; font-weight: 600; }
+  .iq-option .iq-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .iq-option .oc-check { width: 22px; height: 22px; border: 2px solid var(--border-lit); border-radius: 0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: transparent; transition: all 0.25s; }
+  .iq-option.selected .oc-check { background: var(--gold); border-color: var(--gold); color: #111; }
+
+  .interview-nav { display: flex; justify-content: center; gap: 12px; margin-top: 28px; }
+
+  /* Result cards */
+  .result-cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+  .result-card {
+    background: #000; border: 2px solid var(--border); border-radius: 0;
+    padding: 24px; width: 280px; text-align: center; position: relative;
+    transition: all 0.25s;
+  }
+  .result-card:hover { border-color: var(--border-lit); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .result-card.recommended { border-color: var(--gold); }
+  .result-badge {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--gold); color: #111; font-size: 11px; font-weight: 700;
+    padding: 3px 12px; border-radius: 0; letter-spacing: 2px; text-transform: uppercase;
+  }
+  .result-card .rc-img { width: 120px; height: 120px; margin: 8px auto 16px; border-radius: 0; background: #fff; overflow: hidden; border: 2px solid var(--gold); }
+  .result-card .rc-img img { width: 100%; height: 100%; object-fit: cover; }
+  .result-card h3 { font-size: 17px; margin-bottom: 4px; }
+  .result-card .rc-price { font-size: 22px; font-weight: 700; color: var(--gold); margin-bottom: 12px; }
+  .result-card .rc-why { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; text-align: left; }
+  .result-card .rc-why li { padding: 2px 0; }
+  .result-card .rc-btn {
+    display: inline-block; padding: 10px 24px; border-radius: 0; font-size: 14px;
+    font-weight: 500; cursor: pointer; border: none; transition: all 0.15s;
+    background: var(--gold); color: #111; text-transform: uppercase; letter-spacing: 3px;
+    font-family: 'Abhaya Libre', Georgia, serif;
+  }
+  .result-card .rc-btn:hover { background: #ffe87a; }
+
+  /* Radio picker grid (I know what I want) */
+  .radio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+  .radio-pick {
+    background: #000; border: 2px solid var(--border); border-radius: 0;
+    padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.25s;
+  }
+  .radio-pick:hover { border-color: var(--gold-dim); background: var(--card-hover); transform: translateY(-2px); }
+  .radio-pick .rp-img { width: 100px; height: 100px; margin: 0 auto 12px; border-radius: 0; background: #fff; overflow: hidden; border: 2px solid var(--gold); }
+  .radio-pick .rp-img img { width: 100%; height: 100%; object-fit: cover; }
+  .radio-pick h4 { font-size: 14px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .radio-pick .rp-price { color: var(--gold); font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .radio-pick .rp-tag { font-size: 11px; color: var(--muted); }
+
+  /* ── Adapter prompt modal ──────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 998;
+    background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: #000; border: 3px solid var(--gold); border-radius: 0;
+    padding: 28px 32px; max-width: 420px; width: 90vw; text-align: center;
+  }
+  .modal-box h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+  .modal-box p { font-size: 14px; color: var(--muted); line-height: 1.5; margin-bottom: 20px; }
+  .modal-box .modal-btns { display: flex; gap: 12px; justify-content: center; }
+  .modal-box .modal-btns button {
+    padding: 10px 24px; border-radius: 0; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s; text-transform: uppercase; letter-spacing: 2px;
+    font-family: 'Abhaya Libre', Georgia, serif;
+  }
+  .modal-btn-add { background: var(--gold); color: #111; }
+  .modal-btn-add:hover { background: #ffe87a; }
+  .modal-btn-cancel { background: var(--card); color: var(--muted); border: 1px solid var(--border) !important; }
+  .modal-btn-cancel:hover { color: var(--text); border-color: var(--border-lit) !important; }
+
+  /* ── Image lightbox ────────────────────────── */
+  .opt-card .oc-img { position: relative; cursor: zoom-in; }
+  .opt-card .oc-img::after {
+    content: '🔍'; position: absolute; bottom: 2px; right: 2px;
+    font-size: 10px; background: rgba(0,0,0,0.6); border-radius: 4px;
+    padding: 1px 3px; opacity: 0; transition: opacity 0.2s;
+  }
+  .opt-card:hover .oc-img::after { opacity: 1; }
+  .lightbox {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999;
+    background: rgba(0,0,0,0.85); align-items: center; justify-content: center;
+    cursor: zoom-out; animation: fadeIn 0.2s ease;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 90vw; max-height: 85vh; object-fit: contain;
+    border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+  }
+  .lightbox .lb-caption {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    color: #ccc; font-size: 14px; text-align: center; max-width: 80vw;
+  }
+  .lightbox .lb-close {
+    position: absolute; top: 20px; right: 24px; color: #888; font-size: 32px;
+    cursor: pointer; line-height: 1; transition: color 0.2s;
+  }
+  .lightbox .lb-close:hover { color: #fff; }
+
+  /* ── Mobile step indicator ────────────────── */
+  .step-mobile { display: none; text-align: center; margin-bottom: 12px; }
+  .step-mobile .sm-label { font-size: 13px; color: var(--gold); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .step-mobile .sm-dots { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+  .step-mobile .sm-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--border);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .step-mobile .sm-dot.done { background: var(--green); }
+  .step-mobile .sm-dot.active { background: var(--gold); transform: scale(1.3); }
+
+  /* ── Responsive ───────────────────────────── */
+  @media (max-width: 768px) {
+    .hero { flex-direction: column; gap: 20px; }
+    .hero-img { width: 100%; max-width: 300px; margin: 0 auto; }
+    .opt-card .oc-img { width: 56px; height: 56px; }
+    .opt-card .oc-desc { max-height: none; overflow: visible; }
+    .step-labels { display: none; }
+    .progress { display: none; }
+    .step-mobile { display: block; }
+    .bottom-bar { flex-wrap: nowrap; gap: 12px; padding: 10px 16px; }
+    .bb-summary { gap: 10px; }
+    .bb-base, .bb-adds, .bb-items { display: none; }
+    .bb-divider { display: none; }
+    .bb-total { font-size: 20px; }
+    .btn-nav { padding: 10px 18px; font-size: 13px; }
+    .btn-cart { font-size: 14px; padding: 10px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Radio Made Easy</div>
+  <div class="breadcrumb"><a href="#">Shop</a> / <a href="#">Handheld Radios</a> / Kit Builder</div>
+  <div class="demo-badge">WIREFRAME DEMO</div>
+</div>
+
+<div class="page">
+
+  <!-- RADIO SELECTOR PHASE -->
+  <div id="selector-phase" class="selector-phase">
+    <div class="selector-landing" id="selector-landing">
+      <h2>Build Your Custom Radio Kit</h2>
+      <p>Every RME kit comes pre-programmed and ready to use out of the box. Pick your radio and customize it with antennas, batteries, and accessories — we'll handle the rest.</p>
+      <div class="selector-paths">
+        <div class="selector-path" onclick="startInterview()">
+          <div class="sp-icon">🧭</div>
+          <h3>Help Me Choose</h3>
+          <p>Answer a few quick questions and we'll recommend the best radio for your needs.</p>
+        </div>
+        <div class="selector-path" onclick="showRadioPicker()">
+          <div class="sp-icon">📻</div>
+          <h3>I Know What I Want</h3>
+          <p>Jump straight to our lineup and pick your radio to start building your kit.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interview questions (hidden until started) -->
+    <div id="interview-container" style="display:none"></div>
+
+    <!-- Radio picker grid (hidden until chosen) -->
+    <div id="radio-picker" style="display:none">
+      <div style="text-align:center;margin-bottom:8px">
+        <h2 style="font-size:22px">Choose Your Radio</h2>
+        <p style="color:var(--muted);font-size:14px">Select a radio to start building your kit.</p>
+      </div>
+      <div class="radio-grid" id="radio-grid"></div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn-nav btn-back" onclick="backToSelectorLanding()">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIZARD PHASE (hidden until radio selected) -->
+  <div id="wizard-phase" style="display:none">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-img" style="cursor:zoom-in" onclick="openLightbox('https://staging10.radiomadeeasy.com/wp-content/uploads/2022/08/20250904_100309-EDIT.jpg','UV-5R Essentials Kit')">
+      <img src="https://staging10.radiomadeeasy.com/wp-content/uploads/2022/08/20250904_100309-EDIT.jpg"
+           alt="UV-5R Essentials Kit"
+           onerror="this.parentElement.innerHTML='<div style=&quot;color:#444;font-size:13px;text-align:center&quot;>UV-5R<br>Essentials Kit</div>'">
+    </div>
+    <div class="hero-info">
+      <h1>UV-5R Essentials Kit</h1>
+      <div class="base-price">$59.00</div>
+      <div class="desc">The go-to starter radio kit. Everything you need to get on the air — pre-programmed and ready to use out of the box. Customize your kit below with antenna upgrades and accessories.</div>
+      <div class="includes">
+        <strong>Kit includes:</strong>
+        <ul>
+          <li>Baofeng UV-5R radio (pre-programmed)</li>
+          <li>Factory antenna, battery, belt clip</li>
+          <li>Charging cradle</li>
+          <li>RME Quick Start Guide</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile step indicator -->
+  <div class="step-mobile" id="step-mobile">
+    <div class="sm-label" id="sm-label">Step 1 of 6 — Antenna Upgrade</div>
+    <div class="sm-dots" id="sm-dots">
+      <div class="sm-dot active"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+      <div class="sm-dot"></div>
+    </div>
+  </div>
+
+  <!-- Progress (desktop) -->
+  <div class="step-labels" id="step-labels">
+    <div class="step-label active" onclick="goStep(0)">Antennas</div>
+    <div class="step-label" onclick="goStep(1)">More Antennas</div>
+    <div class="step-label" onclick="goStep(2)">Battery</div>
+    <div class="step-label" onclick="goStep(3)">Accessories</div>
+    <div class="step-label" onclick="goStep(4)">Programming</div>
+    <div class="step-label" onclick="goStep(5)">Review</div>
+  </div>
+  <div class="progress" id="progress">
+    <div class="progress-step active"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+    <div class="progress-step"></div>
+  </div>
+
+  <!-- STEP 0: Antenna Upgrade -->
+  <div class="wizard-section active" id="step-0">
+    <div class="section-head">
+      <h2>Antenna Upgrades</h2>
+      <p>Your kit includes the factory antenna. Add one or more high-performance BNC antennas below — each upgrade includes the SMA-F to BNC-F adapter needed to mount on your UV-5R.</p>
+    </div>
+    <div class="options-grid" id="antenna-options">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- STEP 1: Additional Antennas -->
+  <div class="wizard-section" id="step-1">
+    <div class="section-head">
+      <h2>Additional Antennas</h2>
+      <p>Supplemental antennas for extended range, mobile use, or body-worn setups. These don't replace your primary antenna — they give you options for different scenarios.</p>
+    </div>
+    <div class="options-grid" id="addl-antenna-options">
+    </div>
+  </div>
+
+  <!-- STEP 2: Battery Upgrade -->
+  <div class="wizard-section" id="step-2">
+    <div class="section-head">
+      <h2>Battery Upgrade</h2>
+      <p>Your kit includes the factory battery (cradle charging only). Upgrade to a USB-C rechargeable battery — charge from any USB-C cable, no cradle needed.</p>
+    </div>
+    <div class="options-grid" id="battery-options">
+    </div>
+  </div>
+
+  <!-- STEP 3: Accessories -->
+  <div class="wizard-section" id="step-3">
+    <div class="section-head">
+      <h2>Add Accessories</h2>
+      <p>Speakermics, cables, protective gear, and more. Select everything you need to complete your setup.</p>
+    </div>
+    <div class="options-grid" id="accessory-options">
+    </div>
+  </div>
+
+  <!-- STEP 4: Programming -->
+  <div class="wizard-section" id="step-4">
+    <div class="section-head">
+      <h2>Custom Programming</h2>
+      <p>Every RME kit comes custom programmed with GMRS, FRS, NOAA weather, and local repeaters for your area — included at no extra charge.</p>
+    </div>
+    <div class="options-grid" id="programming-options">
+    </div>
+  </div>
+
+  <!-- STEP 5: Review -->
+  <div class="wizard-section" id="step-5">
+    <div class="section-head">
+      <h2>Review Your Kit</h2>
+      <p>Here's everything in your customized UV-5R Essentials Kit. Make sure it looks good, then add to cart.</p>
+    </div>
+    <div class="review-list" id="review-list">
+    </div>
+  </div>
+
+  </div><!-- /wizard-phase -->
+
+</div>
+
+<!-- Sticky bottom bar -->
+<div class="bottom-bar">
+  <div class="bb-summary">
+    <div><div class="bb-base">Base kit: $59</div><div class="bb-adds" id="bb-adds">+ $0 add-ons</div></div>
+    <div class="bb-divider"></div>
+    <div><div class="bb-total" id="bb-total">$59</div><div class="bb-items" id="bb-items">Base kit only</div></div>
+  </div>
+  <div class="bb-divider"></div>
+  <button class="btn-nav btn-back" id="btn-back" onclick="prevStep()" style="display:none">Back</button>
+  <button class="btn-nav btn-next" id="btn-next" onclick="nextStep()">Next: Additional Antennas →</button>
+</div>
+
+<script>
+const S = 'https://staging10.radiomadeeasy.com/wp-content/uploads/';
+let BASE_PRICE = 59;
+let currentStep = 0;
+const totalSteps = 6;
+
+// Selected state
+let selectedAntennas = new Set(); // multiselect
+let selectedAddlAntennas = new Set(); // multiselect
+let selectedBatteries = new Map(); // key → quantity (e.g. 'usbc-standard' → 2)
+let selectedAccessories = new Set(); // multiselect
+let adapterSuppressed = false; // user chose to supply their own adapter
+
+// Programming state
+let programmingChoice = 'standard'; // 'none', 'standard', 'multi'
+let progUseShipping = true; // use shipping address for programming location
+let progZipPrimary = '';
+let progZipsExtra = []; // up to 3 extra locations (4 total with primary)
+let progConfirmedPrimary = ''; // resolved city/state for primary
+let progConfirmedExtras = []; // resolved city/state for extras
+let progNotes = '';
+
+// ── Product data (radio-specific) ──
+// Items are keyed per radio. getItems(category) returns the right set for the selected radio.
+const ADAPTER_PRICE = 5; // SMA-F to BNC-F Adapter [456] — added once if any BNC antenna selected
+
+// Shared items (available for all radios)
+const sharedAntennaUpgrades = [
+  { key: 'stubby', name: 'Stubby Antenna with BNC Adapter', desc: 'Compact, low-profile antenna. Great for covert carry, backpacking, or when you need a shorter profile.', price: 39, img: S+'2023/05/20250227_154740.jpg', ids: [816, 456], addsToCart: ['Stubby Antenna [816] — $39'] },
+  { key: 'foulweather', name: 'Foul Weather Whip with BNC Adapter', desc: 'Flexible whip that bends without breaking. Ideal for field use, rucking, and mounting on chest rigs or plate carriers.', price: 40, img: S+'2024/03/20240320_115347.jpg', ids: [3916, 456], addsToCart: ['Foul Weather Whip [3916] — $40'] },
+  { key: 'signalstick', name: 'Signal Stick with BNC Adapter', desc: 'Super elastic, nearly indestructible flexible antenna. Excellent all-around performer for both transmit and receive.', price: 25, img: S+'2022/07/IMGP8549-scaled.jpg', ids: [39, 456], addsToCart: ['Signal Stick [39] — $25'] },
+];
+
+const sharedAdditionalAntennas = [
+  { key: 'wearable', name: 'Wearable BNC Antenna', desc: 'Low-profile antenna designed for body-worn setups. Lays flat against gear or clothing for a streamlined, covert profile.', price: 69, img: S+'2022/10/20221006_154507.jpg', id: 460, needsAdapter: true },
+  { key: 'slimjim', name: 'Roll Up Slim Jim Antenna', desc: 'Portable VHF/UHF antenna you can hang from a tree branch, window, or tarp ridge line. Dramatically extends your range — essential for base camp ops.', price: 49, img: S+'2022/08/12200-2-scaled.jpg', id: 99, needsAdapter: true },
+  { key: 'magmount', name: 'Magnetic BNC Antenna Base', desc: 'Magnetic base mount for any BNC antenna. Stick on a vehicle roof, toolbox, or any metal surface for instant mobile capability.', price: 39, img: S+'2022/10/IMGP8553-scaled.jpg', id: 521, needsAdapter: true },
+  { key: 'mollemount', name: 'BNC MOLLE Antenna Mount', desc: 'Attach any BNC antenna to MOLLE webbing on your vest, pack, or plate carrier. Keeps the antenna off the radio for a low-profile setup.', price: 19, img: S+'2025/12/1000009993.jpg', id: 8717, needsAdapter: true },
+  { key: 'extraadapter', name: 'Extra SMA-F to BNC-F Adapter', desc: 'Spare BNC adapter so you can leave one on a mag mount or other accessory and still have one for the radio. One adapter is already included if you selected an antenna upgrade.', price: 5, img: S+'2022/09/smaftobncf.jpg', id: 456, needsAdapter: false, isAdapter: true },
+];
+
+// Radio-specific product catalogs
+const radioProducts = {
+  'uv5r': {
+    batteryLabel: 'Factory Battery (1800mAh)',
+    batteryDesc: 'Standard battery included with your kit. Requires charging cradle (included).',
+    batteries: [
+      { key: 'usbc-standard', name: 'USB-C Battery (1300mAh) with Cable', desc: 'Standard-size rechargeable battery with built-in USB-C port. Charge from any USB-C cable — no cradle needed.', price: 25, img: S+'2023/08/20230831_163401.jpg', id: 2367 },
+      { key: 'usbc-extended', name: 'USB-C Extended Battery (3800mAh) with Cable', desc: 'High-capacity extended battery with built-in USB-C port. Nearly triple the runtime of the factory battery.', price: 29, img: S+'2023/04/20250725_123654.jpg', id: 749 },
+    ],
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone. Mount on your chest rig, collar, or shoulder strap for hands-free communication.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Keeps audio discreet — popular for security, events, and low-profile ops.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'aprs', name: 'APRS Cable', desc: 'Audio interface cable connecting your radio to a smartphone. Run Rattlegram or APRSdroid for off-grid text messaging and position reporting.', price: 25, img: S+'2023/06/20230608_164856-1.jpg', id: 1177 },
+      { key: 'progcable', name: 'USB Programming Cable', desc: 'Program custom frequencies via CHIRP software on your computer. Essential for serious operators who want full channel control.', price: 25, img: S+'2024/08/uv5r-programming-cable.jpg', id: 4838 },
+      { key: 'exo', name: 'Exoskeleton', desc: 'Hard protective shell that prevents accidental PTT button presses and absorbs drops. Essential for field use.', price: 29, img: S+'2022/07/4A7A3860_white_square.png', id: 38 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection. Hear radio traffic through your earpro.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'uv5r-mini': {
+    batteryLabel: 'Built-in USB-C Battery',
+    batteryDesc: 'The UV-5R Mini has a built-in USB-C rechargeable battery — just plug in any USB-C cable to charge. Battery is not removable.',
+    batteries: [],
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone. Mount on your chest rig, collar, or shoulder strap for hands-free communication.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Keeps audio discreet — popular for security, events, and low-profile ops.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'progcable', name: 'USB Programming Cable', desc: 'Program custom frequencies via CHIRP software on your computer.', price: 25, img: S+'2024/08/uv5r-programming-cable.jpg', id: 4838 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'uv-pro': {
+    batteryLabel: 'USB-C Rechargeable Battery (2600mAh)',
+    batteryDesc: 'The UV-PRO includes a USB-C rechargeable battery. Charge from any USB-C cable — no cradle needed.',
+    batteries: [
+      { key: 'uvpro-spare', name: 'Extra UV-PRO Battery (2600mAh)', desc: 'Spare USB-C rechargeable battery for the UV-PRO. Swap in the field for extended ops without waiting to recharge.', price: 25, img: S+'2025/11/uvpro-battery-black.jpg', id: 8312 },
+    ],
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'bs22', name: 'BS-22 Wireless Speakermic', desc: 'Bluetooth wireless speaker-microphone designed for the UV-PRO. No cable — clips to your gear and pairs via Bluetooth.', price: 59, img: S+'2025/12/1000009367.jpg', id: 8491 },
+      { key: 'kplug', name: 'K-Plug Adapter', desc: 'Adapter that lets you use standard Kenwood-plug accessories (speakermics, eartubes, headsets) with your UV-PRO.', price: 25, img: S+'2025/11/1000008462.jpg', id: 8268 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Requires K-Plug Adapter for the UV-PRO.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'dmr-6x2': {
+    batteryLabel: 'USB-C Rechargeable Battery (3100mAh)',
+    batteryDesc: 'The DMR 6X2 PRO includes a high-capacity 3100mAh USB-C rechargeable battery. 2-3 days of battery life with battery save enabled.',
+    batteries: [
+      { key: 'dmr6x2-spare', name: 'Extra DMR 6X2 PRO Battery (3100mAh)', desc: 'Spare USB-C rechargeable battery. Swap in the field for extended ops — 2-3 days of runtime per battery.', price: 45, img: null, id: 6868 },
+    ],
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DMR 6X2 PRO.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Kenwood plug — plugs directly into the DMR 6X2 PRO.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'progcable', name: 'DMR 6X2 PRO Programming Cable', desc: 'USB programming cable for the DMR 6X2 PRO. Required for CPS software programming and firmware updates.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+  'da-7x2': {
+    batteryLabel: 'USB-C Rechargeable Battery (3100mAh)',
+    batteryDesc: 'The DA-7X2 includes a high-capacity 3100mAh USB-C rechargeable battery. 2-3 days of battery life with battery save enabled.',
+    batteries: [
+      { key: 'da7x2-spare', name: 'Extra DA-7X2 Battery (3100mAh)', desc: 'Spare USB-C rechargeable battery. Swap in the field for extended ops — 2-3 days of runtime per battery.', price: 45, img: null, id: 6868 },
+    ],
+    accessories: [
+      { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
+      { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DA-7X2.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
+      { key: 'eartube', name: 'Acoustic Eartube Headset', desc: 'Covert-style earpiece with push-to-talk. Kenwood plug — plugs directly into the DA-7X2.', price: 19, img: S+'2023/07/20230530_1405362.jpg', id: 1431 },
+      { key: 'progcable', name: 'DA-7X2 Programming Cable', desc: 'USB programming cable for the DA-7X2. Required for CPS software programming and firmware updates.', price: 12, img: S+'2025/12/1000009966.jpg', id: 8711 },
+      { key: 'saddle', name: 'Kenwood Plug Saddle', desc: 'Rubber port protector that keeps moisture and debris out of the accessory jack when not in use.', price: 9, img: S+'2024/02/4A7A3864-White.png', id: 3701 },
+      { key: 'monocable', name: 'Speakermic to Earpro Cable', desc: '3.5mm mono cable connecting your speakermic to electronic ear protection.', price: 9, img: S+'2023/07/20230703_103456.jpg', id: 1438 },
+    ],
+  },
+};
+
+// Active product lists — populated when radio is selected
+let antennaUpgrades = sharedAntennaUpgrades;
+let additionalAntennas = sharedAdditionalAntennas;
+let batteryUpgrades = radioProducts['uv5r'].batteries;
+let accessories = radioProducts['uv5r'].accessories;
+
+function loadRadioProducts(radioKey) {
+  const rp = radioProducts[radioKey] || radioProducts['uv5r'];
+  antennaUpgrades = sharedAntennaUpgrades;
+  additionalAntennas = sharedAdditionalAntennas;
+  batteryUpgrades = rp.batteries;
+  accessories = rp.accessories;
+}
+
+// ── Render functions ────────────────────────────────
+function renderAntennaUpgrades() {
+  const container = document.getElementById('antenna-options');
+  const anySelected = selectedAntennas.size > 0;
+
+  // Factory antenna — always included, always shown as selected
+  let factoryHtml = `
+    <div class="opt-card selected" style="cursor:default;opacity:0.85">
+      <div class="oc-check" style="background:var(--green);border-color:var(--green);color:#111">✓</div>
+      <div class="oc-body">
+        <div class="oc-name">Factory Antenna</div>
+        <div class="oc-desc">Standard rubber duck antenna included with your kit.</div>
+      </div>
+      <div class="oc-price free" style="color:var(--green)">Included</div>
+    </div>
+  `;
+
+  // Adapter note
+  let note = anySelected
+    ? '<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:#5c5"><strong>SMA-F to BNC-F Adapter — $5</strong> will be added once to your order, shared by all BNC antennas below.</div>'
+    : '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--muted)">Want better performance? Add one or more BNC antenna upgrades below. Each requires a BNC adapter ($5, added once).</div>';
+
+  container.innerHTML = factoryHtml + note + antennaUpgrades.map(a => `
+    <div class="opt-card ${selectedAntennas.has(a.key) ? 'selected' : ''}"
+         onclick="toggleAntenna('${a.key}')">
+      <div class="oc-check">${selectedAntennas.has(a.key) ? '✓' : ''}</div>
+      ${a.img ? `<div class="oc-img"><img src="${a.img}" alt="${a.name}" onerror="this.parentElement.innerHTML='<div style=\\'color:#444;font-size:11px;text-align:center;padding:8px\\'>No img</div>'"></div>` : ''}
+      <div class="oc-body">
+        <div class="oc-name">${a.name}</div>
+        <div class="oc-desc">${a.desc}</div>
+        <div class="oc-meta"></div>
+      </div>
+      <div class="oc-price">+$${a.price}</div>
+    </div>
+  `).join('');
+}
+
+function renderAdditionalAntennas() {
+  const hasUpgrade = selectedAntennas.size > 0;
+  const container = document.getElementById('addl-antenna-options');
+
+  // Show BNC adapter note at top
+  let adapterNote = '';
+  if (hasUpgrade) {
+    adapterNote = '<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#5c5"><strong>BNC adapter already included</strong> with your antenna upgrade. BNC antennas below will share that adapter — or grab a spare below if you want one dedicated to each setup.</div>';
+  } else {
+    adapterNote = '<div style="background:#2a2000;border:1px solid #3a3000;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#d4af37"><strong>No antenna upgrade selected.</strong> BNC antennas below require an SMA-F to BNC-F Adapter — it will be auto-added if needed.</div>';
+  }
+
+  container.innerHTML = adapterNote + additionalAntennas.map(a => {
+    const isAdapter = a.isAdapter;
+    // Contextual subtitle for the extra adapter card
+    let adapterSubtitle = '';
+    if (isAdapter && hasUpgrade) {
+      adapterSubtitle = '<div style="font-size:11px;color:var(--green);margin-top:2px">✓ One already included with your upgrade — this adds a spare</div>';
+    } else if (isAdapter && !hasUpgrade) {
+      adapterSubtitle = '<div style="font-size:11px;color:var(--gold-dim);margin-top:2px">One will be auto-added if you select a BNC antenna — this adds an extra</div>';
+    }
+
+    return `
+    <div class="opt-card ${selectedAddlAntennas.has(a.key) ? 'selected' : ''}"
+         onclick="toggleAddlAntenna('${a.key}')">
+      <div class="oc-check">${selectedAddlAntennas.has(a.key) ? '✓' : ''}</div>
+      ${a.img ? `<div class="oc-img"><img src="${a.img}" alt="${a.name}" onerror="this.parentElement.innerHTML='<div style=\\'color:#444;font-size:11px;text-align:center;padding:8px\\'>No img</div>'"></div>` : ''}
+      <div class="oc-body">
+        <div class="oc-name">${a.name}</div>
+        <div class="oc-desc">${a.desc}</div>
+        ${adapterSubtitle}
+        <div class="oc-meta"></div>
+      </div>
+      <div class="oc-price">${a.price ? '+$' + a.price : 'Price TBD'}</div>
+    </div>
+  `}).join('');
+}
+
+function renderBatteryUpgrades() {
+  const container = document.getElementById('battery-options');
+  const rp = radioProducts[selectedRadioKey] || radioProducts['uv5r'];
+
+  // Factory/included battery — always shown
+  let factoryHtml = `
+    <div class="opt-card selected" style="cursor:default;opacity:0.85">
+      <div class="oc-check" style="background:var(--green);border-color:var(--green);color:#111">✓</div>
+      <div class="oc-body">
+        <div class="oc-name">${rp.batteryLabel}</div>
+        <div class="oc-desc">${rp.batteryDesc}</div>
+      </div>
+      <div class="oc-price free" style="color:var(--green)">Included</div>
+    </div>
+  `;
+
+  // If no battery upgrades available for this radio
+  if (batteryUpgrades.length === 0) {
+    container.innerHTML = factoryHtml;
+    return;
+  }
+
+  const anySelected = selectedBatteries.size > 0;
+  const isUv5r = selectedRadioKey === 'uv5r';
+  let note = anySelected
+    ? '<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:#5c5">' + (isUv5r ? 'USB-C batteries selected below. Each includes a USB-C charging cable.' : 'Extra batteries selected below. Great for extended field ops.') + '</div>'
+    : '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--muted)">' + (isUv5r ? 'Want to ditch the charging cradle? Add a USB-C rechargeable battery below. Grab extras for longer trips or to share across radios.' : 'Need extra runtime? Grab a spare battery to swap in the field without waiting to recharge.') + '</div>';
+
+  container.innerHTML = factoryHtml + note + batteryUpgrades.map(b => {
+    const qty = selectedBatteries.get(b.key) || 0;
+    const isSelected = qty > 0;
+    return `
+    <div class="opt-card ${isSelected ? 'selected' : ''}"
+         onclick="toggleBattery('${b.key}')">
+      <div class="oc-check">${isSelected ? '✓' : ''}</div>
+      ${b.img ? `<div class="oc-img"><img src="${b.img}" alt="${b.name}" onerror="this.parentElement.innerHTML='<div style=\\'color:#444;font-size:11px;text-align:center;padding:8px\\'>No img</div>'"></div>` : ''}
+      <div class="oc-body">
+        <div class="oc-name">${b.name}</div>
+        <div class="oc-desc">${b.desc}</div>
+      </div>
+      ${isSelected ? `
+        <div class="qty-stepper" onclick="event.stopPropagation()">
+          <button onclick="batteryQty('${b.key}',-1)">−</button>
+          <div class="qty-val">${qty}</div>
+          <button onclick="batteryQty('${b.key}',1)">+</button>
+        </div>
+        <div class="oc-price">+$${b.price * qty}</div>
+      ` : `<div class="oc-price">+$${b.price}/ea</div>`}
+    </div>
+  `}).join('');
+}
+
+function renderAccessories() {
+  const container = document.getElementById('accessory-options');
+  container.innerHTML = accessories.map(a => `
+    <div class="opt-card ${selectedAccessories.has(a.key) ? 'selected' : ''}"
+         onclick="toggleAccessory('${a.key}')">
+      <div class="oc-check">${selectedAccessories.has(a.key) ? '✓' : ''}</div>
+      ${a.img ? `<div class="oc-img"><img src="${a.img}" alt="${a.name}" onerror="this.parentElement.innerHTML='<div style=\\'color:#444;font-size:11px;text-align:center;padding:8px\\'>No img</div>'"></div>` : ''}
+      <div class="oc-body">
+        <div class="oc-name">${a.name}</div>
+        <div class="oc-desc">${a.desc}</div>
+        <div class="oc-meta"></div>
+      </div>
+      <div class="oc-price">${a.price ? '+$' + a.price : 'Price TBD'}</div>
+    </div>
+  `).join('');
+}
+
+function renderProgramming() {
+  const container = document.getElementById('programming-options');
+
+  const standardChecked = programmingChoice === 'standard' ? 'checked' : '';
+  const multiChecked = programmingChoice === 'multi' ? 'checked' : '';
+  const noneChecked = programmingChoice === 'none' ? 'checked' : '';
+
+  let html = '';
+
+  // Option 1: Standard (included)
+  html += `
+    <div class="opt-card ${programmingChoice === 'standard' ? 'selected' : ''}"
+         onclick="selectProgramming('standard')" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="oc-radio"></div>
+        <div class="oc-body">
+          <div class="oc-name">Standard Custom Programming <span class="prog-included">Included</span></div>
+          <div class="oc-desc" style="max-height:none">GMRS channels (1-22 + repeater pairs), FRS, NOAA weather, and local repeaters for one location. Our recommended channel layout — ready to use out of the box.</div>
+        </div>
+        <div class="oc-price free" style="color:var(--green)">Included</div>
+      </div>
+      ${programmingChoice === 'standard' ? renderProgLocationFields() : ''}
+    </div>
+  `;
+
+  // Option 2: Multi-location (+$10)
+  html += `
+    <div class="opt-card ${programmingChoice === 'multi' ? 'selected' : ''}"
+         onclick="selectProgramming('multi')" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="oc-radio"></div>
+        <div class="oc-body">
+          <div class="oc-name">Multi-Location Programming <span class="prog-upcharge">+$10</span></div>
+          <div class="oc-desc" style="max-height:none">Program repeaters for up to 4 locations. Radio memory slots are evenly divided between locations by default. Perfect if you travel between home, work, cabin, or other areas.</div>
+        </div>
+        <div class="oc-price">+$10</div>
+      </div>
+      ${programmingChoice === 'multi' ? renderProgMultiFields() : ''}
+    </div>
+  `;
+
+  // Option 3: No programming (deemphasized)
+  html += `
+    <div class="opt-card prog-deemph ${programmingChoice === 'none' ? 'selected' : ''}"
+         onclick="selectProgramming('none')">
+      <div class="oc-radio"></div>
+      <div class="oc-body">
+        <div class="oc-name">Skip Programming — Ship Immediately</div>
+        <div class="oc-desc" style="max-height:none">Radio ships with factory default channels only. Choose this if you plan to program it yourself via CHIRP or another method.</div>
+      </div>
+      <div class="oc-price free" style="color:var(--muted)">—</div>
+    </div>
+  `;
+
+  // Notes field (always visible unless 'none')
+  if (programmingChoice !== 'none') {
+    html += `
+      <div class="prog-section">
+        <div class="prog-field">
+          <label>Anything else we should know about your programming preferences?</label>
+          <textarea placeholder="e.g. Custom channel names, specific repeater frequencies, Part 90 channels (license required), etc."
+                    onchange="progNotes=this.value" onfocus="event.stopPropagation()">${progNotes}</textarea>
+          <div class="prog-note">Optional — leave blank if standard programming is all you need.</div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+function renderProgLocationFields() {
+  const shipChecked = progUseShipping ? 'checked' : '';
+  const diffChecked = !progUseShipping ? 'checked' : '';
+  const confirmedHtml = progConfirmedPrimary ? `<div class="prog-confirmed">✅ ${progConfirmedPrimary}</div>` : '';
+  return `
+    <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="prog-field">
+        <label>Where will you primarily use this radio?</label>
+        <div class="prog-radio-row" onclick="setProgShipping(true)">
+          <input type="radio" name="prog-loc" ${shipChecked}> Same as my shipping address
+        </div>
+        <div class="prog-radio-row" onclick="setProgShipping(false)">
+          <input type="radio" name="prog-loc" ${diffChecked}> A different location
+        </div>
+      </div>
+      ${!progUseShipping ? `
+        <div class="prog-field">
+          <label>Zip code or City, State</label>
+          <div class="prog-zip-row">
+            <input type="text" maxlength="60" placeholder="e.g. 90210 or Denver, CO" value="${progZipPrimary}"
+                   oninput="progZipPrimary=this.value;clearProgConfirm('primary')" onfocus="event.stopPropagation()"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();lookupLocation('primary')}">
+            <button class="prog-lookup-btn" onclick="event.stopPropagation();lookupLocation('primary')">Verify</button>
+          </div>
+          ${confirmedHtml}
+          <div class="prog-note">We use this as the center point of our repeater search, pulling in repeaters from the surrounding area. One central location usually covers a wide radius — no need to add nearby cities separately.</div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderProgMultiFields() {
+  let zipsHtml = '';
+
+  // Primary location
+  const confirmedPri = progConfirmedPrimary ? `<div class="prog-confirmed">✅ ${progConfirmedPrimary}</div>` : '';
+  zipsHtml += `
+    <div class="prog-field">
+      <label>Location 1 (primary)</label>
+      <div class="prog-zip-row">
+        <input type="text" maxlength="60" placeholder="Zip code or City, State" value="${progZipPrimary}"
+               oninput="progZipPrimary=this.value;clearProgConfirm('primary')" onfocus="event.stopPropagation()"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();lookupLocation('primary')}">
+        <button class="prog-lookup-btn" onclick="event.stopPropagation();lookupLocation('primary')">Verify</button>
+      </div>
+      ${confirmedPri}
+    </div>
+  `;
+
+  // Extra locations (up to 3 more = 4 total)
+  for (let i = 0; i < progZipsExtra.length; i++) {
+    const confirmedExtra = progConfirmedExtras[i] ? `<div class="prog-confirmed">✅ ${progConfirmedExtras[i]}</div>` : '';
+    zipsHtml += `
+      <div class="prog-field">
+        <label>Location ${i + 2}</label>
+        <div class="prog-zip-row">
+          <input type="text" maxlength="60" placeholder="Zip code or City, State" value="${progZipsExtra[i]}"
+                 oninput="progZipsExtra[${i}]=this.value;clearProgConfirm('extra',${i})" onfocus="event.stopPropagation()"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();lookupLocation('extra',${i})}">
+          <button class="prog-lookup-btn" onclick="event.stopPropagation();lookupLocation('extra',${i})">Verify</button>
+          <button class="prog-zip-remove" onclick="event.stopPropagation();removeProgZip(${i})" title="Remove">&times;</button>
+        </div>
+        ${confirmedExtra}
+      </div>
+    `;
+  }
+
+  const canAddMore = progZipsExtra.length < 3;
+
+  return `
+    <div class="prog-section" onclick="event.stopPropagation()" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      ${zipsHtml}
+      ${canAddMore ? '<div class="prog-add-zip" onclick="event.stopPropagation();addProgZip()">+ Add another location</div>' : '<div class="prog-note">Maximum 4 locations reached.</div>'}
+      <div class="prog-note" style="margin-top:12px">Each location is used as a center point for a repeater search of the surrounding area. Only add separate locations for areas that are far apart (e.g. home vs. vacation cabin). Memory slots are evenly divided between locations by default — mention in notes if you need a different split.</div>
+    </div>
+  `;
+}
+
+function selectProgramming(choice) {
+  programmingChoice = choice;
+  if (choice === 'standard') { progZipsExtra = []; progConfirmedExtras = []; }
+  renderProgramming();
+  updateBottomBar();
+}
+
+function setProgShipping(useShipping) {
+  progUseShipping = useShipping;
+  renderProgramming();
+}
+
+function addProgZip() {
+  if (progZipsExtra.length < 3) {
+    progZipsExtra.push('');
+    progConfirmedExtras.push('');
+    renderProgramming();
+  }
+}
+
+function removeProgZip(index) {
+  progZipsExtra.splice(index, 1);
+  progConfirmedExtras.splice(index, 1);
+  renderProgramming();
+}
+
+function clearProgConfirm(which, index) {
+  if (which === 'primary') progConfirmedPrimary = '';
+  else if (which === 'extra' && index !== undefined) progConfirmedExtras[index] = '';
+}
+
+async function lookupLocation(which, index) {
+  const raw = which === 'primary' ? progZipPrimary : progZipsExtra[index];
+  if (!raw || !raw.trim()) return;
+  const val = raw.trim();
+
+  // Determine if zip code or city/state
+  const isZip = /^\d{5}$/.test(val);
+
+  try {
+    let city, state, zip;
+    if (isZip) {
+      // Zip code lookup via Zippopotam.us
+      const resp = await fetch(`https://api.zippopotam.us/us/${val}`);
+      if (!resp.ok) throw new Error('not found');
+      const data = await resp.json();
+      city = data.places[0]['place name'];
+      state = data.places[0]['state abbreviation'];
+      zip = val;
+    } else {
+      // City/state — try to parse and look up
+      const parts = val.split(',').map(s => s.trim());
+      if (parts.length < 2) {
+        showProgError(which, index, 'Please enter as "City, State" (e.g. Denver, CO) or a 5-digit zip code.');
+        return;
+      }
+      const searchCity = parts[0];
+      const searchState = parts[1].replace(/\./g, '').toUpperCase();
+      // Use Nominatim for city/state → confirmation
+      const q = encodeURIComponent(`${searchCity}, ${searchState}, US`);
+      const resp = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&countrycodes=us&limit=1&addressdetails=1`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!resp.ok) throw new Error('lookup failed');
+      const results = await resp.json();
+      if (!results.length) throw new Error('not found');
+      const addr = results[0].address;
+      city = addr.city || addr.town || addr.village || addr.hamlet || searchCity;
+      state = addr.state ? getStateAbbr(addr.state) || addr.state : searchState;
+      zip = addr.postcode || '';
+    }
+
+    const display = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+    if (which === 'primary') {
+      progConfirmedPrimary = display;
+    } else {
+      progConfirmedExtras[index] = display;
+    }
+    renderProgramming();
+  } catch (e) {
+    showProgError(which, index, 'Could not verify that location. Please check and try again.');
+  }
+}
+
+function showProgError(which, index, msg) {
+  // Briefly show error inline
+  const label = which === 'primary' ? 'primary' : `extra-${index}`;
+  const existing = document.querySelector(`.prog-error-${label}`);
+  if (existing) existing.remove();
+  const inputs = document.querySelectorAll('.prog-zip-row');
+  const target = which === 'primary' ? inputs[0] : inputs[index + (programmingChoice === 'multi' ? 1 : 0)];
+  if (!target) return;
+  const err = document.createElement('div');
+  err.className = `prog-confirmed prog-error-${label}`;
+  err.style.color = 'var(--red)';
+  err.textContent = msg;
+  target.parentElement.insertBefore(err, target.nextElementSibling);
+  setTimeout(() => err.remove(), 5000);
+}
+
+// US state name → abbreviation
+const _stateMap = {Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',Connecticut:'CT',Delaware:'DE',Florida:'FL',Georgia:'GA',Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY'};
+function getStateAbbr(name) { return _stateMap[name] || null; }
+
+function renderReview() {
+  const list = document.getElementById('review-list');
+  let items = [];
+
+  // Base kit — no remove button
+  const selRadio = radioLineup.find(r => r.key === selectedRadioKey) || radioLineup[0];
+  items.push(`
+    <div class="review-item base">
+      <div class="ri-img"><img src="${selRadio.img}" alt="" onerror="this.parentElement.innerHTML='📻'"></div>
+      <div class="ri-name">${selRadio.name}<small>Base kit — pre-programmed radio + essentials</small></div>
+      <div class="ri-price">$${selRadio.price}</div>
+    </div>
+  `);
+
+  // Antenna upgrades
+  selectedAntennas.forEach(key => {
+    const ant = antennaUpgrades.find(a => a.key === key);
+    if (ant) {
+      items.push(`
+        <div class="review-item">
+          <div class="ri-img">${ant.img ? `<img src="${ant.img}" alt="">` : ''}</div>
+          <div class="ri-name">${ant.name}<small>Antenna upgrade — mounts directly on radio</small></div>
+          <div class="ri-price">+$${ant.price}</div>
+          <button class="ri-remove" onclick="reviewRemove('antenna','${key}')" title="Remove">&times;</button>
+        </div>
+      `);
+    }
+  });
+
+  // BNC adapter — auto-included, removable with warning
+  const hasUpgrade = selectedAntennas.size > 0;
+  const anyBNCNeeded = hasUpgrade || [...selectedAddlAntennas].some(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    return a && a.needsAdapter;
+  });
+  if (anyBNCNeeded && !adapterSuppressed) {
+    items.push(`
+      <div class="review-item" style="opacity:0.7">
+        <div class="ri-img"><img src="${S}2022/09/smaftobncf.jpg" alt=""></div>
+        <div class="ri-name">SMA-F to BNC-F Adapter<small>${hasUpgrade ? 'Included with antenna upgrade' : 'Auto-added — required for BNC antennas'}</small></div>
+        <div class="ri-price">+$5</div>
+        <button class="ri-remove" onclick="reviewRemoveAdapter('auto')" title="Remove">&times;</button>
+      </div>
+    `);
+  }
+
+  // Additional antennas (excluding extra adapter)
+  selectedAddlAntennas.forEach(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    if (a && !a.isAdapter) {
+      items.push(`
+        <div class="review-item">
+          <div class="ri-img">${a.img ? `<img src="${a.img}" alt="">` : ''}</div>
+          <div class="ri-name">${a.name}<small>Additional antenna</small></div>
+          <div class="ri-price">${a.price ? '+$' + a.price : 'TBD'}</div>
+          <button class="ri-remove" onclick="reviewRemove('addl','${key}')" title="Remove">&times;</button>
+        </div>
+      `);
+    }
+  });
+
+  // Extra adapter
+  if (selectedAddlAntennas.has('extraadapter')) {
+    items.push(`
+      <div class="review-item">
+        <div class="ri-img"><img src="${S}2022/09/smaftobncf.jpg" alt=""></div>
+        <div class="ri-name">Extra SMA-F to BNC-F Adapter<small>Spare adapter</small></div>
+        <div class="ri-price">+$5</div>
+        <button class="ri-remove" onclick="reviewRemoveAdapter('extra')" title="Remove">&times;</button>
+      </div>
+    `);
+  }
+
+  // Battery upgrades
+  selectedBatteries.forEach((qty, key) => {
+    const bat = batteryUpgrades.find(b => b.key === key);
+    if (bat) {
+      items.push(`
+        <div class="review-item">
+          <div class="ri-img">${bat.img ? `<img src="${bat.img}" alt="">` : ''}</div>
+          <div class="ri-name">${bat.name}${qty > 1 ? ' <small>×' + qty + '</small>' : ''}<small>Battery upgrade</small></div>
+          <div class="ri-price">+$${bat.price * qty}</div>
+          <button class="ri-remove" onclick="reviewRemove('battery','${key}')" title="Remove">&times;</button>
+        </div>
+      `);
+    }
+  });
+
+  // Accessories
+  selectedAccessories.forEach(key => {
+    const a = accessories.find(x => x.key === key);
+    if (a) {
+      items.push(`
+        <div class="review-item">
+          <div class="ri-img">${a.img ? `<img src="${a.img}" alt="">` : ''}</div>
+          <div class="ri-name">${a.name}<small>Accessory</small></div>
+          <div class="ri-price">${a.price ? '+$' + a.price : 'TBD'}</div>
+          <button class="ri-remove" onclick="reviewRemove('accessory','${key}')" title="Remove">&times;</button>
+        </div>
+      `);
+    }
+  });
+
+  // Programming
+  if (programmingChoice === 'standard') {
+    const loc = progUseShipping ? 'shipping address' : (progZipPrimary || 'TBD');
+    items.push(`
+      <div class="review-item" style="opacity:0.7">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+        <div class="ri-name">Custom Programming<small>Standard — local repeaters for ${loc}</small></div>
+        <div class="ri-price" style="color:var(--green)">Included</div>
+      </div>
+    `);
+  } else if (programmingChoice === 'multi') {
+    const locs = [progZipPrimary, ...progZipsExtra].filter(z => z).join(', ') || 'TBD';
+    items.push(`
+      <div class="review-item">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+        <div class="ri-name">Multi-Location Programming<small>Up to 4 locations: ${locs}</small></div>
+        <div class="ri-price">+$10</div>
+        <button class="ri-remove" onclick="reviewRemove('programming')" title="Remove">&times;</button>
+      </div>
+    `);
+  } else {
+    items.push(`
+      <div class="review-item" style="opacity:0.5">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📡</div>
+        <div class="ri-name">No Programming<small>Ships with factory defaults — program it yourself</small></div>
+        <div class="ri-price" style="color:var(--muted)">—</div>
+      </div>
+    `);
+  }
+
+  if (items.length === 1) {
+    items.push('<div class="empty-state">No upgrades or accessories selected — just the base kit.</div>');
+  }
+
+  const total = calcTotal();
+  items.push(`
+    <div class="review-total">
+      <div class="rt-label">Kit Total</div>
+      <div class="rt-price">$${total}</div>
+    </div>
+  `);
+
+  list.innerHTML = items.join('');
+}
+
+// ── Review remove handlers ──────────────────────────
+function reviewRemove(type, key) {
+  if (type === 'antenna') { selectedAntennas.delete(key); }
+  else if (type === 'addl') { selectedAddlAntennas.delete(key); }
+  else if (type === 'battery') { selectedBatteries.delete(key); }
+  else if (type === 'programming') { programmingChoice = 'standard'; }
+  else if (type === 'accessory') { selectedAccessories.delete(key); }
+  updateBottomBar();
+  renderReview();
+}
+
+function reviewRemoveAdapter(which) {
+  // Count how many BNC antennas depend on adapters
+  const bncUpgrades = selectedAntennas.size; // all upgrades are BNC
+  const bncAddl = [...selectedAddlAntennas].filter(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    return a && a.needsAdapter;
+  });
+  const totalBNCAntennas = bncUpgrades + bncAddl.length;
+
+  // Count how many adapters they currently have
+  const hasAutoAdapter = bncUpgrades > 0 || bncAddl.length > 0; // the auto one
+  const hasExtraAdapter = selectedAddlAntennas.has('extraadapter');
+  const adapterCount = (hasAutoAdapter ? 1 : 0) + (hasExtraAdapter ? 1 : 0);
+
+  if (which === 'extra') {
+    // Removing the spare — just remove it
+    selectedAddlAntennas.delete('extraadapter');
+    updateBottomBar();
+    renderReview();
+    return;
+  }
+
+  // Removing the auto adapter — warn if BNC antennas still in cart
+  if (totalBNCAntennas > 0) {
+    // Build list of affected antenna names
+    let affected = [];
+    selectedAntennas.forEach(key => {
+      const a = antennaUpgrades.find(x => x.key === key);
+      if (a) affected.push(a.name);
+    });
+    bncAddl.forEach(key => {
+      const a = additionalAntennas.find(x => x.key === key);
+      if (a) affected.push(a.name);
+    });
+
+    document.getElementById('adapter-warn-list').innerHTML = affected.map(n => '<li>' + n + '</li>').join('');
+    document.getElementById('adapter-warn-modal').classList.add('open');
+    return;
+  }
+
+  // No BNC antennas — safe to remove (shouldn't normally happen)
+  updateBottomBar();
+  renderReview();
+}
+
+function adapterWarnKeep() {
+  document.getElementById('adapter-warn-modal').classList.remove('open');
+}
+
+function adapterWarnRemoveOnly() {
+  // Remove adapter from order but keep all antennas — user has their own
+  adapterSuppressed = true;
+  document.getElementById('adapter-warn-modal').classList.remove('open');
+  updateBottomBar();
+  renderReview();
+}
+
+function adapterWarnRemoveAll() {
+  // Remove all BNC antennas and the adapter
+  selectedAntennas.clear();
+  [...selectedAddlAntennas].forEach(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    if (a && (a.needsAdapter || a.isAdapter)) selectedAddlAntennas.delete(key);
+  });
+  document.getElementById('adapter-warn-modal').classList.remove('open');
+  updateBottomBar();
+  renderReview();
+}
+
+// ── Selection handlers ──────────────────────────────
+function toggleAntenna(key) {
+  if (selectedAntennas.has(key)) selectedAntennas.delete(key);
+  else { selectedAntennas.add(key); adapterSuppressed = false; }
+  renderAntennaUpgrades();
+  updateBottomBar();
+}
+
+function toggleAddlAntenna(key) {
+  if (selectedAddlAntennas.has(key)) {
+    selectedAddlAntennas.delete(key);
+    renderAdditionalAntennas();
+    updateBottomBar();
+    return;
+  }
+
+  // Check if this antenna needs a BNC adapter and user doesn't have one yet
+  const item = additionalAntennas.find(x => x.key === key);
+  const hasAdapter = selectedAntennas.size > 0 || selectedAddlAntennas.has('extraadapter');
+  if (item && item.needsAdapter && !hasAdapter) {
+    // Show adapter prompt
+    pendingAntennaKey = key;
+    document.getElementById('adapter-modal').classList.add('open');
+    return;
+  }
+
+  selectedAddlAntennas.add(key);
+  renderAdditionalAntennas();
+  updateBottomBar();
+}
+
+let pendingAntennaKey = null;
+
+function adapterModalAdd() {
+  // Add both the adapter and the pending antenna
+  adapterSuppressed = false;
+  selectedAddlAntennas.add('extraadapter');
+  selectedAddlAntennas.add(pendingAntennaKey);
+  pendingAntennaKey = null;
+  document.getElementById('adapter-modal').classList.remove('open');
+  renderAdditionalAntennas();
+  updateBottomBar();
+}
+
+function adapterModalSkip() {
+  // User says they already have an adapter — add antenna without adapter
+  selectedAddlAntennas.add(pendingAntennaKey);
+  pendingAntennaKey = null;
+  document.getElementById('adapter-modal').classList.remove('open');
+  renderAdditionalAntennas();
+  updateBottomBar();
+}
+
+function adapterModalCancel() {
+  // User declined — don't add the antenna
+  pendingAntennaKey = null;
+  document.getElementById('adapter-modal').classList.remove('open');
+}
+
+function toggleBattery(key) {
+  if (selectedBatteries.has(key)) selectedBatteries.delete(key);
+  else selectedBatteries.set(key, 1);
+  renderBatteryUpgrades();
+  updateBottomBar();
+}
+
+function batteryQty(key, delta) {
+  const current = selectedBatteries.get(key) || 0;
+  const newQty = current + delta;
+  if (newQty <= 0) selectedBatteries.delete(key);
+  else selectedBatteries.set(key, newQty);
+  renderBatteryUpgrades();
+  updateBottomBar();
+}
+
+function toggleAccessory(key) {
+  if (selectedAccessories.has(key)) selectedAccessories.delete(key);
+  else selectedAccessories.add(key);
+  renderAccessories();
+  updateBottomBar();
+}
+
+// ── Total calculation ───────────────────────────────
+function calcTotal() {
+  let total = BASE_PRICE;
+  const hasUpgrade = selectedAntennas.size > 0;
+
+  // Sum all selected antenna upgrades
+  selectedAntennas.forEach(key => {
+    const a = antennaUpgrades.find(x => x.key === key);
+    if (a) total += a.price;
+  });
+
+  // Additional antennas
+  selectedAddlAntennas.forEach(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    if (a && a.price) total += a.price;
+  });
+
+  // BNC adapter ($5) added ONCE if any BNC antenna is selected (upgrade or additional)
+  const anyBNC = hasUpgrade || [...selectedAddlAntennas].some(key => {
+    const a = additionalAntennas.find(x => x.key === key);
+    return a && a.needsAdapter;
+  });
+  if (anyBNC && !adapterSuppressed) total += ADAPTER_PRICE;
+
+  // Battery upgrades
+  selectedBatteries.forEach((qty, key) => {
+    const bat = batteryUpgrades.find(b => b.key === key);
+    if (bat) total += bat.price * qty;
+  });
+
+  // Programming upcharge
+  if (programmingChoice === 'multi') total += 10;
+
+  // Accessories
+  selectedAccessories.forEach(key => {
+    const a = accessories.find(x => x.key === key);
+    if (a && a.price) total += a.price;
+  });
+  return total;
+}
+
+function countAddons() {
+  let count = selectedAntennas.size;
+  count += selectedAddlAntennas.size;
+  selectedBatteries.forEach((qty) => { count += qty; });
+  if (programmingChoice === 'multi') count++;
+  count += selectedAccessories.size;
+  return count;
+}
+
+function updateBottomBar() {
+  const total = calcTotal();
+  const adds = total - BASE_PRICE;
+  const count = countAddons();
+  document.getElementById('bb-total').textContent = '$' + total;
+  document.getElementById('bb-adds').textContent = adds > 0 ? '+ $' + adds + ' add-ons' : '+ $0 add-ons';
+  document.getElementById('bb-items').textContent = count > 0 ? count + ' item' + (count > 1 ? 's' : '') + ' added' : 'Base kit only';
+}
+
+// ── Navigation ──────────────────────────────────────
+const stepNames = ['Antenna Upgrade', 'Additional Antennas', 'Battery', 'Accessories', 'Programming', 'Review'];
+
+function goStep(n) {
+  if (n < 0 || n >= totalSteps) return;
+  currentStep = n;
+
+  // Show/hide sections
+  document.querySelectorAll('.wizard-section').forEach((el, i) => {
+    el.classList.toggle('active', i === n);
+  });
+
+  // Update progress
+  document.querySelectorAll('.progress-step').forEach((el, i) => {
+    el.classList.remove('done', 'active');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+
+  // Update labels
+  document.querySelectorAll('.step-label').forEach((el, i) => {
+    el.classList.remove('done', 'active');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+
+  // Update mobile step indicator
+  document.getElementById('sm-label').textContent = 'Step ' + (n + 1) + ' of ' + totalSteps + ' — ' + stepNames[n];
+  document.querySelectorAll('.sm-dot').forEach((el, i) => {
+    el.classList.remove('done', 'active');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+
+  // Update buttons
+  const back = document.getElementById('btn-back');
+  const next = document.getElementById('btn-next');
+  back.style.display = n === 0 ? 'none' : '';
+
+  if (n === totalSteps - 1) {
+    // Review step
+    next.textContent = '🛒  Add to Cart';
+    next.className = 'btn-nav btn-cart';
+    next.onclick = function() { alert('Added to cart! (Demo — this would add ' + (countAddons() + 1) + ' items to WooCommerce cart)'); };
+    renderReview();
+  } else {
+    next.textContent = 'Next: ' + stepNames[n + 1] + ' →';
+    next.className = 'btn-nav btn-next';
+    next.onclick = nextStep;
+  }
+
+  // Render the current step
+  if (n === 0) renderAntennaUpgrades();
+  else if (n === 1) renderAdditionalAntennas();
+  else if (n === 2) renderBatteryUpgrades();
+  else if (n === 3) renderAccessories();
+  else if (n === 4) renderProgramming();
+
+  // Scroll to top of wizard (skip on initial load)
+  if (wizardInitialized) {
+    document.querySelector('.step-labels').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function nextStep() { goStep(currentStep + 1); }
+function prevStep() { goStep(currentStep - 1); }
+
+// ── Lightbox ────────────────────────────────────────
+function openLightbox(src, caption) {
+  const lb = document.getElementById('lightbox');
+  lb.querySelector('img').src = src;
+  lb.querySelector('.lb-caption').textContent = caption || '';
+  lb.classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// Intercept clicks on product images — open lightbox instead of toggling selection
+document.addEventListener('click', function(e) {
+  const imgWrap = e.target.closest('.oc-img');
+  if (!imgWrap) return;
+  const img = imgWrap.querySelector('img');
+  if (!img || !img.src) return;
+  e.stopPropagation(); // prevent card selection toggle
+  const card = imgWrap.closest('.opt-card');
+  const name = card ? card.querySelector('.oc-name')?.textContent : '';
+  openLightbox(img.src, name);
+}, true); // capture phase so it fires before the card onclick
+
+// ── Radio lineup data ────────────────────────────────
+const radioLineup = [
+  {
+    key: 'uv5r', name: 'UV-5R Essentials Kit', price: 59, id: 106,
+    img: S+'2022/08/20250904_100309-EDIT.jpg',
+    tagline: 'The reliable standard',
+    pitch: 'The most popular two-way radio on the planet. Massive accessory ecosystem — batteries, antennas, cases, and chargers are widely available and affordable. If you already own UV-5Rs, everything is compatible.',
+    solves: [],
+    features: ['128 memory channels', 'Dual-band VHF/UHF', 'Huge accessory ecosystem', 'Most affordable option'],
+    tags: ['budget', 'simple', 'compatible', 'compact']
+  },
+  {
+    key: 'uv5r-mini', name: 'UV-5R Mini Essentials Kit', price: 39, id: 8438,
+    img: S+'2025/12/1000009129-scaled.jpg',
+    tagline: 'More channels, smaller price',
+    pitch: 'Packs 999 memory channels into the most affordable kit we offer. Built-in USB-C charging (no cradle needed) and Bluetooth programming from your phone. Also picks up aircraft frequencies.',
+    solves: ['More coverage area / channels', 'Listen to aircraft', 'USB-C charging'],
+    features: ['999 memory channels', 'USB-C charging built in', 'Airband receive', 'Automatic NOAA weather alerts', 'Bluetooth phone programming'],
+    tags: ['budget', 'simple', 'channels', 'airband', 'usbc', 'compact', 'noaa']
+  },
+  {
+    key: 'uv-pro', name: 'UV-PRO Essentials Kit', price: 159, id: 7862,
+    img: S+'2025/09/20250904_100414-EDIT.jpg',
+    tagline: 'Waterproof & connected',
+    pitch: 'IP67 waterproof, GPS location sharing, text messaging, and full Bluetooth TNC support for APRS and Winlink. Simple enough to start using immediately, but with room to grow into advanced digital modes. The only handheld we offer with Bluetooth smartphone control.',
+    solves: ['Waterproof / water use', 'GPS / location sharing', 'Bluetooth / app control', 'Room to grow'],
+    features: ['IP67 waterproof', '180 memory channels', 'GPS + APRS built in', 'USB-C charging built in', 'Analog text messaging', 'Bluetooth TNC for APRS/Winlink', 'Mobile app control', 'Airband receive', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+    tags: ['waterproof', 'gps', 'bluetooth', 'airband', 'grow', 'professional', 'usbc', 'channels', 'noaa', 'commercial']
+  },
+  {
+    key: 'dmr-6x2', name: 'DMR 6X2 PRO Essentials Kit', price: 249, id: 2931,
+    img: S+'2023/11/20250904_100231-EDIT.jpg',
+    tagline: 'Digital & encryption capable',
+    pitch: 'Full DMR digital radio with encryption capability for private communications. 4000 memory channels, GPS, APRS, and digital text messaging. Our most economical path to encryption-capable digital radio.',
+    solves: ['Privacy / encryption capable', 'More coverage area / channels', 'GPS / location sharing', 'Digital text messaging'],
+    features: ['DMR digital + analog', 'Encryption capable', '4000 memory channels', 'GPS + APRS', 'Digital text messaging', 'USB-C battery', 'IP54 water resistant', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+    tags: ['encryption', 'digital', 'channels', 'gps', 'professional', 'bluetooth', 'water-resistant', 'usbc', 'grow', 'noaa', 'commercial']
+  },
+  {
+    key: 'da-7x2', name: 'DA-7X2 Essentials Kit', price: 299, id: 9050,
+    img: S+'2026/02/1000011350.jpg',
+    tagline: 'The best we offer',
+    pitch: 'Everything the DMR 6X2 PRO does, plus true dual receive, crossband repeat (use it as a portable repeater), airband monitoring, NXDN digital mode, and Bluetooth PTT. For operators who want no compromises.',
+    solves: ['Privacy / encryption capable', 'Crossband repeat', 'Listen to aircraft', 'Maximum capability'],
+    features: ['DMR + NXDN digital modes', 'Encryption capable', '4000 memory channels', 'Crossband repeat', 'True dual receive', 'Digital text messaging', 'GPS + APRS', 'Airband receive', 'Bluetooth PTT', 'USB-C battery', 'IP54 water resistant', 'Automatic NOAA weather alerts', 'FCC Part 90 commercial certified'],
+    tags: ['encryption', 'digital', 'crossband', 'airband', 'professional', 'premium', 'bluetooth', 'water-resistant', 'usbc', 'gps', 'grow', 'channels', 'noaa', 'commercial']
+  },
+];
+
+// ── Interview logic ─────────────────────────────────
+const interviewQuestions = [
+  {
+    id: 'budget',
+    question: "What kind of radio are you looking for?",
+    sub: "This helps us match you with the right tier.",
+    multi: false,
+    options: [
+      { key: 'low', icon: '💵', label: 'Economical', detail: 'A solid, reliable radio without the extras', tags: ['budget'] },
+      { key: 'mid', icon: '💰', label: 'Mid-range', detail: 'More features and durability — the sweet spot for most people', tags: ['waterproof', 'gps', 'bluetooth', 'grow'] },
+      { key: 'high', icon: '💎', label: 'The best of the best', detail: 'Maximum capability, no compromises', tags: ['encryption', 'digital', 'premium', 'crossband'] },
+    ]
+  },
+  {
+    id: 'use',
+    question: "Where will you use it most?",
+    sub: "Pick the one that fits best.",
+    multi: false,
+    options: [
+      { key: 'general', icon: '🏘️', label: 'Around town / neighborhood', detail: 'Family, neighborhood, or local communication', tags: ['budget', 'simple'] },
+      { key: 'outdoor', icon: '🏕️', label: 'Outdoors — hiking, camping, overlanding', detail: 'Trail, campsite, or off-road use', tags: ['gps', 'grow'] },
+      { key: 'water', icon: '🚤', label: 'On or near water', detail: 'Kayaking, boating, beach, or wet environments', tags: ['waterproof'] },
+      { key: 'professional', icon: '🏗️', label: 'Work / commercial / business use', detail: 'Worksite, security, event coordination, business ops', tags: ['professional', 'commercial', 'waterproof', 'gps'] },
+      { key: 'emergency', icon: '🆘', label: 'Emergency preparedness', detail: 'Disaster readiness, backup comms', tags: ['channels', 'durable'] },
+    ]
+  },
+  {
+    id: 'features',
+    question: "What matters most to you?",
+    sub: "Pick up to two. Skip if nothing stands out.",
+    multi: true,
+    options: [
+      { key: 'price', icon: '🏷️', label: 'Lowest price', detail: 'Just get me on the air affordably', tags: ['budget'] },
+      { key: 'waterproof', icon: '💧', label: 'Waterproof', detail: "It's going to get wet", tags: ['waterproof'] },
+      { key: 'encryption', icon: '🔒', label: 'Privacy / encryption', detail: "I want the option for secure, encrypted communications", tags: ['encryption', 'digital'] },
+      { key: 'channels', icon: '📊', label: 'Maximum channels / coverage', detail: 'I want lots of repeaters and memory slots', tags: ['channels'] },
+      { key: 'airband', icon: '✈️', label: 'Listen to aircraft', detail: 'I want to monitor aviation frequencies', tags: ['airband'] },
+      { key: 'bluetooth', icon: '🎧', label: 'Bluetooth headset', detail: 'Helmet comms, wireless earpiece, or hands-free operation', tags: ['bluetooth'] },
+      { key: 'grow', icon: '📈', label: 'Room to grow', detail: "I'm new but want advanced features later", tags: ['grow'] },
+      { key: 'noaa', icon: '🌦️', label: 'Automatic weather alerts', detail: 'Auto-notifies you of severe weather — all radios can tune NOAA manually', tags: ['noaa'] },
+      { key: 'compact', icon: '📏', label: 'Small & lightweight', detail: 'I want the most compact, pocketable radio', tags: ['compact'] },
+      { key: 'compatible', icon: '🔄', label: 'UV-5R compatible', detail: 'I already have UV-5Rs or their accessories', tags: ['compatible', 'budget'] },
+    ]
+  },
+];
+
+let interviewStep = 0;
+let interviewAnswers = {};
+
+function startInterview() {
+  document.getElementById('selector-landing').style.display = 'none';
+  document.getElementById('interview-container').style.display = 'block';
+  interviewStep = 0;
+  interviewAnswers = {};
+  renderInterviewQuestion();
+}
+
+function showRadioPicker() {
+  document.getElementById('selector-landing').style.display = 'none';
+  document.getElementById('radio-picker').style.display = 'block';
+  renderRadioGrid();
+}
+
+function backToSelectorLanding() {
+  document.getElementById('selector-landing').style.display = '';
+  document.getElementById('radio-picker').style.display = 'none';
+  document.getElementById('interview-container').style.display = 'none';
+}
+
+function renderRadioGrid() {
+  const grid = document.getElementById('radio-grid');
+  grid.innerHTML = radioLineup.map(r => `
+    <div class="radio-pick" onclick="selectRadio('${r.key}')">
+      <div class="rp-img"><img src="${r.img}" alt="${r.name}" onerror="this.parentElement.innerHTML='📻'"></div>
+      <h4>${r.name.replace(' Essentials Kit','')}</h4>
+      <div class="rp-price">$${r.price}</div>
+      <div class="rp-tag">${r.tagline}</div>
+    </div>
+  `).join('');
+}
+
+function renderInterviewQuestion() {
+  const container = document.getElementById('interview-container');
+  const q = interviewQuestions[interviewStep];
+  const answers = interviewAnswers[q.id] || (q.multi ? [] : null);
+
+  let optionsHtml = q.options.map(o => {
+    const isSelected = q.multi ? (answers && answers.includes(o.key)) : answers === o.key;
+    return `
+      <div class="iq-option ${isSelected ? 'selected' : ''}" onclick="answerInterview('${q.id}','${o.key}',${q.multi})">
+        <div class="iq-icon">${o.icon}</div>
+        <div class="iq-body">
+          <div class="iq-label">${o.label}</div>
+          <div class="iq-detail">${o.detail}</div>
+        </div>
+        <div class="oc-check">${isSelected ? '✓' : ''}</div>
+      </div>
+    `;
+  }).join('');
+
+  const isFirst = interviewStep === 0;
+  const isLast = interviewStep === interviewQuestions.length - 1;
+  const hasAnswer = q.multi ? (answers && answers.length > 0) : answers !== null;
+
+  container.innerHTML = `
+    <div class="interview-q">
+      <h2>${q.question}</h2>
+      <div class="iq-sub">${q.sub}</div>
+      <div class="iq-options">${optionsHtml}</div>
+      <div class="interview-nav">
+        ${isFirst ? '<button class="btn-nav btn-back" onclick="backToSelectorLanding()">← Back</button>' : '<button class="btn-nav btn-back" onclick="prevInterviewStep()">← Back</button>'}
+        <button class="btn-nav btn-next" onclick="${isLast ? 'showInterviewResults()' : 'nextInterviewStep()'}" ${!hasAnswer && !q.multi ? 'disabled' : ''}>${isLast ? 'See My Recommendation →' : 'Next →'}</button>
+      </div>
+    </div>
+  `;
+}
+
+function answerInterview(qId, optKey, multi) {
+  const q = interviewQuestions.find(x => x.id === qId);
+  if (multi) {
+    if (!interviewAnswers[qId]) interviewAnswers[qId] = [];
+    const arr = interviewAnswers[qId];
+    const idx = arr.indexOf(optKey);
+    if (idx >= 0) arr.splice(idx, 1);
+    else if (!q.maxSelect || arr.length < q.maxSelect) arr.push(optKey);
+  } else {
+    interviewAnswers[qId] = optKey;
+  }
+  renderInterviewQuestion();
+}
+
+function nextInterviewStep() {
+  if (interviewStep < interviewQuestions.length - 1) { interviewStep++; renderInterviewQuestion(); }
+}
+function prevInterviewStep() {
+  if (interviewStep > 0) { interviewStep--; renderInterviewQuestion(); }
+}
+
+function getPersonalizedReasons(radio) {
+  // Map interview answers to personalized "why this fits" reasons
+  const reasons = [];
+  const a = interviewAnswers;
+
+  // Budget match
+  if (a.budget === 'low' && radio.tags.includes('budget')) reasons.push('Economical and reliable — gets you on the air without the extras');
+  if (a.budget === 'mid' && radio.tags.includes('grow')) reasons.push('Great mid-range option — solid features with room to grow');
+  if (a.budget === 'high' && radio.tags.includes('premium')) reasons.push('Top-tier — maximum capability with no compromises');
+
+  // Use case match
+  if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the wet environments you described');
+  if (a.use === 'water' && !radio.tags.includes('waterproof') && radio.tags.includes('water-resistant')) reasons.push('IP54 water resistant — handles rain and splashes');
+  if (a.use === 'outdoor' && radio.tags.includes('gps')) reasons.push('GPS & APRS — perfect for the outdoor use you mentioned');
+  if (a.use === 'professional' && radio.tags.includes('commercial')) reasons.push('FCC Part 90 commercial certified — approved for business and commercial use');
+  if (a.use === 'professional' && radio.tags.includes('professional') && !radio.tags.includes('commercial')) reasons.push('Feature-rich and reliable for professional use');
+  if (a.use === 'general' && radio.tags.includes('budget')) reasons.push('Simple and reliable — great for everyday neighborhood use');
+  if (a.use === 'emergency' && radio.tags.includes('channels')) reasons.push('Lots of channels — covers more repeaters for emergency readiness');
+
+  // Feature matches
+  if (a.features) {
+    if (a.features.includes('waterproof') && radio.tags.includes('waterproof')) reasons.push('IP67 waterproof — fully submersible for the conditions you need');
+    if (a.features.includes('waterproof') && !radio.tags.includes('waterproof') && radio.tags.includes('water-resistant')) reasons.push('IP54 water resistant — rated for rain and splashes');
+    if (a.features.includes('encryption') && radio.tags.includes('encryption')) reasons.push('Encryption capable — supports private, encrypted communications');
+    if (a.features.includes('airband') && radio.tags.includes('airband')) reasons.push('Airband receive — listen to aircraft like you wanted');
+    if (a.features.includes('bluetooth') && radio.tags.includes('bluetooth')) reasons.push('Bluetooth headset support — pairs with helmet comms, earpieces, or wireless PTT');
+    if (a.features.includes('channels') && radio.tags.includes('channels')) reasons.push('Extra memory channels for the wide coverage area you need');
+    if (a.features.includes('grow') && radio.tags.includes('grow')) reasons.push('Room to grow — simple now, with advanced features when you\'re ready');
+    if (a.features.includes('noaa') && radio.tags.includes('noaa')) reasons.push('Automatic NOAA weather alerts — get warned before severe weather hits');
+    if (a.features.includes('noaa') && !radio.tags.includes('noaa')) reasons.push('Can tune NOAA frequencies manually, but lacks automatic weather alerts');
+    if (a.features.includes('compact') && radio.tags.includes('compact')) reasons.push('Compact and lightweight — easy to pocket or pack');
+    if (a.features.includes('compatible') && radio.tags.includes('compatible')) reasons.push('UV-5R compatible — works with your existing batteries, chargers, and accessories');
+    if (a.features.includes('price') && radio.tags.includes('budget')) reasons.push('Most affordable option — best value for getting on the air');
+  }
+
+  // Deduplicate similar reasons
+  return [...new Set(reasons)].slice(0, 4);
+}
+
+function showInterviewResults() {
+  // Score each radio based on tag matches
+  const scores = {};
+  radioLineup.forEach(r => { scores[r.key] = 0; });
+
+  interviewQuestions.forEach(q => {
+    const answer = interviewAnswers[q.id];
+    if (!answer) return;
+    const keys = Array.isArray(answer) ? answer : [answer];
+    keys.forEach(k => {
+      const opt = q.options.find(o => o.key === k);
+      if (!opt) return;
+      radioLineup.forEach(r => {
+        opt.tags.forEach(tag => {
+          if (r.tags.includes(tag)) scores[r.key] += 1;
+        });
+      });
+    });
+  });
+
+  // Sort by score descending
+  const ranked = radioLineup.slice().sort((a, b) => scores[b.key] - scores[a.key]);
+  const top = ranked[0];
+  const runner = ranked[1];
+
+  const topReasons = getPersonalizedReasons(top);
+  const runnerReasons = getPersonalizedReasons(runner);
+
+  function renderResultCard(radio, reasons, isPrimary) {
+    const name = radio.name.replace(' Essentials Kit', '');
+    const reasonsHtml = reasons.length > 0
+      ? '<ul style="list-style:none;padding:0;margin:0">' + reasons.map(r => '<li style="padding:3px 0">✅ ' + r + '</li>').join('') + '</ul>'
+      : '<ul>' + radio.features.map(f => '<li>✓ ' + f + '</li>').join('') + '</ul>';
+
+    return `
+      <div class="result-card ${isPrimary ? 'recommended' : ''}">
+        ${isPrimary ? '<div class="result-badge">Best Match</div>' : ''}
+        <div class="rc-img"><img src="${radio.img}" alt="${radio.name}" onerror="this.parentElement.innerHTML='📻'"></div>
+        <h3>${name}</h3>
+        <div class="rc-price">$${radio.price}</div>
+        <div class="rc-why">${reasonsHtml}</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">${radio.pitch}</p>
+        <button class="rc-btn" onclick="selectRadio('${radio.key}')" ${!isPrimary ? 'style="background:var(--card);color:var(--text);border:1px solid var(--border)"' : ''}>Build This Kit →</button>
+      </div>
+    `;
+  }
+
+  const container = document.getElementById('interview-container');
+  container.innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <h2 style="font-size:22px;margin-bottom:6px">Our Recommendation</h2>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Based on what you told us, here's what we'd pick for you.</p>
+      <div class="result-cards">
+        ${renderResultCard(top, topReasons, true)}
+        ${renderResultCard(runner, runnerReasons, false)}
+      </div>
+      <div style="margin-top:24px">
+        <button class="btn-nav btn-back" onclick="interviewStep=0;renderInterviewQuestion()">← Retake Quiz</button>
+        <button class="btn-nav btn-back" onclick="showRadioPicker()" style="margin-left:8px">See All Radios</button>
+      </div>
+    </div>
+  `;
+}
+
+// ── Mismatch detection ──────────────────────────────
+// Each rule: if the user indicated a need (interview answer) and the selected
+// radio lacks that capability, warn them and suggest a better fit.
+const mismatchRules = [
+  {
+    // User wants waterproof but radio has no water protection at all
+    check: (answers, radio) => {
+      const wantsWater = answers.use === 'water' || (answers.features && answers.features.includes('waterproof'));
+      const hasWaterProtection = radio.tags.includes('waterproof') || radio.tags.includes('water-resistant');
+      return wantsWater && !hasWaterProtection;
+    },
+    warning: "has no water resistance rating",
+    need: "you mentioned water use or waterproofing is important to you",
+    suggestTags: ['waterproof', 'water-resistant'],
+  },
+  {
+    // User wants encryption but radio doesn't have it
+    check: (answers, radio) => {
+      const wantsEncryption = answers.features && answers.features.includes('encryption');
+      const hasEncryption = radio.tags.includes('encryption');
+      return wantsEncryption && !hasEncryption;
+    },
+    warning: "does not have encryption capability — only DMR radios support encrypted communications",
+    need: "you mentioned privacy or encryption is important",
+    suggestTags: ['encryption'],
+  },
+  {
+    // User selected commercial/business use but picked a consumer-grade radio
+    check: (answers, radio) => {
+      const wantsPro = answers.use === 'professional';
+      const isPro = radio.tags.includes('professional');
+      return wantsPro && !isPro;
+    },
+    warning: "is a great radio for personal use, but may not hold up to the demands of commercial or business use",
+    need: "you mentioned this is for work or business",
+    suggestTags: ['professional'],
+  },
+  {
+    // User wants airband but radio doesn't have it
+    check: (answers, radio) => {
+      const wantsAirband = answers.features && answers.features.includes('airband');
+      const hasAirband = radio.tags.includes('airband');
+      return wantsAirband && !hasAirband;
+    },
+    warning: "cannot receive aircraft/aviation frequencies",
+    need: "you said listening to aircraft is important",
+    suggestTags: ['airband'],
+  },
+  {
+    // User wants Bluetooth/app control but radio doesn't have it
+    check: (answers, radio) => {
+      const wantsBT = answers.features && answers.features.includes('bluetooth');
+      const hasBT = radio.tags.includes('bluetooth');
+      return wantsBT && !hasBT;
+    },
+    warning: "does not support Bluetooth headsets",
+    need: "you mentioned Bluetooth headset connectivity is important",
+    suggestTags: ['bluetooth'],
+  },
+  {
+    // User wants max channels but picked a low-channel radio
+    check: (answers, radio) => {
+      const wantsChannels = answers.features && answers.features.includes('channels');
+      const hasChannels = radio.tags.includes('channels');
+      return wantsChannels && !hasChannels;
+    },
+    warning: "has limited memory channels compared to other options",
+    need: "you said maximum channels/coverage is important",
+    suggestTags: ['channels'],
+  },
+];
+
+let pendingRadioKey = null;
+
+function checkMismatches(key) {
+  // Only check if they came through the interview
+  if (Object.keys(interviewAnswers).length === 0) return null;
+
+  const radio = radioLineup.find(r => r.key === key);
+  if (!radio) return null;
+
+  for (const rule of mismatchRules) {
+    if (rule.check(interviewAnswers, radio)) {
+      // Find the best alternative — never suggest a cheaper/lesser radio (no downgrade suggestions)
+      const alt = radioLineup.find(r => r.key !== key && r.price >= radio.price && rule.suggestTags.some(t => r.tags.includes(t)));
+      // Only warn if we can suggest an upgrade — don't discourage a choice with no better option
+      if (alt) return { radio, rule, alt };
+    }
+  }
+  return null;
+}
+
+function selectRadio(key) {
+  const mismatch = checkMismatches(key);
+  if (mismatch) {
+    pendingRadioKey = key;
+    showMismatchWarning(mismatch);
+    return;
+  }
+  confirmRadioSelection(key);
+}
+
+function showMismatchWarning(m) {
+  const modal = document.getElementById('mismatch-modal');
+  const radioName = m.radio.name.replace(' Essentials Kit', '');
+  let altHtml = '';
+  if (m.alt) {
+    const altName = m.alt.name.replace(' Essentials Kit', '');
+    altHtml = `
+      <button class="modal-btn-add" onclick="pendingRadioKey=null;document.getElementById('mismatch-modal').classList.remove('open');confirmRadioSelection('${m.alt.key}')">
+        Switch to ${altName} — $${m.alt.price}
+      </button>
+    `;
+  }
+  modal.querySelector('.modal-box').innerHTML = `
+    <h3>Heads Up</h3>
+    <p>The <strong>${radioName}</strong> ${m.rule.warning}.</p>
+    <p style="margin-top:8px">${m.rule.need.charAt(0).toUpperCase() + m.rule.need.slice(1)}. Just want to make sure you're aware before we continue.</p>
+    <div class="modal-btns" style="flex-direction:column;gap:8px;margin-top:20px">
+      ${altHtml}
+      <button class="modal-btn-cancel" onclick="document.getElementById('mismatch-modal').classList.remove('open');confirmRadioSelection(pendingRadioKey)">
+        Continue with ${radioName} anyway
+      </button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+let selectedRadioKey = 'uv5r'; // track which radio is selected
+
+function confirmRadioSelection(key) {
+  const radio = radioLineup.find(r => r.key === key);
+  if (!radio) return;
+  pendingRadioKey = null;
+  selectedRadioKey = key;
+
+  // Load radio-specific products and update base price
+  loadRadioProducts(key);
+  BASE_PRICE = radio.price;
+
+  // Reset selections (items may not exist for new radio)
+  selectedAntennas = new Set();
+  selectedAddlAntennas = new Set();
+  adapterSuppressed = false;
+  selectedBatteries = new Map();
+  selectedAccessories = new Set();
+  programmingChoice = 'standard';
+  progUseShipping = true;
+  progZipPrimary = '';
+  progZipsExtra = [];
+  progConfirmedPrimary = '';
+  progConfirmedExtras = [];
+
+  // Update hero with selected radio
+  document.querySelector('.hero-img img').src = radio.img;
+  document.querySelector('.hero-info h1').textContent = radio.name;
+  document.querySelector('.hero-info .base-price').textContent = '$' + radio.price + '.00';
+
+  // Hide selector, show wizard
+  document.getElementById('selector-phase').style.display = 'none';
+  document.getElementById('wizard-phase').style.display = 'block';
+  document.querySelector('.bottom-bar').style.display = '';
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Init ────────────────────────────────────────────
+let wizardInitialized = false;
+// Hide bottom bar initially (selector phase)
+document.querySelector('.bottom-bar').style.display = 'none';
+goStep(0);
+wizardInitialized = true;
+</script>
+
+<!-- Adapter prompt modal -->
+<div class="modal-overlay" id="adapter-modal">
+  <div class="modal-box">
+    <h3>BNC Adapter Needed</h3>
+    <p>This antenna connects via BNC and requires an SMA-F to BNC-F Adapter to work with your radio. If you don't already have one, we recommend adding it to your order.</p>
+    <div class="modal-btns" style="flex-direction:column;gap:8px">
+      <button class="modal-btn-add" onclick="adapterModalAdd()">Add adapter to my order — $5</button>
+      <button class="modal-btn-cancel" onclick="adapterModalSkip()">I already have one</button>
+    </div>
+  </div>
+</div>
+
+<!-- Radio mismatch warning modal -->
+<div class="modal-overlay" id="mismatch-modal">
+  <div class="modal-box"></div>
+</div>
+
+<!-- Adapter removal warning modal -->
+<div class="modal-overlay" id="adapter-warn-modal">
+  <div class="modal-box">
+    <h3>⚠ Adapter Required</h3>
+    <p>The following antennas in your kit require an SMA-F to BNC-F Adapter and won't work without it:</p>
+    <ul id="adapter-warn-list" style="text-align:left;margin:0 auto 16px;max-width:280px;font-size:14px;color:var(--red);list-style:none;padding:0;line-height:1.8"></ul>
+    <div class="modal-btns" style="flex-direction:column;gap:8px">
+      <button class="modal-btn-add" onclick="adapterWarnKeep()">Keep adapter in my kit</button>
+      <button class="modal-btn-cancel" onclick="adapterWarnRemoveAll()">Remove adapter and all BNC antennas</button>
+      <button class="modal-btn-cancel" onclick="adapterWarnRemoveOnly()" style="font-size:12px">Remove adapter only — I'll supply my own</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lb-close">&times;</div>
+  <img src="" alt="Product image">
+  <div class="lb-caption"></div>
+</div>
+
+</body>
+</html>
