@@ -1592,6 +1592,39 @@ function prevInterviewStep() {
   if (interviewStep > 0) { interviewStep--; renderInterviewQuestion(); }
 }
 
+function getPersonalizedReasons(radio) {
+  // Map interview answers to personalized "why this fits" reasons
+  const reasons = [];
+  const a = interviewAnswers;
+
+  // Budget match
+  if (a.budget === 'low' && radio.price < 75) reasons.push('Fits your budget — affordable without cutting corners');
+  if (a.budget === 'mid' && radio.price >= 75 && radio.price <= 250) reasons.push('Right in your price range with premium features');
+  if (a.budget === 'high' && radio.price >= 200) reasons.push('Top-tier option with no compromises');
+
+  // Use case match
+  if (a.use === 'water' && radio.tags.includes('waterproof')) reasons.push('Waterproof — built for the wet environments you described');
+  if (a.use === 'outdoor' && radio.tags.includes('gps')) reasons.push('GPS & APRS — perfect for the outdoor use you mentioned');
+  if (a.use === 'professional' && radio.tags.includes('encryption')) reasons.push('Encryption — the secure comms your work requires');
+  if (a.use === 'general' && radio.tags.includes('budget')) reasons.push('Simple and reliable — great for everyday neighborhood use');
+  if (a.use === 'emergency' && radio.tags.includes('channels')) reasons.push('Lots of channels — covers more repeaters for emergency readiness');
+
+  // Feature matches
+  if (a.features) {
+    if (a.features.includes('waterproof') && radio.tags.includes('waterproof')) reasons.push('Waterproof rated — handles the wet conditions you need');
+    if (a.features.includes('encryption') && radio.tags.includes('encryption')) reasons.push('Digital encryption for the private comms you asked about');
+    if (a.features.includes('airband') && radio.tags.includes('airband')) reasons.push('Airband receive — listen to aircraft like you wanted');
+    if (a.features.includes('bluetooth') && radio.tags.includes('bluetooth')) reasons.push('Bluetooth smartphone control — program and manage from your phone');
+    if (a.features.includes('channels') && radio.tags.includes('channels')) reasons.push('Extra memory channels for the wide coverage area you need');
+    if (a.features.includes('grow') && radio.tags.includes('grow')) reasons.push('Room to grow — simple now, with advanced features when you\'re ready');
+    if (a.features.includes('compatible') && radio.tags.includes('compatible')) reasons.push('UV-5R compatible — works with your existing batteries, chargers, and accessories');
+    if (a.features.includes('price') && radio.tags.includes('budget')) reasons.push('Most affordable option — best value for getting on the air');
+  }
+
+  // Deduplicate similar reasons
+  return [...new Set(reasons)].slice(0, 4);
+}
+
 function showInterviewResults() {
   // Score each radio based on tag matches
   const scores = {};
@@ -1617,29 +1650,36 @@ function showInterviewResults() {
   const top = ranked[0];
   const runner = ranked[1];
 
+  const topReasons = getPersonalizedReasons(top);
+  const runnerReasons = getPersonalizedReasons(runner);
+
+  function renderResultCard(radio, reasons, isPrimary) {
+    const name = radio.name.replace(' Essentials Kit', '');
+    const reasonsHtml = reasons.length > 0
+      ? '<ul style="list-style:none;padding:0;margin:0">' + reasons.map(r => '<li style="padding:3px 0">✅ ' + r + '</li>').join('') + '</ul>'
+      : '<ul>' + radio.features.map(f => '<li>✓ ' + f + '</li>').join('') + '</ul>';
+
+    return `
+      <div class="result-card ${isPrimary ? 'recommended' : ''}">
+        ${isPrimary ? '<div class="result-badge">Best Match</div>' : ''}
+        <div class="rc-img"><img src="${radio.img}" alt="${radio.name}" onerror="this.parentElement.innerHTML='📻'"></div>
+        <h3>${name}</h3>
+        <div class="rc-price">$${radio.price}</div>
+        <div class="rc-why">${reasonsHtml}</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">${radio.pitch}</p>
+        <button class="rc-btn" onclick="selectRadio('${radio.key}')" ${!isPrimary ? 'style="background:var(--card);color:var(--text);border:1px solid var(--border)"' : ''}>Build This Kit →</button>
+      </div>
+    `;
+  }
+
   const container = document.getElementById('interview-container');
   container.innerHTML = `
     <div style="text-align:center;padding:20px 0">
       <h2 style="font-size:22px;margin-bottom:6px">Our Recommendation</h2>
-      <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Based on your answers, here's what we'd suggest.</p>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Based on what you told us, here's what we'd pick for you.</p>
       <div class="result-cards">
-        <div class="result-card recommended">
-          <div class="result-badge">Best Match</div>
-          <div class="rc-img"><img src="${top.img}" alt="${top.name}" onerror="this.parentElement.innerHTML='📻'"></div>
-          <h3>${top.name.replace(' Essentials Kit','')}</h3>
-          <div class="rc-price">$${top.price}</div>
-          <div class="rc-why"><ul>${top.features.map(f => '<li>✓ ' + f + '</li>').join('')}</ul></div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:16px">${top.pitch}</p>
-          <button class="rc-btn" onclick="selectRadio('${top.key}')">Build This Kit →</button>
-        </div>
-        <div class="result-card">
-          <div class="rc-img"><img src="${runner.img}" alt="${runner.name}" onerror="this.parentElement.innerHTML='📻'"></div>
-          <h3>${runner.name.replace(' Essentials Kit','')}</h3>
-          <div class="rc-price">$${runner.price}</div>
-          <div class="rc-why"><ul>${runner.features.map(f => '<li>✓ ' + f + '</li>').join('')}</ul></div>
-          <p style="font-size:13px;color:var(--muted);margin-bottom:16px">${runner.pitch}</p>
-          <button class="rc-btn" onclick="selectRadio('${runner.key}')" style="background:var(--card);color:var(--text);border:1px solid var(--border)">Build This Kit →</button>
-        </div>
+        ${renderResultCard(top, topReasons, true)}
+        ${renderResultCard(runner, runnerReasons, false)}
       </div>
       <div style="margin-top:24px">
         <button class="btn-nav btn-back" onclick="interviewStep=0;renderInterviewQuestion()">← Retake Quiz</button>
@@ -1649,17 +1689,131 @@ function showInterviewResults() {
   `;
 }
 
+// ── Mismatch detection ──────────────────────────────
+// Each rule: if the user indicated a need (interview answer) and the selected
+// radio lacks that capability, warn them and suggest a better fit.
+const mismatchRules = [
+  {
+    // User wants waterproof but radio isn't
+    check: (answers, radio) => {
+      const wantsWater = answers.use === 'water' || (answers.features && answers.features.includes('waterproof'));
+      const isWaterproof = radio.tags.includes('waterproof');
+      return wantsWater && !isWaterproof;
+    },
+    warning: "is not waterproof",
+    need: "you mentioned water use or waterproofing is important to you",
+    suggestTags: ['waterproof'],
+  },
+  {
+    // User wants encryption but radio doesn't have it
+    check: (answers, radio) => {
+      const wantsEncryption = answers.use === 'professional' || (answers.features && answers.features.includes('encryption'));
+      const hasEncryption = radio.tags.includes('encryption');
+      return wantsEncryption && !hasEncryption;
+    },
+    warning: "does not support encryption or digital modes",
+    need: "you mentioned privacy or professional use is important",
+    suggestTags: ['encryption'],
+  },
+  {
+    // User wants airband but radio doesn't have it
+    check: (answers, radio) => {
+      const wantsAirband = answers.features && answers.features.includes('airband');
+      const hasAirband = radio.tags.includes('airband');
+      return wantsAirband && !hasAirband;
+    },
+    warning: "cannot receive aircraft/aviation frequencies",
+    need: "you said listening to aircraft is important",
+    suggestTags: ['airband'],
+  },
+  {
+    // User wants Bluetooth/app control but radio doesn't have it
+    check: (answers, radio) => {
+      const wantsBT = answers.features && answers.features.includes('bluetooth');
+      const hasBT = radio.tags.includes('bluetooth');
+      return wantsBT && !hasBT;
+    },
+    warning: "does not have Bluetooth or smartphone app control",
+    need: "you mentioned Bluetooth/smartphone control is important",
+    suggestTags: ['bluetooth'],
+  },
+  {
+    // User wants max channels but picked a low-channel radio
+    check: (answers, radio) => {
+      const wantsChannels = answers.features && answers.features.includes('channels');
+      const hasChannels = radio.tags.includes('channels');
+      return wantsChannels && !hasChannels;
+    },
+    warning: "has limited memory channels compared to other options",
+    need: "you said maximum channels/coverage is important",
+    suggestTags: ['channels'],
+  },
+];
+
+let pendingRadioKey = null;
+
+function checkMismatches(key) {
+  // Only check if they came through the interview
+  if (Object.keys(interviewAnswers).length === 0) return null;
+
+  const radio = radioLineup.find(r => r.key === key);
+  if (!radio) return null;
+
+  for (const rule of mismatchRules) {
+    if (rule.check(interviewAnswers, radio)) {
+      // Find the best alternative
+      const alt = radioLineup.find(r => r.key !== key && rule.suggestTags.some(t => r.tags.includes(t)));
+      return { radio, rule, alt };
+    }
+  }
+  return null;
+}
+
 function selectRadio(key) {
+  const mismatch = checkMismatches(key);
+  if (mismatch) {
+    pendingRadioKey = key;
+    showMismatchWarning(mismatch);
+    return;
+  }
+  confirmRadioSelection(key);
+}
+
+function showMismatchWarning(m) {
+  const modal = document.getElementById('mismatch-modal');
+  const radioName = m.radio.name.replace(' Essentials Kit', '');
+  let altHtml = '';
+  if (m.alt) {
+    const altName = m.alt.name.replace(' Essentials Kit', '');
+    altHtml = `
+      <button class="modal-btn-add" onclick="pendingRadioKey=null;document.getElementById('mismatch-modal').classList.remove('open');selectRadio('${m.alt.key}')">
+        Switch to ${altName} — $${m.alt.price}
+      </button>
+    `;
+  }
+  modal.querySelector('.modal-box').innerHTML = `
+    <h3>Heads Up</h3>
+    <p>The <strong>${radioName}</strong> ${m.rule.warning}.</p>
+    <p style="margin-top:8px">${m.rule.need.charAt(0).toUpperCase() + m.rule.need.slice(1)}. Just want to make sure you're aware before we continue.</p>
+    <div class="modal-btns" style="flex-direction:column;gap:8px;margin-top:20px">
+      ${altHtml}
+      <button class="modal-btn-cancel" onclick="document.getElementById('mismatch-modal').classList.remove('open');confirmRadioSelection(pendingRadioKey)">
+        Continue with ${radioName} anyway
+      </button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function confirmRadioSelection(key) {
   const radio = radioLineup.find(r => r.key === key);
   if (!radio) return;
+  pendingRadioKey = null;
 
   // Update hero with selected radio
   document.querySelector('.hero-img img').src = radio.img;
   document.querySelector('.hero-info h1').textContent = radio.name;
   document.querySelector('.hero-info .base-price').textContent = '$' + radio.price + '.00';
-
-  // Update base price
-  // (In production this would load radio-specific accessories — for demo, keep UV-5R accessories)
 
   // Hide selector, show wizard
   document.getElementById('selector-phase').style.display = 'none';
@@ -1688,6 +1842,11 @@ wizardInitialized = true;
       <button class="modal-btn-cancel" onclick="adapterModalSkip()">I already have one</button>
     </div>
   </div>
+</div>
+
+<!-- Radio mismatch warning modal -->
+<div class="modal-overlay" id="mismatch-modal">
+  <div class="modal-box"></div>
 </div>
 
 <!-- Adapter removal warning modal -->
