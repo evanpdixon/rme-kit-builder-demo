@@ -667,8 +667,8 @@ const radioProducts = {
   },
   'uv5r-mini': {
     batteryLabel: 'Built-in USB-C Battery',
-    batteryDesc: 'The UV-5R Mini has a built-in USB-C rechargeable battery. No upgrades needed — just plug in any USB-C cable to charge.',
-    batteries: [], // No battery upgrades — USB-C built in
+    batteryDesc: 'The UV-5R Mini has a built-in USB-C rechargeable battery — just plug in any USB-C cable to charge. Battery is not removable.',
+    batteries: [],
     accessories: [
       { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
       { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone. Mount on your chest rig, collar, or shoulder strap for hands-free communication.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
@@ -679,9 +679,11 @@ const radioProducts = {
     ],
   },
   'uv-pro': {
-    batteryLabel: 'Built-in USB-C Battery (2600mAh)',
-    batteryDesc: 'The UV-PRO has a built-in USB-C rechargeable battery. No upgrades needed.',
-    batteries: [], // USB-C built in
+    batteryLabel: 'USB-C Rechargeable Battery (2600mAh)',
+    batteryDesc: 'The UV-PRO includes a USB-C rechargeable battery. Charge from any USB-C cable — no cradle needed.',
+    batteries: [
+      { key: 'uvpro-spare', name: 'Extra UV-PRO Battery (2600mAh)', desc: 'Spare USB-C rechargeable battery for the UV-PRO. Swap in the field for extended ops without waiting to recharge.', price: 25, img: S+'2025/11/uvpro-battery-black.jpg', id: 8312 },
+    ],
     accessories: [
       { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
       { key: 'bs22', name: 'BS-22 Wireless Speakermic', desc: 'Bluetooth wireless speaker-microphone designed for the UV-PRO. No cable — clips to your gear and pairs via Bluetooth.', price: 59, img: S+'2025/12/1000009367.jpg', id: 8491 },
@@ -691,9 +693,11 @@ const radioProducts = {
     ],
   },
   'dmr-6x2': {
-    batteryLabel: 'Included 3100mAh USB-C Battery',
-    batteryDesc: 'The DMR 6X2 PRO includes a high-capacity 3100mAh battery with USB-C charging. 2-3 days of battery life with battery save enabled.',
-    batteries: [], // 3100mAh USB-C included
+    batteryLabel: 'USB-C Rechargeable Battery (3100mAh)',
+    batteryDesc: 'The DMR 6X2 PRO includes a high-capacity 3100mAh USB-C rechargeable battery. 2-3 days of battery life with battery save enabled.',
+    batteries: [
+      { key: 'dmr6x2-spare', name: 'Extra DMR 6X2 PRO Battery (3100mAh)', desc: 'Spare USB-C rechargeable battery. Swap in the field for extended ops — 2-3 days of runtime per battery.', price: 45, img: null, id: 6868 },
+    ],
     accessories: [
       { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
       { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DMR 6X2 PRO.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
@@ -704,9 +708,11 @@ const radioProducts = {
     ],
   },
   'da-7x2': {
-    batteryLabel: 'Included 3100mAh USB-C Battery',
-    batteryDesc: 'The DA-7X2 includes a high-capacity 3100mAh battery with USB-C charging. 2-3 days of battery life with battery save enabled.',
-    batteries: [], // 3100mAh USB-C included
+    batteryLabel: 'USB-C Rechargeable Battery (3100mAh)',
+    batteryDesc: 'The DA-7X2 includes a high-capacity 3100mAh USB-C rechargeable battery. 2-3 days of battery life with battery save enabled.',
+    batteries: [
+      { key: 'da7x2-spare', name: 'Extra DA-7X2 Battery (3100mAh)', desc: 'Spare USB-C rechargeable battery. Swap in the field for extended ops — 2-3 days of runtime per battery.', price: 45, img: null, id: 6868 },
+    ],
     accessories: [
       { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards. Common frequencies, GMRS channels, NATO phonetic alphabet, and emergency procedures.', price: 19, img: S+'2023/05/1000007350.jpg', id: 966 },
       { key: 'speakermic', name: 'UV-5R Speakermic', desc: 'Clip-on speaker-microphone with Kenwood plug. Compatible with the DA-7X2.', price: 29, img: S+'2023/07/20230530_1403102.jpg', id: 1430 },
@@ -830,9 +836,10 @@ function renderBatteryUpgrades() {
   }
 
   const anySelected = selectedBatteries.size > 0;
+  const isUv5r = selectedRadioKey === 'uv5r';
   let note = anySelected
-    ? '<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:#5c5">USB-C batteries selected below. Each includes a USB-C charging cable.</div>'
-    : '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--muted)">Want to ditch the charging cradle? Add a USB-C rechargeable battery below. Grab extras for longer trips or to share across radios.</div>';
+    ? '<div style="background:#1a2a1a;border:1px solid #2a3a2a;border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:#5c5">' + (isUv5r ? 'USB-C batteries selected below. Each includes a USB-C charging cable.' : 'Extra batteries selected below. Great for extended field ops.') + '</div>'
+    : '<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:16px 0;font-size:13px;color:var(--muted)">' + (isUv5r ? 'Want to ditch the charging cradle? Add a USB-C rechargeable battery below. Grab extras for longer trips or to share across radios.' : 'Need extra runtime? Grab a spare battery to swap in the field without waiting to recharge.') + '</div>';
 
   container.innerHTML = factoryHtml + note + batteryUpgrades.map(b => {
     const qty = selectedBatteries.get(b.key) || 0;
