@@ -3851,7 +3851,8 @@ function goStep(n) {
 
   // Scroll to top of wizard (skip on initial load)
   if (wizardInitialized) {
-    document.querySelector('.step-labels').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const scrollTarget = document.querySelector('.step-mobile').offsetParent ? document.querySelector('.step-mobile') : document.querySelector('.step-labels');
+    if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
 
