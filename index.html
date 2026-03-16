@@ -1123,10 +1123,11 @@ function startNextKit() {
   }
 }
 
-function completeCurrentKit(cartItems) {
+function completeCurrentKit(cartItems, programmingData) {
   const kit = kitSession.kits[kitSession.currentKitIndex];
   kit.status = 'complete';
   kit.cartItems = cartItems || [];
+  if (programmingData) kit.programming = programmingData;
 
   // Hide all category phases and bottom bar
   document.getElementById('selector-phase').style.display = 'none';
@@ -1154,6 +1155,17 @@ function startHandheldFlow() {
 
   // Pre-set interview answers from preferences
   interviewAnswers = {};
+
+  // Carry forward programming from prior kits
+  const prior = getPriorProgramming();
+  if (prior) {
+    programmingChoice = prior.choice || 'standard';
+    progUseShipping = prior.useShipping !== undefined ? prior.useShipping : true;
+    progZipPrimary = prior.zip || '';
+    progZipsExtra = prior.zipsExtra ? [...prior.zipsExtra] : [];
+    progBrandmeisterId = prior.brandmeisterId || '';
+  }
+
   document.getElementById('breadcrumb').innerHTML = '<a href="#">Shop</a> / <a href="#" onclick="backToKitPlan();return false">Kit Plan</a> / Handheld Radio';
 }
 
@@ -1319,6 +1331,50 @@ const coaxProducts = {
   ]
 };
 
+// ── Cross-kit programming carry-forward ──────────────
+function getPriorProgramming() {
+  // Find programming data from the most recently completed kit
+  for (let i = kitSession.kits.length - 1; i >= 0; i--) {
+    const k = kitSession.kits[i];
+    if (k.status !== 'complete') continue;
+    if (k.category === 'hf') continue; // HF has no programming
+    if (k.programming) return k.programming;
+  }
+  return null;
+}
+
+// ── Cross-kit recommendation helpers ─────────────────
+function getCompletedRadioKeys() {
+  // Returns all radio keys from completed kits
+  const result = { handheld: [], mobile: [], base: [], hf: [] };
+  kitSession.kits.forEach(k => {
+    if (k.status === 'complete' && k.radioKey) result[k.category].push(k.radioKey);
+  });
+  return result;
+}
+
+function getRecommendedMobileRadio() {
+  const done = getCompletedRadioKeys();
+  // If DMR handhelds were chosen, recommend D578 for digital interop
+  const dmrHandhelds = done.handheld.filter(k => k === 'dmr-6x2' || k === 'da-7x2');
+  const hasWaterproofPref = kitSession.preferences.includes('waterproof');
+  if (dmrHandhelds.length > 0 && !hasWaterproofPref) return 'd578';
+  // If a mobile kit was already built, match it
+  if (done.mobile.length > 0) return done.mobile[0];
+  return null;
+}
+
+function getRecommendedBaseRadio() {
+  const done = getCompletedRadioKeys();
+  // Match a completed vehicle mobile radio
+  if (done.mobile.length > 0) return done.mobile[0];
+  // Same DMR handheld logic
+  const dmrHandhelds = done.handheld.filter(k => k === 'dmr-6x2' || k === 'da-7x2');
+  const hasWaterproofPref = kitSession.preferences.includes('waterproof');
+  if (dmrHandhelds.length > 0 && !hasWaterproofPref) return 'd578';
+  return null;
+}
+
 // ══════════════════════════════════════════════════════
 // ── MOBILE FLOW ──
 // ══════════════════════════════════════════════════════
@@ -1345,23 +1401,35 @@ function renderMobileRadioChoice() {
   const phase = document.getElementById('mobile-phase');
   const prefs = kitSession.preferences;
   const hasDigitalPref = prefs.includes('digital') || prefs.includes('crossband');
+  const recommended = getRecommendedMobileRadio();
 
   phase.innerHTML = `
     <div class="selector-landing">
       <h2>Choose Your Mobile Radio</h2>
       <p>Both radios are 50W and include a hand mic, mounting bracket, power cable, and free custom programming.</p>
       <div class="radio-grid" style="max-width:700px;margin:0 auto">
-        ${mobileRadioLineup.map(r => `
+        ${mobileRadioLineup.map(r => {
+          let badge = '';
+          if (recommended === r.key) {
+            const done = getCompletedRadioKeys();
+            const dmrHandhelds = done.handheld.filter(k => k === 'dmr-6x2' || k === 'da-7x2');
+            if (dmrHandhelds.length > 0) badge = 'Recommended — matches your DMR handhelds';
+            else if (done.mobile.length > 0) badge = 'Recommended — matches your vehicle radio';
+            else badge = 'Recommended';
+          } else if (hasDigitalPref && r.digital) {
+            badge = 'Recommended for digital/encryption';
+          }
+          return `
           <div class="radio-pick ${mobileState.radioKey === r.key ? 'selected' : ''}" onclick="selectMobileRadio('${r.key}')">
             <div class="rp-img"><img src="${r.img || ''}" alt="${r.name}" onerror="this.parentElement.innerHTML='📻'"></div>
             <h4>${r.name.replace(' Essentials Kit','').replace(' Mobile Radio Kit','')}</h4>
             <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${r.tagline}</div>
             <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${r.price}</div>
             <div style="font-size:12px;color:#ddd;line-height:1.5;margin-bottom:8px">${r.pitch}</div>
-            ${hasDigitalPref && r.digital ? '<div style="font-size:11px;padding:4px 8px;background:#1a1800;border:1px solid var(--gold);color:var(--gold);display:inline-block">Recommended for digital/encryption</div>' : ''}
+            ${badge ? `<div style="font-size:11px;padding:4px 8px;background:#1a1800;border:1px solid var(--gold);color:var(--gold);display:inline-block;margin-bottom:8px">${badge}</div>` : ''}
             <ul style="text-align:left;font-size:12px;color:#ccc;margin-top:8px;padding-left:16px">${r.features.map(f=>'<li>'+f+'</li>').join('')}</ul>
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>
       <div class="needs-btns" style="margin-top:20px">
         <button class="btn-nav btn-back" onclick="backToKitPlan()">← Back to Kit Plan</button>
@@ -1373,6 +1441,7 @@ function renderMobileRadioChoice() {
 function selectMobileRadio(key) {
   mobileState.radioKey = key;
   mobileState.step = 0;
+  if (kitSession.kits[kitSession.currentKitIndex]) kitSession.kits[kitSession.currentKitIndex].radioKey = key;
   renderMobileWizard();
 }
 
@@ -1425,7 +1494,7 @@ function advanceMobileStep() {
     renderMobileWizard();
   } else {
     // Complete kit
-    completeCurrentKit(mobileState.cartItems);
+    completeCurrentKit(mobileState.cartItems, mobileState.selections.programming);
   }
 }
 
@@ -1580,7 +1649,14 @@ function renderMobileProgramming() {
   const radio = mobileRadioLineup.find(r => r.key === mobileState.radioKey);
   const isDMR = radio && radio.digital;
   const sel = mobileState.selections;
-  if (!sel.programming) sel.programming = { zip: '', notes: '', brandmeisterId: '' };
+  if (!sel.programming) {
+    const prior = getPriorProgramming();
+    sel.programming = {
+      zip: prior ? prior.zip : '',
+      notes: '',
+      brandmeisterId: prior ? (prior.brandmeisterId || '') : ''
+    };
+  }
 
   c.innerHTML = `
     <div class="section-head"><h2>Custom Programming</h2><p>Every Radio Made Easy kit comes custom programmed with GMRS, FRS, NOAA weather, and local repeaters for your area — included at no extra charge.</p></div>
@@ -1601,6 +1677,15 @@ function renderMobileProgramming() {
         <div style="font-size:11px;color:#ddd;margin-top:4px">This applies only to amateur radio license holders. If you don't have one yet, you can <a href="https://brandmeister.network" target="_blank" style="color:var(--gold)">apply at Brandmeister.network</a>.</div>
       </div>
       ` : ''}
+      <div style="margin-bottom:16px">
+        <div class="nq-option ${sel.programming.itinerantLicense ? 'selected' : ''}" onclick="mobileState.selections.programming.itinerantLicense=!mobileState.selections.programming.itinerantLicense;renderMobileProgramming()">
+          <div class="nq-check">${sel.programming.itinerantLicense ? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="nq-label">Business Itinerant License Assistance — $579</div>
+            <div class="nq-detail">We'll help you obtain your FCC Business Itinerant license — valid for 10 years. Required for commercial Part 90 operation.</div>
+          </div>
+        </div>
+      </div>
       <div>
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Special instructions (optional)</label>
         <textarea id="mp-notes" placeholder="Any special frequencies, channels, or notes for programming..."
@@ -1649,6 +1734,11 @@ function renderMobileReview() {
     if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
   });
 
+  // Business license
+  if (sel.programming && sel.programming.itinerantLicense) {
+    items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579 }); total += 579;
+  }
+
   mobileState.cartItems = items;
 
   c.innerHTML = `
@@ -1657,12 +1747,12 @@ function renderMobileReview() {
       ${items.map(item => `
         <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
           <span style="color:#ddd">${item.name}</span>
-          <span style="color:var(--gold);font-weight:600">$${item.price}</span>
+          <span style="color:var(--gold);font-weight:600">$${typeof item.price === 'number' ? item.price.toFixed(2) : item.price}</span>
         </div>
       `).join('')}
       <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:16px;font-weight:700">
         <span style="color:var(--gold)">Total</span>
-        <span style="color:var(--gold)">$${total}</span>
+        <span style="color:var(--gold)">$${total.toFixed(2)}</span>
       </div>
     </div>
   `;
@@ -1692,21 +1782,35 @@ function renderBaseRadioChoice() {
   const phase = document.getElementById('base-phase');
   const prefs = kitSession.preferences;
   const hasDigitalPref = prefs.includes('digital') || prefs.includes('crossband');
+  const recommended = getRecommendedBaseRadio();
 
   phase.innerHTML = `
     <div class="selector-landing">
       <h2>Choose Your Base Station Radio</h2>
       <p>Same radios as our vehicle mobile kits — paired with base station accessories for a fixed-location setup.</p>
       <div class="radio-grid" style="max-width:700px;margin:0 auto">
-        ${mobileRadioLineup.map(r => `
+        ${mobileRadioLineup.map(r => {
+          let badge = '';
+          if (recommended === r.key) {
+            const done = getCompletedRadioKeys();
+            if (done.mobile.length > 0) badge = 'Recommended — matches your vehicle radio';
+            else {
+              const dmrHandhelds = done.handheld.filter(k => k === 'dmr-6x2' || k === 'da-7x2');
+              if (dmrHandhelds.length > 0) badge = 'Recommended — matches your DMR handhelds';
+              else badge = 'Recommended';
+            }
+          } else if (hasDigitalPref && r.digital) {
+            badge = 'Recommended for digital/privacy';
+          }
+          return `
           <div class="radio-pick ${baseState.radioKey === r.key ? 'selected' : ''}" onclick="selectBaseRadio('${r.key}')">
             <div class="rp-img"><img src="${r.img || ''}" alt="${r.name}" onerror="this.parentElement.innerHTML='📻'"></div>
             <h4>${r.name.replace(' Essentials Kit','').replace(' Mobile Radio Kit','')}</h4>
             <div style="font-size:13px;color:var(--muted);margin-bottom:4px">${r.tagline}</div>
             <div style="font-size:18px;font-weight:700;color:var(--gold);margin-bottom:8px">$${r.price}</div>
-            ${hasDigitalPref && r.digital ? '<div style="font-size:11px;padding:4px 8px;background:#1a1800;border:1px solid var(--gold);color:var(--gold);display:inline-block">Recommended for digital/privacy</div>' : ''}
-          </div>
-        `).join('')}
+            ${badge ? `<div style="font-size:11px;padding:4px 8px;background:#1a1800;border:1px solid var(--gold);color:var(--gold);display:inline-block">` + badge + '</div>' : ''}
+          </div>`;
+        }).join('')}
       </div>
       <div class="needs-btns" style="margin-top:20px">
         <button class="btn-nav btn-back" onclick="backToKitPlan()">← Back to Kit Plan</button>
@@ -1718,6 +1822,7 @@ function renderBaseRadioChoice() {
 function selectBaseRadio(key) {
   baseState.radioKey = key;
   baseState.step = 0;
+  if (kitSession.kits[kitSession.currentKitIndex]) kitSession.kits[kitSession.currentKitIndex].radioKey = key;
   renderBaseWizard();
 }
 
@@ -1765,7 +1870,7 @@ function renderBaseWizard() {
 function advanceBaseStep() {
   const steps = getBaseSteps();
   if (baseState.step < steps.length - 1) { baseState.step++; renderBaseWizard(); }
-  else completeCurrentKit(baseState.cartItems);
+  else completeCurrentKit(baseState.cartItems, baseState.selections.programming);
 }
 
 function renderBaseAntennaPath() {
@@ -1855,18 +1960,33 @@ function renderBaseCoax() {
 
       <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Length (feet)</label>
       <div style="display:flex;align-items:center;gap:12px">
-        <input type="range" id="coax-slider" min="10" max="150" step="5" value="${len}"
+        <input type="range" id="base-coax-slider" min="10" max="150" step="5" value="${len}"
           style="flex:1;accent-color:var(--gold)"
-          oninput="baseState.selections.coax.length=parseInt(this.value);document.getElementById('coax-len').textContent=this.value;renderBaseCoax()">
-        <div id="coax-len" style="font-size:20px;font-weight:700;color:var(--gold);min-width:50px;text-align:center">${len}</div>
+          oninput="baseState.selections.coax.length=parseInt(this.value);document.getElementById('base-coax-input').value=this.value;updateBaseCoaxPrice()">
+        <input type="number" id="base-coax-input" min="1" max="300" value="${len}"
+          style="width:60px;background:#111;border:1px solid var(--border);color:var(--gold);padding:6px;text-align:center;font-size:16px;font-weight:700"
+          oninput="const v=Math.max(1,parseInt(this.value)||1);baseState.selections.coax.length=v;document.getElementById('base-coax-slider').value=Math.min(150,v);updateBaseCoaxPrice()">
         <span style="color:#888;font-size:13px">ft</span>
       </div>
-      <div style="margin-top:16px;padding:12px;background:#1a1800;border:1px solid var(--gold-dim);text-align:center">
+      <div id="base-coax-price" style="margin-top:16px;padding:12px;background:#1a1800;border:1px solid var(--gold-dim);text-align:center">
         <div style="font-size:13px;color:#ddd">${len}ft of ${grade === '400uf' ? '400' : '240'} Ultra Flex @ $${pricePerFt}/ft</div>
         <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">$${coaxTotal.toFixed(2)}</div>
       </div>
       <div style="font-size:11px;color:#888;margin-top:8px">Tip: Add a few extra feet for routing around corners and through walls. It's better to have too much than too little.</div>
     </div>
+  `;
+}
+
+function updateBaseCoaxPrice() {
+  const sel = baseState.selections;
+  const g = sel.coax.grade;
+  const l = sel.coax.length;
+  const over = l > 50;
+  const ppf = g === '400uf' ? (over ? 3.50 : 5) : (over ? 2 : 3);
+  const tot = Math.round(l * ppf * 100) / 100;
+  document.getElementById('base-coax-price').innerHTML = `
+    <div style="font-size:13px;color:#ddd">${l}ft of ${g === '400uf' ? '400' : '240'} Ultra Flex @ $${ppf}/ft</div>
+    <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">$${tot.toFixed(2)}</div>
   `;
 }
 
@@ -1929,12 +2049,18 @@ function toggleBaseAccessory(key) {
 }
 
 function renderBaseProgramming() {
-  // Reuse mobile programming renderer with base state
   const c = document.getElementById('base-step-content');
   const radio = mobileRadioLineup.find(r => r.key === baseState.radioKey);
   const isDMR = radio && radio.digital;
   const sel = baseState.selections;
-  if (!sel.programming) sel.programming = { zip: '', notes: '', brandmeisterId: '' };
+  if (!sel.programming) {
+    const prior = getPriorProgramming();
+    sel.programming = {
+      zip: prior ? prior.zip : '',
+      notes: '',
+      brandmeisterId: prior ? (prior.brandmeisterId || '') : ''
+    };
+  }
 
   c.innerHTML = `
     <div class="section-head"><h2>Custom Programming</h2><p>Every Radio Made Easy kit comes custom programmed with GMRS, FRS, NOAA weather, and local repeaters for your area — included at no extra charge.</p></div>
@@ -1954,6 +2080,15 @@ function renderBaseProgramming() {
         <div style="font-size:11px;color:#ddd;margin-top:4px">Applies only to amateur radio license holders. <a href="https://brandmeister.network" target="_blank" style="color:var(--gold)">Apply at Brandmeister.network</a>.</div>
       </div>
       ` : ''}
+      <div style="margin-bottom:16px">
+        <div class="nq-option ${sel.programming.itinerantLicense ? 'selected' : ''}" onclick="baseState.selections.programming.itinerantLicense=!baseState.selections.programming.itinerantLicense;renderBaseProgramming()">
+          <div class="nq-check">${sel.programming.itinerantLicense ? '✓' : ''}</div>
+          <div style="flex:1">
+            <div class="nq-label">Business Itinerant License Assistance — $579</div>
+            <div class="nq-detail">We'll help you obtain your FCC Business Itinerant license — valid for 10 years. Required for commercial Part 90 operation.</div>
+          </div>
+        </div>
+      </div>
       <div>
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Special instructions (optional)</label>
         <textarea placeholder="Any special frequencies, channels, or notes..."
@@ -2009,6 +2144,11 @@ function renderBaseReview() {
     const a = mobileProducts.accessories.find(x => x.key === key);
     if (a) { items.push({ name: a.name, price: a.price, id: a.id }); total += a.price; }
   });
+
+  // Business license
+  if (sel.programming && sel.programming.itinerantLicense) {
+    items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579 }); total += 579;
+  }
 
   baseState.cartItems = items;
 
@@ -2075,6 +2215,7 @@ function renderHfRadioChoice() {
 }
 
 function selectHfRadio(key) {
+  if (kitSession.kits[kitSession.currentKitIndex]) kitSession.kits[kitSession.currentKitIndex].radioKey = key;
   hfState.radioKey = key;
   hfState.step = 0;
   renderHfWizard();
@@ -2175,12 +2316,14 @@ function renderHfCoax() {
 
       <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Length (feet)</label>
       <div style="display:flex;align-items:center;gap:12px">
-        <input type="range" min="10" max="150" step="5" value="${len}" style="flex:1;accent-color:var(--gold)"
-          oninput="hfState.selections.coax.length=parseInt(this.value);renderHfCoax()">
-        <div style="font-size:20px;font-weight:700;color:var(--gold);min-width:50px;text-align:center">${len}</div>
+        <input type="range" id="hf-coax-slider" min="10" max="150" step="5" value="${len}" style="flex:1;accent-color:var(--gold)"
+          oninput="hfState.selections.coax.length=parseInt(this.value);document.getElementById('hf-coax-input').value=this.value;updateHfCoaxPrice()">
+        <input type="number" id="hf-coax-input" min="1" max="300" value="${len}"
+          style="width:60px;background:#111;border:1px solid var(--border);color:var(--gold);padding:6px;text-align:center;font-size:16px;font-weight:700"
+          oninput="const v=Math.max(1,parseInt(this.value)||1);hfState.selections.coax.length=v;document.getElementById('hf-coax-slider').value=Math.min(150,v);updateHfCoaxPrice()">
         <span style="color:#888;font-size:13px">ft</span>
       </div>
-      <div style="margin-top:16px;padding:12px;background:#1a1800;border:1px solid var(--gold-dim);text-align:center">
+      <div id="hf-coax-price" style="margin-top:16px;padding:12px;background:#1a1800;border:1px solid var(--gold-dim);text-align:center">
         <div style="font-size:13px;color:#ddd">${len}ft @ $${pricePerFt}/ft</div>
         <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">$${coaxTotal.toFixed(2)}</div>
       </div>
@@ -2192,6 +2335,19 @@ function renderHfCoax() {
         </div>
       </div>
     </div>
+  `;
+}
+
+function updateHfCoaxPrice() {
+  const sel = hfState.selections;
+  const g = sel.coax.grade;
+  const l = sel.coax.length;
+  const over = l > 50;
+  const ppf = g === '400uf' ? (over ? 3.50 : 5) : (over ? 2 : 3);
+  const tot = Math.round(l * ppf * 100) / 100;
+  document.getElementById('hf-coax-price').innerHTML = `
+    <div style="font-size:13px;color:#ddd">${l}ft @ $${ppf}/ft</div>
+    <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">$${tot.toFixed(2)}</div>
   `;
 }
 
@@ -2415,6 +2571,7 @@ let progConfirmedExtras = []; // resolved city/state for extras
 let progCoords = { primary: null, extras: [] }; // {lat, lon} for proximity checks
 let progNotes = '';
 let progBrandmeisterId = '';
+let wantsItinerantLicense = false;
 
 // ── Product data (radio-specific) ──
 // Items are keyed per radio. getItems(category) returns the right set for the selected radio.
@@ -2771,6 +2928,8 @@ function renderProgramming() {
   // Notes field (always visible unless 'none')
   if (programmingChoice !== 'none') {
     const isDmr = selectedRadioKey === 'dmr-6x2' || selectedRadioKey === 'da-7x2';
+    const selRadio = radioLineup.find(r => r.key === selectedRadioKey);
+    const showLicensing = interviewAnswers.use === 'professional' || (selRadio && selRadio.tags && selRadio.tags.includes('commercial'));
     html += `
       <div class="prog-section">
         ${isDmr ? `
@@ -2779,6 +2938,18 @@ function renderProgramming() {
           <input type="text" maxlength="10" placeholder="e.g. 1234567" value="${progBrandmeisterId}"
                  oninput="progBrandmeisterId=this.value" onfocus="event.stopPropagation()">
           <div class="prog-note">If you have an amateur radio license and a Brandmeister ID, we'll program it into your radio for DMR digital voice. Don't have one yet? <a href="https://brandmeister.network" target="_blank" rel="noopener" style="color:var(--gold)">Register at brandmeister.network</a></div>
+        </div>
+        ` : ''}
+        ${showLicensing ? `
+        <div class="prog-field" onclick="event.stopPropagation()">
+          <div class="opt-card ${wantsItinerantLicense ? 'selected' : ''}" onclick="wantsItinerantLicense=!wantsItinerantLicense;renderProgramming()" style="margin-bottom:0">
+            <div class="oc-check">${wantsItinerantLicense ? '✓' : ''}</div>
+            <div class="oc-body">
+              <div class="oc-name">Business Itinerant License Assistance</div>
+              <div class="oc-desc" style="max-height:none">We'll help you obtain your FCC Business Itinerant license — valid for 10 years, covers your entire organization. Required for commercial Part 90 operation.</div>
+            </div>
+            <div class="oc-price">+$579</div>
+          </div>
         </div>
         ` : ''}
         <div class="prog-field">
@@ -3237,6 +3408,18 @@ function renderReview() {
     `);
   }
 
+  // Business itinerant license
+  if (wantsItinerantLicense) {
+    items.push(`
+      <div class="review-item">
+        <div class="ri-img" style="background:var(--card);display:flex;align-items:center;justify-content:center;font-size:24px">📋</div>
+        <div class="ri-name">Business Itinerant License Assistance<small>FCC license — valid 10 years</small></div>
+        <div class="ri-price">+$579</div>
+        <button class="ri-remove" onclick="reviewRemove('license')" title="Remove">&times;</button>
+      </div>
+    `);
+  }
+
   if (items.length === 1) {
     items.push('<div class="empty-state">No upgrades or accessories selected — just the base kit.</div>');
   }
@@ -3259,6 +3442,7 @@ function reviewRemove(type, key) {
   else if (type === 'battery') { selectedBatteries.delete(key); }
   else if (type === 'programming') { programmingChoice = 'standard'; }
   else if (type === 'accessory') { selectedAccessories.delete(key); }
+  else if (type === 'license') { wantsItinerantLicense = false; }
   updateBottomBar();
   renderReview();
 }
@@ -3458,6 +3642,9 @@ function calcTotal() {
   // Programming upcharge
   if (programmingChoice === 'multi') total += 10;
 
+  // Business itinerant license
+  if (wantsItinerantLicense) total += 579;
+
   // Accessories
   selectedAccessories.forEach(key => {
     const a = accessories.find(x => x.key === key);
@@ -3502,6 +3689,7 @@ function collectHandheldCartItems() {
   });
 
   if (programmingChoice === 'multi') items.push({ name: 'Multi-Location Programming', price: 10 });
+  if (wantsItinerantLicense) items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579 });
 
   selectedAccessories.forEach(key => {
     const a = accessories.find(x => x.key === key);
@@ -3569,7 +3757,14 @@ function goStep(n) {
     next.className = 'btn-nav btn-cart';
     next.onclick = function() {
       if (inSession) {
-        completeCurrentKit(collectHandheldCartItems());
+        completeCurrentKit(collectHandheldCartItems(), {
+          zip: progUseShipping ? '' : progZipPrimary,
+          notes: progNotes,
+          brandmeisterId: progBrandmeisterId,
+          choice: programmingChoice,
+          useShipping: progUseShipping,
+          zipsExtra: [...progZipsExtra],
+        });
       } else {
         alert('Added to cart! (Demo — this would add ' + (countAddons() + 1) + ' items to WooCommerce cart)');
       }
@@ -4126,6 +4321,7 @@ function confirmRadioSelection(key) {
   if (!radio) return;
   pendingRadioKey = null;
   selectedRadioKey = key;
+  if (kitSession.kits[kitSession.currentKitIndex]) kitSession.kits[kitSession.currentKitIndex].radioKey = key;
 
   // Load radio-specific products and update base price
   loadRadioProducts(key);
