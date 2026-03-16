@@ -1736,7 +1736,7 @@ function renderMobileReview() {
 
   // Business license
   if (sel.programming && sel.programming.itinerantLicense) {
-    items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579 }); total += 579;
+    items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579, id: 7174 }); total += 579;
   }
 
   mobileState.cartItems = items;
@@ -2147,7 +2147,7 @@ function renderBaseReview() {
 
   // Business license
   if (sel.programming && sel.programming.itinerantLicense) {
-    items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579 }); total += 579;
+    items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579, id: 7174 }); total += 579;
   }
 
   baseState.cartItems = items;
@@ -3689,7 +3689,7 @@ function collectHandheldCartItems() {
   });
 
   if (programmingChoice === 'multi') items.push({ name: 'Multi-Location Programming', price: 10 });
-  if (wantsItinerantLicense) items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579 });
+  if (wantsItinerantLicense) items.push({ name: 'Business Itinerant License Assistance (10 years)', price: 579, id: 7174 });
 
   selectedAccessories.forEach(key => {
     const a = accessories.find(x => x.key === key);
