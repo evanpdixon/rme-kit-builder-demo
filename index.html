@@ -1269,7 +1269,8 @@ const mobileProducts = {
     { key: 'power-cable-short', name: 'Power Cable OEM-T to Powerpole (Shortened)', desc: 'Shortened power cable for clean installs.', price: 29, id: 7693 },
   ],
   accessories: [
-    { key: 'bs22', name: 'BS-22 Wireless Speakermic', desc: 'Bluetooth wireless speaker-microphone. Clips to gear, pairs via Bluetooth. Compatible with UV-50PRO and UV-PRO.', price: 59, id: 8491 },
+    { key: 'bs22', name: 'BS-22 Wireless Speakermic', desc: 'Bluetooth wireless speaker-microphone. Clips to gear, pairs via Bluetooth.', price: 59, id: 8491, compatRadios: ['uv-50pro'] },
+    { key: 'bt01', name: 'BT-01 Mobile Bluetooth Speaker Mic', desc: 'Bluetooth speaker-microphone for mobile radios. Wireless audio with PTT for hands-free operation.', price: 149, id: 6717, compatRadios: ['d578'] },
     { key: 'cheatsheets', name: 'Radio Cheat Sheets', desc: 'Waterproof laminated quick-reference cards.', price: 19, id: 966 },
     { key: 'relocation', name: 'Antenna Jack Relocation Cable', desc: 'Right-angle PL-259 to SO-239 cable for repositioning the antenna jack.', price: 19, id: 7271 },
     { key: 'manpack', name: 'Manpack Radio Bag', desc: 'Custom radio bag for portable/manpack operations. Fits mobile radios with battery for field-portable use.', price: 349, id: 856 },
@@ -1580,25 +1581,54 @@ function renderMobileAntenna() {
 function renderMobilePower() {
   const c = document.getElementById('mobile-step-content');
   const sel = mobileState.selections;
-  if (!sel.power) sel.power = [];
+  if (!sel.power) sel.power = { cigAdapter: true, lifepo4: false, lifepo4Size: '20ah', dcCharger: false, cables: [] };
 
   c.innerHTML = `
-    <div class="section-head"><h2>Power Options</h2><p>Your kit includes a power cable with Anderson Powerpoles and a cigarette lighter adapter. Add portable power or hardwire accessories below.</p></div>
+    <div class="section-head"><h2>Power</h2><p>Choose how you'll power your vehicle radio. The cigarette lighter adapter is included by default — the quickest way to get on the air.</p></div>
     <div style="max-width:600px;margin:0 auto">
-      ${mobileProducts.power.map(p => `
-        <div class="nq-option ${sel.power.includes(p.key) ? 'selected' : ''}" onclick="toggleMobilePower('${p.key}')">
-          <div class="nq-check">${sel.power.includes(p.key) ? '✓' : ''}</div>
-          <div style="flex:1">
-            <div class="nq-label">${p.name} ($${p.price})</div>
-            <div class="nq-detail">${p.desc}</div>
-          </div>
-        </div>
-      `).join('')}
 
-      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Power Cables</label>
+      <div class="nq-option selected" style="opacity:0.85;cursor:default;border-color:var(--green)">
+        <div class="nq-check" style="border-color:var(--green);color:var(--green)">✓</div>
+        <div style="flex:1">
+          <div class="nq-label">Cigarette Lighter Power Adapter <span style="font-size:11px;color:var(--green);font-weight:400">Included</span></div>
+          <div class="nq-detail">Plug-and-play 12V power from any vehicle accessory outlet. The fastest way to get started.</div>
+          <div style="font-size:11px;color:#c4a83a;margin-top:6px;line-height:1.4">Note: May not be sufficient at high power on low-amperage circuits. For best performance, we suggest hardwiring to a keyed ignition source or using a secondary battery with a DC-to-DC charger.</div>
+        </div>
+      </div>
+
+      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Portable Power</label>
+
+      <div class="nq-option ${sel.power.lifepo4 ? 'selected' : ''}" onclick="mobileState.selections.power.lifepo4=!mobileState.selections.power.lifepo4;renderMobilePower()" style="flex-wrap:wrap">
+        <div class="nq-check">${sel.power.lifepo4 ? '✓' : ''}</div>
+        <div style="flex:1;min-width:200px">
+          <div class="nq-label">LiFePO4 Battery + DC-to-DC Vehicle Charger</div>
+          <div class="nq-detail">Portable 12V power — run your radio without the engine running. Includes a DC-to-DC charger that keeps the battery topped off from your vehicle's auxiliary circuit. Do not connect charger to starter battery.</div>
+        </div>
+        <div style="font-weight:700;color:var(--gold);font-size:14px;white-space:nowrap">${sel.power.lifepo4Size === '20ah' ? '$228' : '$208'}</div>
+      </div>
+      ${sel.power.lifepo4 ? `
+      <div style="display:flex;gap:8px;margin:-4px 0 8px 36px">
+        <div class="nq-option ${sel.power.lifepo4Size === '20ah' ? 'selected' : ''}" onclick="mobileState.selections.power.lifepo4Size='20ah';renderMobilePower()" style="flex:1;justify-content:center;padding:10px">
+          <div><div class="nq-label" style="text-align:center">20Ah — $228</div><div class="nq-detail" style="text-align:center">Recommended — longer runtime</div></div>
+        </div>
+        <div class="nq-option ${sel.power.lifepo4Size === '10ah' ? 'selected' : ''}" onclick="mobileState.selections.power.lifepo4Size='10ah';renderMobilePower()" style="flex:1;justify-content:center;padding:10px">
+          <div><div class="nq-label" style="text-align:center">10Ah — $208</div><div class="nq-detail" style="text-align:center">Lighter, compact</div></div>
+        </div>
+      </div>
+      ` : ''}
+
+      <div class="nq-option ${sel.power.dcCharger ? 'selected' : ''}" onclick="mobileState.selections.power.dcCharger=!mobileState.selections.power.dcCharger;renderMobilePower()">
+        <div class="nq-check">${sel.power.dcCharger ? '✓' : ''}</div>
+        <div style="flex:1">
+          <div class="nq-label">DC-to-DC Vehicle Charger Only — $99</div>
+          <div class="nq-detail">Already have a LiFePO4 battery? Add just the vehicle charger. Charges from auxiliary battery circuit — do not connect to starter battery.</div>
+        </div>
+      </div>
+
+      <label style="font-size:14px;color:var(--gold);display:block;margin:20px 0 8px">Wiring & Cables</label>
       ${mobileProducts.powerCables.map(p => `
-        <div class="nq-option ${sel.power.includes(p.key) ? 'selected' : ''}" onclick="toggleMobilePower('${p.key}')">
-          <div class="nq-check">${sel.power.includes(p.key) ? '✓' : ''}</div>
+        <div class="nq-option ${sel.power.cables.includes(p.key) ? 'selected' : ''}" onclick="toggleMobilePowerCable('${p.key}')">
+          <div class="nq-check">${sel.power.cables.includes(p.key) ? '✓' : ''}</div>
           <div style="flex:1">
             <div class="nq-label">${p.name} ($${p.price})</div>
             <div class="nq-detail">${p.desc}</div>
@@ -1609,8 +1639,8 @@ function renderMobilePower() {
   `;
 }
 
-function toggleMobilePower(key) {
-  const arr = mobileState.selections.power;
+function toggleMobilePowerCable(key) {
+  const arr = mobileState.selections.power.cables;
   const idx = arr.indexOf(key);
   if (idx >= 0) arr.splice(idx, 1); else arr.push(key);
   renderMobilePower();
@@ -1620,11 +1650,13 @@ function renderMobileAccessories() {
   const c = document.getElementById('mobile-step-content');
   const sel = mobileState.selections;
   if (!sel.accessories) sel.accessories = [];
+  const rk = mobileState.radioKey;
+  const filtered = mobileProducts.accessories.filter(a => !a.compatRadios || a.compatRadios.includes(rk));
 
   c.innerHTML = `
     <div class="section-head"><h2>Accessories</h2><p>Add speakermics, cable management, and more to complete your mobile setup.</p></div>
     <div style="max-width:600px;margin:0 auto">
-      ${mobileProducts.accessories.map(a => `
+      ${filtered.map(a => `
         <div class="nq-option ${sel.accessories.includes(a.key) ? 'selected' : ''}" onclick="toggleMobileAccessory('${a.key}')">
           <div class="nq-check">${sel.accessories.includes(a.key) ? '✓' : ''}</div>
           <div style="flex:1">
@@ -1723,8 +1755,23 @@ function renderMobileReview() {
   }
 
   // Power
-  (sel.power || []).forEach(key => {
-    const p = [...mobileProducts.power, ...mobileProducts.powerCables].find(x => x.key === key);
+  const pw = sel.power || {};
+  if (pw.cigAdapter) {
+    items.push({ name: 'Cigarette Lighter Power Adapter', price: 0 });
+  }
+  if (pw.lifepo4) {
+    const is20 = pw.lifepo4Size === '20ah';
+    const bat = mobileProducts.power.find(x => x.key === (is20 ? 'lifepo4-20ah' : 'lifepo4-10ah'));
+    const charger = mobileProducts.power.find(x => x.key === 'charger-dc');
+    if (bat) { items.push({ name: bat.name, price: bat.price, id: bat.id }); total += bat.price; }
+    if (charger) { items.push({ name: charger.name + ' (bundled)', price: charger.price, id: charger.id }); total += charger.price; }
+  }
+  if (pw.dcCharger && !pw.lifepo4) {
+    const charger = mobileProducts.power.find(x => x.key === 'charger-dc');
+    if (charger) { items.push({ name: charger.name, price: charger.price, id: charger.id }); total += charger.price; }
+  }
+  (pw.cables || []).forEach(key => {
+    const p = mobileProducts.powerCables.find(x => x.key === key);
     if (p) { items.push({ name: p.name, price: p.price, id: p.id }); total += p.price; }
   });
 
@@ -2027,11 +2074,13 @@ function renderBaseAccessories() {
   const c = document.getElementById('base-step-content');
   const sel = baseState.selections;
   if (!sel.accessories) sel.accessories = [];
+  const rk = baseState.radioKey;
+  const filtered = mobileProducts.accessories.filter(a => !a.compatRadios || a.compatRadios.includes(rk));
 
   c.innerHTML = `
     <div class="section-head"><h2>Accessories</h2><p>Add accessories to complete your base station setup.</p></div>
     <div style="max-width:600px;margin:0 auto">
-      ${mobileProducts.accessories.map(a => `
+      ${filtered.map(a => `
         <div class="nq-option ${sel.accessories.includes(a.key) ? 'selected' : ''}" onclick="toggleBaseAccessory('${a.key}')">
           <div class="nq-check">${sel.accessories.includes(a.key) ? '✓' : ''}</div>
           <div style="flex:1"><div class="nq-label">${a.name} ($${a.price})</div><div class="nq-detail">${a.desc}</div></div>
