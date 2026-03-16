@@ -210,6 +210,17 @@
             font-size: 0.8rem;
             padding: 12px 0;
         }
+        .nav-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #e5a00d;
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid #30363d;
+            padding: 6px 14px;
+            border-radius: 6px;
+        }
+        .nav-link:hover { background: #161b22; }
 
         /* Responsive */
         @media (max-width: 600px) {
@@ -225,6 +236,7 @@
             <h1>Daily Dashboard</h1>
             <div class="date">Monday, March 16, 2026</div>
             <div class="time-now" id="clock"></div>
+            <a href="backlog.html" class="nav-link">View Full Backlog (284 tasks)</a>
         </header>
 
         <div class="progress-label"><span id="done-count">0</span> of <span id="total-count">0</span> tasks complete</div>
@@ -327,7 +339,31 @@
             </div>
         </div>
 
-        <!-- 5. ADMIN / OTHER -->
+        <!-- 5. CONTENT CREATION -->
+        <div class="priority-section" data-section="content">
+            <div class="priority-header" onclick="toggleSection(this)">
+                <h2>Content Creation</h2>
+                <span class="badge" data-badge="content">0/2</span>
+            </div>
+            <div class="priority-body">
+                <div class="task">
+                    <input type="checkbox" onchange="handleCheck(this)">
+                    <div class="task-text">
+                        Update Zero to Hero Chirp programming tutorial
+                        <span class="sub">Re-record/update the tutorial for current Chirp interface</span>
+                    </div>
+                </div>
+                <div class="task">
+                    <input type="checkbox" onchange="handleCheck(this)">
+                    <div class="task-text">
+                        Create written guide / blog post for Chirp programming
+                        <span class="sub">Supplement the video with a written walkthrough — not video-only</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. ADMIN / OTHER -->
         <div class="priority-section" data-section="admin">
             <div class="priority-header" onclick="toggleSection(this)">
                 <h2>Administrative Work</h2>
