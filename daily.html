@@ -313,11 +313,12 @@
         <div class="priority-section" data-section="grocery">
             <div class="priority-header" onclick="toggleSection(this)">
                 <h2>Grocery Store Trip</h2>
-                <span class="badge" data-badge="grocery">0 items</span>
+                <span class="badge" data-badge="grocery">2 items</span>
             </div>
             <div class="priority-body">
                 <ul class="grocery-list" id="grocery-list">
-                    <!-- Items added dynamically -->
+                    <li><input type="checkbox" onchange="toggleGrocery(this)"><span>Ziploc bags</span><button style="margin-left:auto;background:none;border:none;color:#484f58;cursor:pointer;font-size:1.1rem;" onclick="removeGrocery(this)" title="Remove">&times;</button></li>
+                    <li><input type="checkbox" onchange="toggleGrocery(this)"><span>Protein shakes</span><button style="margin-left:auto;background:none;border:none;color:#484f58;cursor:pointer;font-size:1.1rem;" onclick="removeGrocery(this)" title="Remove">&times;</button></li>
                 </ul>
                 <div class="add-item">
                     <input type="text" id="grocery-input" placeholder="Add item..." onkeydown="if(event.key==='Enter')addGroceryItem()">
@@ -375,6 +376,7 @@
                     }
                 });
                 if (state.groceryItems) {
+                    document.getElementById('grocery-list').innerHTML = '';
                     state.groceryItems.forEach(item => {
                         addGroceryItemDirect(item.text, item.checked);
                     });
